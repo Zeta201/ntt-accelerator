@@ -94,7 +94,7 @@ Removed 0 unused modules.
 Cleaned up 0 empty switches.
 
 8.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
-Marked 4 switch rules as full_case in process $proc$../../experiments/ntt16/rtl/ntt_controller16.v:67$150 in module ntt_controller16.
+Marked 4 switch rules as full_case in process $proc$../../experiments/ntt16/rtl/ntt_controller16.v:64$150 in module ntt_controller16.
 Marked 2 switch rules as full_case in process $proc$../../experiments/ntt16/rtl/coefficient_memory16.v:28$38 in module coefficient_memory16.
 Removed 1 dead cases from process $proc$../../experiments/ntt16/rtl/twiddle_rom16.v:8$16 in module twiddle_rom16.
 Marked 1 switch rules as full_case in process $proc$../../experiments/ntt16/rtl/twiddle_rom16.v:8$16 in module twiddle_rom16.
@@ -113,7 +113,7 @@ Converted 1 switch.
 <suppressed ~7 debug messages>
 
 8.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
-Creating decoders for process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:67$150'.
+Creating decoders for process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:64$150'.
      1/12: $0\start_d[0:0]
      2/12: $0\tw_reg[4:0]
      3/12: $0\b_reg[4:0]
@@ -173,29 +173,29 @@ Creating decoders for process `\twiddle_rom16.$proc$../../experiments/ntt16/rtl/
 No latch inferred for signal `\twiddle_rom16.\tw' from process `\twiddle_rom16.$proc$../../experiments/ntt16/rtl/twiddle_rom16.v:8$16'.
 
 8.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
-Creating register for signal `\ntt_controller16.\lo_reg' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:67$150'.
+Creating register for signal `\ntt_controller16.\lo_reg' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:64$150'.
   created $dff cell `$procdff$390' with positive edge clock.
-Creating register for signal `\ntt_controller16.\hi_reg' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:67$150'.
+Creating register for signal `\ntt_controller16.\hi_reg' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:64$150'.
   created $dff cell `$procdff$391' with positive edge clock.
-Creating register for signal `\ntt_controller16.\done' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:67$150'.
+Creating register for signal `\ntt_controller16.\done' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:64$150'.
   created $dff cell `$procdff$392' with positive edge clock.
-Creating register for signal `\ntt_controller16.\u_reg' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:67$150'.
+Creating register for signal `\ntt_controller16.\u_reg' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:64$150'.
   created $dff cell `$procdff$393' with positive edge clock.
-Creating register for signal `\ntt_controller16.\v_reg' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:67$150'.
+Creating register for signal `\ntt_controller16.\v_reg' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:64$150'.
   created $dff cell `$procdff$394' with positive edge clock.
-Creating register for signal `\ntt_controller16.\state' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:67$150'.
+Creating register for signal `\ntt_controller16.\state' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:64$150'.
   created $dff cell `$procdff$395' with positive edge clock.
-Creating register for signal `\ntt_controller16.\stage' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:67$150'.
+Creating register for signal `\ntt_controller16.\stage' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:64$150'.
   created $dff cell `$procdff$396' with positive edge clock.
-Creating register for signal `\ntt_controller16.\bidx' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:67$150'.
+Creating register for signal `\ntt_controller16.\bidx' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:64$150'.
   created $dff cell `$procdff$397' with positive edge clock.
-Creating register for signal `\ntt_controller16.\start_d' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:67$150'.
+Creating register for signal `\ntt_controller16.\start_d' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:64$150'.
   created $dff cell `$procdff$398' with positive edge clock.
-Creating register for signal `\ntt_controller16.\a_reg' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:67$150'.
+Creating register for signal `\ntt_controller16.\a_reg' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:64$150'.
   created $dff cell `$procdff$399' with positive edge clock.
-Creating register for signal `\ntt_controller16.\b_reg' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:67$150'.
+Creating register for signal `\ntt_controller16.\b_reg' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:64$150'.
   created $dff cell `$procdff$400' with positive edge clock.
-Creating register for signal `\ntt_controller16.\tw_reg' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:67$150'.
+Creating register for signal `\ntt_controller16.\tw_reg' using process `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:64$150'.
   created $dff cell `$procdff$401' with positive edge clock.
 Creating register for signal `\coefficient_memory16.\li' using process `\coefficient_memory16.$proc$../../experiments/ntt16/rtl/coefficient_memory16.v:28$38'.
   created $dff cell `$procdff$402' with positive edge clock.
@@ -279,8 +279,8 @@ Creating register for signal `\coefficient_memory16.$memwr$\mem$../../experiment
 8.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
 
 8.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
-Found and cleaned up 5 empty switches in `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:67$150'.
-Removing empty process `ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:67$150'.
+Found and cleaned up 5 empty switches in `\ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:64$150'.
+Removing empty process `ntt_controller16.$proc$../../experiments/ntt16/rtl/ntt_controller16.v:64$150'.
 Found and cleaned up 2 empty switches in `\coefficient_memory16.$proc$../../experiments/ntt16/rtl/coefficient_memory16.v:28$38'.
 Removing empty process `coefficient_memory16.$proc$../../experiments/ntt16/rtl/coefficient_memory16.v:28$38'.
 Found and cleaned up 1 empty switch in `\twiddle_rom16.$proc$../../experiments/ntt16/rtl/twiddle_rom16.v:8$16'.
@@ -1023,26 +1023,26 @@ Optimizing module mod_add.
 8.9. Executing WREDUCE pass (reducing word size of cells).
 Removed top 1 bits (of 2) from port B of cell ntt_controller16.$auto$simple.cc:194:make_patterns_logic$505 ($ne).
 Removed top 1 bits (of 2) from port B of cell ntt_controller16.$auto$simple.cc:194:make_patterns_logic$483 ($ne).
-Removed top 3 bits (of 4) from port B of cell ntt_controller16.$sub$../../experiments/ntt16/rtl/ntt_controller16.v:49$143 ($sub).
-Removed top 1 bits (of 4) from port Y of cell ntt_controller16.$sub$../../experiments/ntt16/rtl/ntt_controller16.v:49$143 ($sub).
-Removed top 1 bits (of 4) from port A of cell ntt_controller16.$sub$../../experiments/ntt16/rtl/ntt_controller16.v:49$143 ($sub).
-Removed top 1 bits (of 8) from port A of cell ntt_controller16.$add$../../experiments/ntt16/rtl/ntt_controller16.v:53$147 ($add).
-Removed top 5 bits (of 8) from port B of cell ntt_controller16.$add$../../experiments/ntt16/rtl/ntt_controller16.v:53$147 ($add).
-Removed top 4 bits (of 8) from port B of cell ntt_controller16.$add$../../experiments/ntt16/rtl/ntt_controller16.v:54$148 ($add).
-Removed top 4 bits (of 8) from port Y of cell ntt_controller16.$add$../../experiments/ntt16/rtl/ntt_controller16.v:54$148 ($add).
-Removed top 4 bits (of 8) from port A of cell ntt_controller16.$add$../../experiments/ntt16/rtl/ntt_controller16.v:54$148 ($add).
-Removed top 4 bits (of 7) from port A of cell ntt_controller16.$shl$../../experiments/ntt16/rtl/ntt_controller16.v:55$149 ($shl).
-Removed top 3 bits (of 7) from port Y of cell ntt_controller16.$shl$../../experiments/ntt16/rtl/ntt_controller16.v:55$149 ($shl).
-Removed top 1 bits (of 2) from port B of cell ntt_controller16.$add$../../experiments/ntt16/rtl/ntt_controller16.v:113$153 ($add).
-Removed top 2 bits (of 3) from port B of cell ntt_controller16.$add$../../experiments/ntt16/rtl/ntt_controller16.v:117$154 ($add).
+Removed top 3 bits (of 4) from port B of cell ntt_controller16.$sub$../../experiments/ntt16/rtl/ntt_controller16.v:46$143 ($sub).
+Removed top 1 bits (of 4) from port Y of cell ntt_controller16.$sub$../../experiments/ntt16/rtl/ntt_controller16.v:46$143 ($sub).
+Removed top 1 bits (of 4) from port A of cell ntt_controller16.$sub$../../experiments/ntt16/rtl/ntt_controller16.v:46$143 ($sub).
+Removed top 1 bits (of 8) from port A of cell ntt_controller16.$add$../../experiments/ntt16/rtl/ntt_controller16.v:50$147 ($add).
+Removed top 5 bits (of 8) from port B of cell ntt_controller16.$add$../../experiments/ntt16/rtl/ntt_controller16.v:50$147 ($add).
+Removed top 4 bits (of 8) from port B of cell ntt_controller16.$add$../../experiments/ntt16/rtl/ntt_controller16.v:51$148 ($add).
+Removed top 4 bits (of 8) from port Y of cell ntt_controller16.$add$../../experiments/ntt16/rtl/ntt_controller16.v:51$148 ($add).
+Removed top 4 bits (of 8) from port A of cell ntt_controller16.$add$../../experiments/ntt16/rtl/ntt_controller16.v:51$148 ($add).
+Removed top 4 bits (of 7) from port A of cell ntt_controller16.$shl$../../experiments/ntt16/rtl/ntt_controller16.v:52$149 ($shl).
+Removed top 3 bits (of 7) from port Y of cell ntt_controller16.$shl$../../experiments/ntt16/rtl/ntt_controller16.v:52$149 ($shl).
+Removed top 1 bits (of 2) from port B of cell ntt_controller16.$add$../../experiments/ntt16/rtl/ntt_controller16.v:110$153 ($add).
+Removed top 2 bits (of 3) from port B of cell ntt_controller16.$add$../../experiments/ntt16/rtl/ntt_controller16.v:114$154 ($add).
 Removed top 1 bits (of 3) from mux cell ntt_controller16.$procmux$212 ($mux).
 Removed top 1 bits (of 3) from mux cell ntt_controller16.$procmux$214 ($mux).
 Removed top 2 bits (of 3) from port B of cell ntt_controller16.$procmux$220_CMP0 ($eq).
 Removed top 1 bits (of 3) from port B of cell ntt_controller16.$procmux$237_CMP0 ($eq).
 Removed top 1 bits (of 3) from port B of cell ntt_controller16.$procmux$268_CMP0 ($eq).
-Removed top 4 bits (of 8) from port Y of cell ntt_controller16.$add$../../experiments/ntt16/rtl/ntt_controller16.v:53$147 ($add).
-Removed top 3 bits (of 7) from port A of cell ntt_controller16.$add$../../experiments/ntt16/rtl/ntt_controller16.v:53$147 ($add).
-Removed top 3 bits (of 6) from port Y of cell ntt_controller16.$mul$../../experiments/ntt16/rtl/ntt_controller16.v:52$146 ($mul).
+Removed top 4 bits (of 8) from port Y of cell ntt_controller16.$add$../../experiments/ntt16/rtl/ntt_controller16.v:50$147 ($add).
+Removed top 3 bits (of 7) from port A of cell ntt_controller16.$add$../../experiments/ntt16/rtl/ntt_controller16.v:50$147 ($add).
+Removed top 3 bits (of 6) from port Y of cell ntt_controller16.$mul$../../experiments/ntt16/rtl/ntt_controller16.v:49$146 ($mul).
 Removed top 1 bits (of 3) from wire ntt_controller16.$procmux$212_Y.
 Removed top 1 bits (of 3) from wire ntt_controller16.$procmux$214_Y.
 Removed top 3 bits (of 7) from wire ntt_controller16.prod.
@@ -1128,27 +1128,27 @@ Removed 0 unused cells and 10 unused wires.
 Extracting $alu and $macc cells in module ntt_top16:
   created 0 $alu and 0 $macc cells.
 Extracting $alu and $macc cells in module ntt_controller16:
-  creating $macc model for $add$../../experiments/ntt16/rtl/ntt_controller16.v:117$154 ($add).
-  creating $macc model for $add$../../experiments/ntt16/rtl/ntt_controller16.v:113$153 ($add).
-  creating $macc model for $add$../../experiments/ntt16/rtl/ntt_controller16.v:54$148 ($add).
-  creating $macc model for $add$../../experiments/ntt16/rtl/ntt_controller16.v:53$147 ($add).
-  creating $macc model for $mul$../../experiments/ntt16/rtl/ntt_controller16.v:52$146 ($mul).
-  creating $macc model for $sub$../../experiments/ntt16/rtl/ntt_controller16.v:49$143 ($sub).
-  creating $macc model for $sub$../../experiments/ntt16/rtl/ntt_controller16.v:47$141 ($sub).
-  creating $alu model for $macc $sub$../../experiments/ntt16/rtl/ntt_controller16.v:47$141.
-  creating $alu model for $macc $sub$../../experiments/ntt16/rtl/ntt_controller16.v:49$143.
-  creating $alu model for $macc $add$../../experiments/ntt16/rtl/ntt_controller16.v:53$147.
-  creating $alu model for $macc $add$../../experiments/ntt16/rtl/ntt_controller16.v:54$148.
-  creating $alu model for $macc $add$../../experiments/ntt16/rtl/ntt_controller16.v:113$153.
-  creating $alu model for $macc $add$../../experiments/ntt16/rtl/ntt_controller16.v:117$154.
-  creating $macc cell for $mul$../../experiments/ntt16/rtl/ntt_controller16.v:52$146: $auto$alumacc.cc:427:replace_macc$535
-  creating $alu model for $eq$../../experiments/ntt16/rtl/ntt_controller16.v:109$152 ($eq): merged with $sub$../../experiments/ntt16/rtl/ntt_controller16.v:47$141.
-  creating $alu cell for $add$../../experiments/ntt16/rtl/ntt_controller16.v:117$154: $auto$alumacc.cc:578:replace_alu$536
-  creating $alu cell for $add$../../experiments/ntt16/rtl/ntt_controller16.v:113$153: $auto$alumacc.cc:578:replace_alu$539
-  creating $alu cell for $add$../../experiments/ntt16/rtl/ntt_controller16.v:54$148: $auto$alumacc.cc:578:replace_alu$542
-  creating $alu cell for $add$../../experiments/ntt16/rtl/ntt_controller16.v:53$147: $auto$alumacc.cc:578:replace_alu$545
-  creating $alu cell for $sub$../../experiments/ntt16/rtl/ntt_controller16.v:49$143: $auto$alumacc.cc:578:replace_alu$548
-  creating $alu cell for $sub$../../experiments/ntt16/rtl/ntt_controller16.v:47$141, $eq$../../experiments/ntt16/rtl/ntt_controller16.v:109$152: $auto$alumacc.cc:578:replace_alu$551
+  creating $macc model for $add$../../experiments/ntt16/rtl/ntt_controller16.v:114$154 ($add).
+  creating $macc model for $add$../../experiments/ntt16/rtl/ntt_controller16.v:110$153 ($add).
+  creating $macc model for $add$../../experiments/ntt16/rtl/ntt_controller16.v:51$148 ($add).
+  creating $macc model for $add$../../experiments/ntt16/rtl/ntt_controller16.v:50$147 ($add).
+  creating $macc model for $mul$../../experiments/ntt16/rtl/ntt_controller16.v:49$146 ($mul).
+  creating $macc model for $sub$../../experiments/ntt16/rtl/ntt_controller16.v:46$143 ($sub).
+  creating $macc model for $sub$../../experiments/ntt16/rtl/ntt_controller16.v:44$141 ($sub).
+  creating $alu model for $macc $sub$../../experiments/ntt16/rtl/ntt_controller16.v:44$141.
+  creating $alu model for $macc $sub$../../experiments/ntt16/rtl/ntt_controller16.v:46$143.
+  creating $alu model for $macc $add$../../experiments/ntt16/rtl/ntt_controller16.v:50$147.
+  creating $alu model for $macc $add$../../experiments/ntt16/rtl/ntt_controller16.v:51$148.
+  creating $alu model for $macc $add$../../experiments/ntt16/rtl/ntt_controller16.v:110$153.
+  creating $alu model for $macc $add$../../experiments/ntt16/rtl/ntt_controller16.v:114$154.
+  creating $macc cell for $mul$../../experiments/ntt16/rtl/ntt_controller16.v:49$146: $auto$alumacc.cc:427:replace_macc$535
+  creating $alu model for $eq$../../experiments/ntt16/rtl/ntt_controller16.v:106$152 ($eq): merged with $sub$../../experiments/ntt16/rtl/ntt_controller16.v:44$141.
+  creating $alu cell for $add$../../experiments/ntt16/rtl/ntt_controller16.v:114$154: $auto$alumacc.cc:578:replace_alu$536
+  creating $alu cell for $add$../../experiments/ntt16/rtl/ntt_controller16.v:110$153: $auto$alumacc.cc:578:replace_alu$539
+  creating $alu cell for $add$../../experiments/ntt16/rtl/ntt_controller16.v:51$148: $auto$alumacc.cc:578:replace_alu$542
+  creating $alu cell for $add$../../experiments/ntt16/rtl/ntt_controller16.v:50$147: $auto$alumacc.cc:578:replace_alu$545
+  creating $alu cell for $sub$../../experiments/ntt16/rtl/ntt_controller16.v:46$143: $auto$alumacc.cc:578:replace_alu$548
+  creating $alu cell for $sub$../../experiments/ntt16/rtl/ntt_controller16.v:44$141, $eq$../../experiments/ntt16/rtl/ntt_controller16.v:106$152: $auto$alumacc.cc:578:replace_alu$551
   created 6 $alu and 1 $macc cells.
 Extracting $alu and $macc cells in module coefficient_memory16:
   created 0 $alu and 0 $macc cells.
@@ -2490,13 +2490,7 @@ Found matching posedge clock domain: \clk, enabled by $auto$simple.cc:193:make_p
 8.22.26. Extracting gate netlist of module `\ntt_controller16' to `<abc-temp-dir>/input.blif'..
 Found matching posedge clock domain: \clk, enabled by $auto$simple.cc:210:make_patterns_logic$489
 
-8.22.27. Extracting gate netlist of module `\ntt_controller16' to `<abc-temp-dir>/input.blif'..
-Found matching posedge clock domain: \clk, enabled by $auto$simple.cc:210:make_patterns_logic$462
-
-8.22.28. Summary of detected clock domains:
-  64 cells in clk={ }, en={ }, arst={ }, srst={ }
-
-8.22.28.1. Executed ABC.
+8.22.26.1. Executed ABC.
 Extracted 26 gates and 59 wires to a netlist network with 33 inputs and 16 outputs.
 Running ABC script: <abc-temp-dir>/abc.script
 ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
@@ -2517,7 +2511,7 @@ ABC: + &nf
 ABC: + &put 
 ABC: + write_blif <abc-temp-dir>/output.blif 
 
-8.22.28.2. Re-integrating ABC results.
+8.22.26.2. Re-integrating ABC results.
 ABC RESULTS:               AND cells:        5
 ABC RESULTS:               MUX cells:       18
 ABC RESULTS:              NAND cells:        1
@@ -2528,7 +2522,31 @@ ABC RESULTS:           input signals:       33
 ABC RESULTS:          output signals:       16
 Removing temp directory.
 
-8.22.28.1. Executed ABC.
+8.22.27. Extracting gate netlist of module `\ntt_controller16' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clk, enabled by $auto$simple.cc:210:make_patterns_logic$462
+
+8.22.28. Summary of detected clock domains:
+  64 cells in clk={ }, en={ }, arst={ }, srst={ }
+
+8.22.29. Extracting gate netlist of module `\mod_sub' to `<abc-temp-dir>/input.blif'..
+No matching clock domain found. Not extracting any FF cells.
+
+8.22.30. Summary of detected clock domains:
+  57 cells in clk={ }, en={ }, arst={ }, srst={ }
+
+8.22.31. Extracting gate netlist of module `\mod_add' to `<abc-temp-dir>/input.blif'..
+No matching clock domain found. Not extracting any FF cells.
+
+8.22.32. Summary of detected clock domains:
+  21 cells in clk={ }, en={ }, arst={ }, srst={ }
+
+8.22.33. Extracting gate netlist of module `\twiddle_rom16' to `<abc-temp-dir>/input.blif'..
+No matching clock domain found. Not extracting any FF cells.
+
+8.22.34. Summary of detected clock domains:
+  3 cells in clk={ }, en={ }, arst={ }, srst={ }
+
+8.22.34.1. Executed ABC.
 Extracted 21 gates and 51 wires to a netlist network with 30 inputs and 9 outputs.
 Running ABC script: <abc-temp-dir>/abc.script
 ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
@@ -2549,7 +2567,7 @@ ABC: + &nf
 ABC: + &put 
 ABC: + write_blif <abc-temp-dir>/output.blif 
 
-8.22.28.2. Re-integrating ABC results.
+8.22.34.2. Re-integrating ABC results.
 ABC RESULTS:               AND cells:        4
 ABC RESULTS:               MUX cells:       14
 ABC RESULTS:              NAND cells:        2
@@ -2558,24 +2576,6 @@ ABC RESULTS:        internal signals:       12
 ABC RESULTS:           input signals:       30
 ABC RESULTS:          output signals:        9
 Removing temp directory.
-
-8.22.29. Extracting gate netlist of module `\mod_sub' to `<abc-temp-dir>/input.blif'..
-No matching clock domain found. Not extracting any FF cells.
-
-8.22.30. Summary of detected clock domains:
-  57 cells in clk={ }, en={ }, arst={ }, srst={ }
-
-8.22.31. Extracting gate netlist of module `\mod_add' to `<abc-temp-dir>/input.blif'..
-No matching clock domain found. Not extracting any FF cells.
-
-8.22.32. Summary of detected clock domains:
-  21 cells in clk={ }, en={ }, arst={ }, srst={ }
-
-8.22.33. Extracting gate netlist of module `\twiddle_rom16' to `<abc-temp-dir>/input.blif'..
-No matching clock domain found. Not extracting any FF cells.
-
-8.22.34. Summary of detected clock domains:
-  3 cells in clk={ }, en={ }, arst={ }, srst={ }
 
 8.22.35. Extracting gate netlist of module `\butterfly_datapath' to `<abc-temp-dir>/input.blif'..
 No matching clock domain found. Not extracting any FF cells.
@@ -3920,6 +3920,6 @@ Found and reported 0 problems.
         1   coefficient_memory16
         1   ntt_controller16
 
-End of script. Logfile hash: 762d4f3994, time: 0.42s, user: 0.14s, system: 0.04s, MEM: 26.28 MB peak
+End of script. Logfile hash: 2b6a9c1758, time: 0.48s, user: 0.16s, system: 0.05s, MEM: 26.62 MB peak
 Yosys 0.70+post (git sha1 0c11ea098be065e585a90a06e7b7da49936cf231, Release, AppleClang clang++ 21.0.0.21000334)
-Time spent: 93% 1x abc (1 sec), 1% 26x opt_clean (0 sec), ...
+Time spent: 92% 1x abc (1 sec), 1% 1x techmap (0 sec), ...
