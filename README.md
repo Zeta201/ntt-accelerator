@@ -369,15 +369,10 @@ The adder calculates $a+b$. Since both inputs are at most 16, the maximum sum is
 
 **Subtraction**
 
-The subtractor calculates $a-b$. If $a\geq b$, the difference is already in the valid range. Otherwise, it adds 17 to the difference:
+The subtractor calculates $a-b$:
 
-$$
-(a-b)\bmod 17 =
-\begin{cases}
-a-b, & a\geq b\\\\
-a+17-b, & a<b
-\end{cases}
-$$
+- If $a\geq b$, the difference is already in the valid range: $(a-b)\bmod 17=a-b$.
+- If $a<b$, it adds 17 to the difference: $(a-b)\bmod 17=a+17-b$.
 
 **Multiplication**
 
