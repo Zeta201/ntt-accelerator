@@ -1,7 +1,6 @@
 `default_nettype none
 
 // Assemble the forward/inverse NTT accelerator from the controller and coefficient memory.
-// Forward behavior (inv=0) is bit-for-bit identical to the baseline rtl/ntt_top.v.
 module ntt_top (
     input  wire        clk,
     input  wire        rst,

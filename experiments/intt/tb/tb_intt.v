@@ -1,5 +1,5 @@
-// Verify forward-mode regression, inverse-transform correctness, round-trips,
-// normalization, and inverse-specific control behavior for the INTT-capable ntt_top.
+// Test forward and inverse transforms, round-trips, normalization,
+// and inverse-mode control behavior.
 
 `default_nettype none
 
@@ -64,7 +64,7 @@ module tb_intt;
         end
     endtask
 
-    // Run one transform and return the result, busy-cycle count, and completion status.
+    // Run a transform and return its outputs, latency, and completion status.
     task run_transform;
         input mode_inv;
         input [4:0] in0, in1, in2, in3, in4, in5, in6, in7;
@@ -149,9 +149,8 @@ module tb_intt;
         rst <= 1'b0;
         @(posedge clk); #1;
 
-        // --- Forward-mode regression: the INTT-capable ntt_top (inv=0) must
-        //     reproduce the baseline forward results exactly, including the
-        //     unchanged 37-cycle latency. ---
+        // Check that the INTT-enabled design preserves baseline forward results
+        // and latency.
         for (i = 0; i < n_names; i = i + 1) begin
             $sformat(input_path,    "reference/test_vectors/input_%0s.txt", names[i]);
             $sformat(expected_path, "reference/test_vectors/expected_%0s.txt", names[i]);
@@ -180,7 +179,7 @@ module tb_intt;
         end
         $display("forward-mode regression: %0d/%0d vectors checked", fwd_checked, n_names);
 
-        // --- Inverse vectors: independent INTT reference, checked against the hardware. ---
+        // Check inverse-transform outputs against the independent reference.
         for (i = 0; i < n_names; i = i + 1) begin
             $sformat(input_path,    "experiments/intt/reference/test_vectors/input_%0s.txt", names[i]);
             $sformat(expected_path, "experiments/intt/reference/test_vectors/expected_%0s.txt", names[i]);
@@ -209,7 +208,7 @@ module tb_intt;
         end
         $display("inverse vectors: %0d/%0d vectors checked", inv_checked, n_names);
 
-        // --- Round trip: NTT then INTT must recover the original input, for a representative sample. ---
+        // Verify that applying NTT followed by INTT recovers the input.
         for (i = 0; i < n_names; i = i + 2) begin
             $sformat(input_path, "reference/test_vectors/input_%0s.txt", names[i]);
             read_8_vector(input_path, ok_in);
@@ -234,7 +233,7 @@ module tb_intt;
         end
         $display("round-trip (NTT then INTT): %0d vectors checked", roundtrip_checked);
 
-        // --- Operation-selection stability: inv must be captured only at the accepted start edge. ---
+        // Verify that the selected transform mode remains unchanged while busy.
         begin : stability_test
             reg [4:0] rt0,rt1,rt2,rt3,rt4,rt5,rt6,rt7;
             integer el; reg okr;
@@ -244,8 +243,7 @@ module tb_intt;
             @(posedge clk);
             #1;
             start <= 1'b0;
-            // Flip inv to 0 while the inverse transform is still busy.
-            inv = 1'b0;
+            inv = 1'b0; // toggled while busy; must not affect this transform
             el = 0;
             while (!done && el < 200) begin
                 @(posedge clk); #1;
@@ -256,13 +254,14 @@ module tb_intt;
             rt4=coef_out[24:20]; rt5=coef_out[29:25]; rt6=coef_out[34:30]; rt7=coef_out[39:35];
             check(el == 61,
                   "mode stability: latency changed after inv toggled while busy, mode_reg was not captured correctly");
+            // Expected: INTT([1..8]) = [13,1,6,5,8,11,10,15] (INTT(x) != x in general).
             check(rt0===5'd13 && rt1===5'd1 && rt2===5'd6 && rt3===5'd5 &&
                   rt4===5'd8 && rt5===5'd11 && rt6===5'd10 && rt7===5'd15,
                   "mode stability: result changed after inv toggled while busy");
             @(posedge clk); #1;
         end
 
-        // --- Start pulse while busy (inverse mode) must be ignored. ---
+        // Verify that start requests received while busy are ignored.
         begin : start_while_busy
             integer el; reg okr;
             reg [4:0] rt0,rt1,rt2,rt3,rt4,rt5,rt6,rt7;
@@ -283,9 +282,8 @@ module tb_intt;
                 el = el + 1;
             end
             check(done, "start-while-busy: transform did not complete");
-            // el starts counting one cycle after the original accepted-start
-            // edge (the spurious start<=1 pulse consumes that extra edge),
-            // so the remaining count to done is 60, not the full 61.
+            // 60, not 61: the spurious start<=1 pulse consumes one extra edge
+            // before this count starts.
             check(el == 60, "start-while-busy: mid-flight start pulse altered the latency");
             rt0=coef_out[4:0]; rt1=coef_out[9:5]; rt2=coef_out[14:10]; rt3=coef_out[19:15];
             rt4=coef_out[24:20]; rt5=coef_out[29:25]; rt6=coef_out[34:30]; rt7=coef_out[39:35];
@@ -295,7 +293,7 @@ module tb_intt;
             @(posedge clk); #1;
         end
 
-        // --- Reset asserted during the normalization phase must return to IDLE cleanly. ---
+        // Verify that reset during normalization returns the controller to IDLE.
         begin : reset_during_norm
             integer el;
             coef_in = {5'd8,5'd7,5'd6,5'd5,5'd4,5'd3,5'd2,5'd1};
@@ -304,9 +302,8 @@ module tb_intt;
             @(posedge clk);
             #1;
             start <= 1'b0;
-            // Run for 40 more cycles: the 12 butterflies finish at cycle 37
-            // from this same reference point, so by cycle 40 the controller
-            // is inside the normalization phase.
+            // The 12 butterflies finish at cycle 37, so 40 cycles lands inside
+            // the normalization phase.
             for (el = 0; el < 40; el = el + 1) begin
                 @(posedge clk); #1;
             end
@@ -321,13 +318,30 @@ module tb_intt;
             @(posedge clk); #1;
         end
 
-        // --- A fresh transform after the mid-norm reset must still complete correctly. ---
+        // Verify that a new inverse transform completes correctly after reset.
         begin : fresh_after_reset
             reg [4:0] rt0,rt1,rt2,rt3,rt4,rt5,rt6,rt7;
             run_transform(1'b1, 5'd1,5'd2,5'd3,5'd4,5'd5,5'd6,5'd7,5'd8,
                           rt0,rt1,rt2,rt3,rt4,rt5,rt6,rt7, elapsed, ok_run);
             check(ok_run, "fresh-after-reset: transform did not complete");
             check(elapsed == 61, "fresh-after-reset: latency incorrect");
+        end
+
+        // Verify normalization of every coefficient in the memory.
+        begin : normalization_per_location
+            reg [4:0] rt0,rt1,rt2,rt3,rt4,rt5,rt6,rt7;
+            reg [4:0] exp_mem [0:7];
+            integer m;
+            exp_mem[0]=5'd14; exp_mem[1]=5'd6;  exp_mem[2]=5'd1;  exp_mem[3]=5'd16;
+            exp_mem[4]=5'd16; exp_mem[5]=5'd10; exp_mem[6]=5'd8;  exp_mem[7]=5'd3;
+
+            run_transform(1'b1, 5'd6,5'd10,5'd11,5'd15,5'd0,5'd7,5'd12,5'd0,
+                          rt0,rt1,rt2,rt3,rt4,rt5,rt6,rt7, elapsed, ok_run);
+            check(ok_run, "normalization-per-location: transform did not complete");
+            for (m = 0; m < 8; m = m + 1) begin
+                check(dut.u_mem.mem[m] === exp_mem[m],
+                      "normalization-per-location: mem[m] != coefficient * 15 mod 17 for some m");
+            end
         end
 
         $display("tb_intt: %0d checks, %0d failures, %0d setup errors", check_count, error_count, setup_error_count);

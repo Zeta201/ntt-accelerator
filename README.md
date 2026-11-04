@@ -1156,12 +1156,25 @@ modifying `rtl/`:
   the 12 inverse butterflies: `phase=1` revisits all 8 memory locations
   (`nidx=0..7`), and for each one drives the *same* `a_reg`/`b_reg`/`tw_reg`
   registers and the *same* `butterfly_datapath` instance with
-  `(mem[nidx], 0, 15)` — since `mod_sub(a,0)=a`, this makes the shared
-  datapath compute exactly `mem[nidx] × 15 mod 17` with no new arithmetic
-  hardware. The result is written back through the existing two-port
-  memory write (`lo_reg=hi_reg=nidx`), which is race-free because both
-  `u_reg` and `v_reg` are registered to the identical scaled value in
-  normalization mode, so the dual write is not order-dependent.
+  `(mem[nidx], 0, 15)`. With `b=0`, the datapath's two outputs are **not**
+  equal: `u = a+b = mem[nidx]` (the unscaled value) and
+  `v = (a-b)×tw = mem[nidx]×15 mod 17` (the scaled value) — `u` and `v`
+  only differ by a factor of 15, so they are not interchangeable. The
+  controller's `S_COMPUTE` logic explicitly accounts for this: in
+  normalization mode it registers `v_c` into **both** `u_reg` and `v_reg`
+  (`u_reg <= phase ? v_c : u_c;`), discarding the datapath's own `u_c`
+  rather than using it. Only because of that explicit override are
+  `u_reg` and `v_reg` guaranteed identical before the write; the result is
+  then committed through the existing two-port memory write
+  (`lo_reg=hi_reg=nidx`), which is race-free because both ports present
+  the same data, not because the datapath happened to produce matching
+  outputs on its own. This was traced in simulation for a concrete
+  nontrivial value (`x=3` at a memory location, forced via direct
+  hierarchical assignment): the datapath computed `u_c=3, v_c=11`
+  exactly as the raw equations predict, the controller's override placed
+  `11` in both `u_reg` and `v_reg`, and `mem[nidx]` ended up `11`
+  (`15×3 mod 17`), confirming the override — not the arithmetic alone —
+  is what makes this correct.
 - `ntt_top.v` — adds the `inv` port and wires it through; otherwise
   identical to `rtl/ntt_top.v`.
 
@@ -1188,8 +1201,10 @@ structure:
   37-cycle latency), the 31 independently-generated INTT vectors (checked
   against the 61-cycle latency and the Python reference), 16 round-trip
   vectors, operation-mode stability while busy, start-pulse-while-busy
-  immunity, and reset recovery mid-normalization-phase — **326 checks, 0
-  failures**.
+  immunity, reset recovery mid-normalization-phase, and an explicit
+  per-location check that all 8 in-place memory locations individually
+  hold `coefficient × 15 mod 17` after a real (non-forced) inverse
+  transform of a nontrivial vector — **335 checks, 0 failures**.
 
 A deliberate testbench bug was found and fixed during this work: the
 initial `run_transform` task checked `done` immediately after a clock edge

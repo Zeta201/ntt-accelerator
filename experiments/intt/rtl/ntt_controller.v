@@ -1,15 +1,6 @@
 `default_nettype none
 
 // Control the iterative NTT/INTT execution.
-//
-// Forward and inverse transforms share the same READ/COMPUTE/WRITE butterfly
-// pipeline, the same address-generation hardware, and the same shared
-// butterfly datapath. Inverse mode selects the inverse-twiddle ROM table and,
-// after the 12 butterflies complete, runs one additional pass ("norm phase")
-// that visits all 8 memory locations and multiplies each by N^-1 mod 17 using
-// the same datapath, reusing the a/b/tw register path and the existing
-// two-port memory write (both ports write the identical scaled value to the
-// same address, so the dual write is race-free regardless of port order).
 module ntt_controller (
     input  wire       clk,
     input  wire       rst,
