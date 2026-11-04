@@ -1,0 +1,21 @@
+name: Synthesis Check
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  synthesize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up OSS CAD Suite (Yosys)
+        uses: YosysHQ/setup-oss-cad-suite@v4
+
+      - name: Show Yosys version
+        run: yosys -V
+
+      - name: Run generic synthesis for baseline and all experiments
+        run: bash scripts/run_synthesis.sh
