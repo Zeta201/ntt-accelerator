@@ -32,10 +32,19 @@ if [ "$ntt16_status" -ne 0 ]; then
 fi
 
 echo
+echo "########## EXPERIMENT: PIPELINED ##########"
+bash scripts/run_pipelined.sh
+pipelined_status=$?
+if [ "$pipelined_status" -ne 0 ]; then
+    fail_count=$((fail_count + 1))
+fi
+
+echo
 echo "=== overall summary ==="
-echo "baseline:        $([ "$baseline_status" -eq 0 ] && echo PASS || echo FAIL)"
-echo "experiment INTT: $([ "$intt_status" -eq 0 ] && echo PASS || echo FAIL)"
-echo "experiment N=16: $([ "$ntt16_status" -eq 0 ] && echo PASS || echo FAIL)"
+echo "baseline:            $([ "$baseline_status" -eq 0 ] && echo PASS || echo FAIL)"
+echo "experiment INTT:     $([ "$intt_status" -eq 0 ] && echo PASS || echo FAIL)"
+echo "experiment N=16:     $([ "$ntt16_status" -eq 0 ] && echo PASS || echo FAIL)"
+echo "experiment pipelined: $([ "$pipelined_status" -eq 0 ] && echo PASS || echo FAIL)"
 
 if [ "$fail_count" -eq 0 ]; then
     echo "ALL SUITES PASSED"

@@ -30,6 +30,7 @@ run_one() {
 run_one baseline
 run_one intt
 run_one ntt16
+run_one pipelined
 
 echo
 echo "=== synthesis summary ==="
