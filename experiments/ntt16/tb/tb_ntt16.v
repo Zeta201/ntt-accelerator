@@ -33,6 +33,15 @@ module tb_ntt16;
     integer setup_error_count;
     integer vectors_checked;
 
+    // Free-running count of cycles where busy=1, matching the baseline's
+    // busy-cycle latency convention (see waves/dump_waveforms.v): the delta
+    // of this accumulator across a transform counts exactly the cycles the
+    // controller is active (LOAD through the final WRITE), independent of
+    // testbench-side start-pulse-registration overhead.
+    integer busy_cycle_accum;
+    integer first_busy_cycles_recorded;
+    integer first_busy_cycles;
+
     // Share scratch buffers across tasks.
     reg [4:0] rdbuf [0:15];
     reg [4:0] stage_check_expected [0:15];
@@ -96,6 +105,8 @@ module tb_ntt16;
     // Monitor butterfly sequencing and verify state-dependent control signals.
     always @(posedge clk) begin
         #1;
+        if (busy) busy_cycle_accum = busy_cycle_accum + 1;
+
         if (dut.u_ctrl.state == 3'd2) begin // S_READ: issue one butterfly.
             check_count = check_count + 1;
             if (dut.u_ctrl.lo !== exp_lo[butterflies_this_transform] ||
@@ -187,6 +198,7 @@ module tb_ntt16;
         reg [4:0] s4_exp [0:15];
         reg [4:0] actual_out;
         integer k, cyc_start, cyc_done, elapsed, timeout_limit, mismatch;
+        integer busy_accum_start, busy_cycles;
         reg checkpoint1_done, checkpoint2_done, checkpoint3_done;
         begin
             $sformat(input_path,    "experiments/ntt16/reference/test_vectors/input_%0s.txt", name);
@@ -228,6 +240,7 @@ module tb_ntt16;
                 @(posedge clk);
                 start <= 1'b1;
                 cyc_start = cycle_count;
+                busy_accum_start = busy_cycle_accum;
                 @(posedge clk);
                 start <= 1'b0;
 
@@ -268,6 +281,7 @@ module tb_ntt16;
                 end else begin
                     cyc_done = cycle_count;
                     elapsed = cyc_done - cyc_start;
+                    busy_cycles = busy_cycle_accum - busy_accum_start;
 
                     for (k = 0; k < 16; k = k + 1) stage_check_expected[k] = s4_exp[k];
                     check_stage_mem(name, 4);
@@ -305,8 +319,24 @@ module tb_ntt16;
                         $display("FAIL: vector '%0s': elapsed cycles %0d differs from first-measured %0d (timing should be data-independent)", name, elapsed, first_elapsed_cycles);
                     end
 
+                    // busy_cycles counts cycles with busy=1 only (LOAD through the
+                    // final WRITE), matching the baseline's documented busy-cycle
+                    // latency convention. elapsed additionally includes the fixed
+                    // cycles between the testbench asserting start and busy actually
+                    // asserting, which is testbench-side handshake overhead, not
+                    // DUT execution time.
+                    check_count = check_count + 1;
+                    if (first_busy_cycles_recorded == 0) begin
+                        first_busy_cycles = busy_cycles;
+                        first_busy_cycles_recorded = 1;
+                        $display("INFO: first measured busy-cycle latency = %0d cycles (vector '%0s')", busy_cycles, name);
+                    end else if (busy_cycles !== first_busy_cycles) begin
+                        error_count = error_count + 1;
+                        $display("FAIL: vector '%0s': busy cycles %0d differs from first-measured %0d (timing should be data-independent)", name, busy_cycles, first_busy_cycles);
+                    end
+
                     if (mismatch == 0) begin
-                        $display("PASS: vector '%0s' (cycles=%0d, butterflies=%0d)", name, elapsed, butterflies_this_transform);
+                        $display("PASS: vector '%0s' (elapsed=%0d, busy_cycles=%0d, butterflies=%0d)", name, elapsed, busy_cycles, butterflies_this_transform);
                     end
                 end
             end
@@ -474,6 +504,8 @@ module tb_ntt16;
         vectors_checked = 0;
         butterflies_total = 0;
         first_elapsed_recorded = 0;
+        busy_cycle_accum = 0;
+        first_busy_cycles_recorded = 0;
 
         load_manifest;
         $display("tb_ntt16: loaded manifest with %0d vector names", n_vectors);

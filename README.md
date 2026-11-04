@@ -1246,7 +1246,7 @@ The implementation was checked using an independent Python reference model and R
 | Verification | Result |
 |---|---:|
 | Python mathematical validation | 5,014 checks, 0 failures |
-| RTL verification | 11,096 checks, 0 failures |
+| RTL verification | 11,135 checks, 0 failures |
 | Test vectors | 39/39 passed |
 | Intermediate-stage checkpoints | All 4 stages verified per vector |
 | Butterfly schedule | All 32 butterflies/transform verified per vector |
@@ -1262,15 +1262,17 @@ Both implementations were synthesized using the same generic Yosys flow (`synth 
 | Transform size | 8 | 16 |
 | Number of stages | 3 | 4 |
 | Butterfly operations | 12 | 32 |
-| Transform latency | 37 cycles | 99 cycles |
+| Transform latency | 37 cycles | 97 cycles |
 | Coefficient memory entries | 8 | 16 |
 | Coefficient memory bits | 40 | 80 |
 | Generic synthesis cells | 603 | 952 |
-| — combinational cells | 364 | 536 |
+| — combinational logic cells (excluding multiplexers) | 364 | 536 |
 | — multiplexers | 159 | 293 |
 | — flip-flops | 80 | 123 |
 
-Doubling the transform size increases generic synthesis cells by 349 (57.9%) and flip-flops by 43 (53.8%). Latency increases from 37 to 99 cycles — close to, but not exactly, proportional to the increase in butterfly operations (12 to 32, a 2.67× increase, versus a 2.68× latency increase), since both include the same fixed one-cycle load overhead.
+Latency is measured in busy cycles, from the accepted-start edge through the final `WRITE` cycle. A dedicated counter in `tb_ntt16.v` confirms exactly 97 cycles for each of the 39 test vectors. Both designs follow the same execution pattern: one `LOAD` cycle and three cycles (`READ`, `COMPUTE`, `WRITE`) per butterfly. Therefore, latency is $1+3B$, where $B$ is the number of butterfly operations: 37 cycles for $N=8$ and 97 cycles for $N=16$.
+
+Doubling the transform size increases the butterfly count by 2.67× and latency by 2.62×, while generic synthesis cells increase by 57.9% and flip-flops by 53.8%. The smaller hardware increase results from reusing a single butterfly datapath sequentially; the additional hardware is primarily required for coefficient storage, addressing, and control.
 
 Module-level cell counts (from the same reports) show where this overhead comes from:
 
@@ -1280,8 +1282,9 @@ Module-level cell counts (from the same reports) show where this overhead comes 
 | Twiddle ROM | 7 | 16 |
 | Coefficient memory | 242 | 548 |
 | Modular arithmetic (combined) | 237 | 237 |
+| Total | 603 | 952 |
 
-Most of the added cells are in the coefficient memory: its read ports (`mem[lo]`, `mem[hi]`) become 16-to-1 multiplexers instead of 8-to-1, and its storage doubles from 40 to 80 flip-flops — accounting for all 43 of the design's added flip-flops together with the controller's 3 extra address-bit registers (`bidx`, `lo_reg`, `hi_reg` each gain one bit: 40→43 controller flip-flops). The controller and twiddle ROM grow modestly for the same reason — wider addresses and twiddle exponents — while the shared butterfly datapath and modular arithmetic are reused unchanged. As in Experiment 1, per-module counts are not strictly additive to the design total, since Yosys optimizes each module in the context of the whole design.
+Unlike Experiment 1, these module counts add up exactly to the reported design totals in both cases, with no synthesis-context-dependent drift. Most of the added cells are in the coefficient memory: its read ports (`mem[lo]`, `mem[hi]`) become 16-to-1 multiplexers instead of 8-to-1, and its storage doubles from 40 to 80 flip-flops. The 43 additional flip-flops in the design are fully accounted for by two sources, confirmed directly in the synthesized netlist (not just inferred from the RTL's declared registers): the coefficient memory's own flip-flop count goes from 40 to 80, and the controller's from 40 to 43, because `bidx`, `lo_reg`, and `hi_reg` each need one additional address bit. The controller and twiddle ROM grow modestly for the same reason — wider addresses and twiddle exponents — while the shared butterfly datapath and modular arithmetic are reused unchanged (confirmed by their identical cell counts above).
 
 These figures are generic synthesis results rather than target-specific FPGA resource estimates. Physical timing and maximum operating frequency were not evaluated.
 
