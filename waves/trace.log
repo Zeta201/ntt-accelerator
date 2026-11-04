@@ -1,0 +1,41 @@
+VCD info: dumpfile waves/ntt_top.vcd opened for output.
+t=46 state=1 stage=0 bidx=0 lo=0 hi=4 twexp=0 a_reg=x b_reg=x tw_reg=x u_reg=x v_reg=x we=0
+t=56 state=2 stage=0 bidx=0 lo=0 hi=4 twexp=0 a_reg=x b_reg=x tw_reg=x u_reg=x v_reg=x we=0
+t=66 state=3 stage=0 bidx=0 lo=0 hi=4 twexp=0 a_reg=1 b_reg=5 tw_reg=1 u_reg=x v_reg=x we=0
+t=76 state=4 stage=0 bidx=0 lo=0 hi=4 twexp=0 a_reg=1 b_reg=5 tw_reg=1 u_reg=6 v_reg=13 we=1
+t=86 state=2 stage=0 bidx=1 lo=1 hi=5 twexp=1 a_reg=1 b_reg=5 tw_reg=1 u_reg=6 v_reg=13 we=0
+t=96 state=3 stage=0 bidx=1 lo=1 hi=5 twexp=1 a_reg=2 b_reg=6 tw_reg=9 u_reg=6 v_reg=13 we=0
+t=106 state=4 stage=0 bidx=1 lo=1 hi=5 twexp=1 a_reg=2 b_reg=6 tw_reg=9 u_reg=8 v_reg=15 we=1
+t=116 state=2 stage=0 bidx=2 lo=2 hi=6 twexp=2 a_reg=2 b_reg=6 tw_reg=9 u_reg=8 v_reg=15 we=0
+t=126 state=3 stage=0 bidx=2 lo=2 hi=6 twexp=2 a_reg=3 b_reg=7 tw_reg=13 u_reg=8 v_reg=15 we=0
+t=136 state=4 stage=0 bidx=2 lo=2 hi=6 twexp=2 a_reg=3 b_reg=7 tw_reg=13 u_reg=10 v_reg=16 we=1
+t=146 state=2 stage=0 bidx=3 lo=3 hi=7 twexp=3 a_reg=3 b_reg=7 tw_reg=13 u_reg=10 v_reg=16 we=0
+t=156 state=3 stage=0 bidx=3 lo=3 hi=7 twexp=3 a_reg=4 b_reg=8 tw_reg=15 u_reg=10 v_reg=16 we=0
+t=166 state=4 stage=0 bidx=3 lo=3 hi=7 twexp=3 a_reg=4 b_reg=8 tw_reg=15 u_reg=12 v_reg=8 we=1
+t=176 state=2 stage=1 bidx=0 lo=0 hi=2 twexp=0 a_reg=4 b_reg=8 tw_reg=15 u_reg=12 v_reg=8 we=0
+t=186 state=3 stage=1 bidx=0 lo=0 hi=2 twexp=0 a_reg=6 b_reg=10 tw_reg=1 u_reg=12 v_reg=8 we=0
+t=196 state=4 stage=1 bidx=0 lo=0 hi=2 twexp=0 a_reg=6 b_reg=10 tw_reg=1 u_reg=16 v_reg=13 we=1
+t=206 state=2 stage=1 bidx=1 lo=1 hi=3 twexp=2 a_reg=6 b_reg=10 tw_reg=1 u_reg=16 v_reg=13 we=0
+t=216 state=3 stage=1 bidx=1 lo=1 hi=3 twexp=2 a_reg=8 b_reg=12 tw_reg=13 u_reg=16 v_reg=13 we=0
+t=226 state=4 stage=1 bidx=1 lo=1 hi=3 twexp=2 a_reg=8 b_reg=12 tw_reg=13 u_reg=3 v_reg=16 we=1
+t=236 state=2 stage=1 bidx=2 lo=4 hi=6 twexp=0 a_reg=8 b_reg=12 tw_reg=13 u_reg=3 v_reg=16 we=0
+t=246 state=3 stage=1 bidx=2 lo=4 hi=6 twexp=0 a_reg=13 b_reg=16 tw_reg=1 u_reg=3 v_reg=16 we=0
+t=256 state=4 stage=1 bidx=2 lo=4 hi=6 twexp=0 a_reg=13 b_reg=16 tw_reg=1 u_reg=12 v_reg=14 we=1
+t=266 state=2 stage=1 bidx=3 lo=5 hi=7 twexp=2 a_reg=13 b_reg=16 tw_reg=1 u_reg=12 v_reg=14 we=0
+t=276 state=3 stage=1 bidx=3 lo=5 hi=7 twexp=2 a_reg=15 b_reg=8 tw_reg=13 u_reg=12 v_reg=14 we=0
+t=286 state=4 stage=1 bidx=3 lo=5 hi=7 twexp=2 a_reg=15 b_reg=8 tw_reg=13 u_reg=6 v_reg=6 we=1
+t=296 state=2 stage=2 bidx=0 lo=0 hi=1 twexp=0 a_reg=15 b_reg=8 tw_reg=13 u_reg=6 v_reg=6 we=0
+t=306 state=3 stage=2 bidx=0 lo=0 hi=1 twexp=0 a_reg=16 b_reg=3 tw_reg=1 u_reg=6 v_reg=6 we=0
+t=316 state=4 stage=2 bidx=0 lo=0 hi=1 twexp=0 a_reg=16 b_reg=3 tw_reg=1 u_reg=2 v_reg=13 we=1
+t=326 state=2 stage=2 bidx=1 lo=2 hi=3 twexp=0 a_reg=16 b_reg=3 tw_reg=1 u_reg=2 v_reg=13 we=0
+t=336 state=3 stage=2 bidx=1 lo=2 hi=3 twexp=0 a_reg=13 b_reg=16 tw_reg=1 u_reg=2 v_reg=13 we=0
+t=346 state=4 stage=2 bidx=1 lo=2 hi=3 twexp=0 a_reg=13 b_reg=16 tw_reg=1 u_reg=12 v_reg=14 we=1
+t=356 state=2 stage=2 bidx=2 lo=4 hi=5 twexp=0 a_reg=13 b_reg=16 tw_reg=1 u_reg=12 v_reg=14 we=0
+t=366 state=3 stage=2 bidx=2 lo=4 hi=5 twexp=0 a_reg=12 b_reg=6 tw_reg=1 u_reg=12 v_reg=14 we=0
+t=376 state=4 stage=2 bidx=2 lo=4 hi=5 twexp=0 a_reg=12 b_reg=6 tw_reg=1 u_reg=1 v_reg=6 we=1
+t=386 state=2 stage=2 bidx=3 lo=6 hi=7 twexp=0 a_reg=12 b_reg=6 tw_reg=1 u_reg=1 v_reg=6 we=0
+t=396 state=3 stage=2 bidx=3 lo=6 hi=7 twexp=0 a_reg=14 b_reg=6 tw_reg=1 u_reg=1 v_reg=6 we=0
+t=406 state=4 stage=2 bidx=3 lo=6 hi=7 twexp=0 a_reg=14 b_reg=6 tw_reg=1 u_reg=3 v_reg=8 we=1
+coef_out (natural order) = 2 1 12 3 13 6 14 8
+expected (from README)   = 2 1 12 3 13 6 14 8
+waves/dump_waveforms.v:66: $finish called at 436 (1s)

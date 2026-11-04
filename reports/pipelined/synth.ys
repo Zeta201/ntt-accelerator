@@ -1,0 +1,14 @@
+# Generic (technology-independent) synthesis of the pipelined ntt_top for a
+# gate/cell-count comparison against the N=8 baseline, under the same flow
+# and settings. No FPGA target or timing library is used, so this produces
+# generic synthesis statistics only -- no LUT/FF/BRAM counts and no timing
+# (Fmax / critical path) are available from this flow.
+read_verilog -sv ../../rtl/modular_arithmetic.v
+read_verilog -sv ../../rtl/twiddle_rom.v
+read_verilog -sv ../../rtl/butterfly_datapath.v
+read_verilog -sv ../../rtl/coefficient_memory.v
+read_verilog -sv ../../experiments/pipelined/rtl/ntt_controller_pipelined.v
+read_verilog -sv ../../experiments/pipelined/rtl/ntt_top_pipelined.v
+hierarchy -top ntt_top_pipelined
+synth -top ntt_top_pipelined
+stat
