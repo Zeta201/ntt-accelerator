@@ -4,10 +4,10 @@
 
 module tb_negative;
 
-    localparam ERR_NONE        = 0;
-    localparam ERR_MISSING     = 1;
-    localparam ERR_MALFORMED   = 2;
-    localparam ERR_BAD_COUNT   = 3;
+    localparam ERR_NONE = 0;
+    localparam ERR_MISSING = 1;
+    localparam ERR_MALFORMED = 2;
+    localparam ERR_BAD_COUNT = 3;
     localparam ERR_OUT_OF_RANGE = 4;
 
     reg [4:0] rdbuf [0:7];
@@ -55,9 +55,9 @@ module tb_negative;
 
     integer errtype;
 
-    reg         clk, rst, start;
-    reg  [39:0] coef_in;
-    wire        busy, done;
+    reg clk, rst, start;
+    reg [39:0] coef_in;
+    wire busy, done;
     wire [39:0] coef_out;
 
     ntt_top dut (

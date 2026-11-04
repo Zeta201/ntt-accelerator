@@ -2,17 +2,17 @@
 
 // Assemble the 16-point NTT accelerator from the controller and coefficient memory.
 module ntt_top16 (
-    input  wire        clk,
-    input  wire        rst,
-    input  wire        start,
-    input  wire [79:0] coef_in,
-    output wire        busy,
-    output wire        done,
+    input wire clk,
+    input wire rst,
+    input wire start,
+    input wire [79:0] coef_in,
+    output wire busy,
+    output wire done,
     output wire [79:0] coef_out
 );
-    wire [3:0]  lo, hi, lo_reg, hi_reg;
-    wire [4:0]  a_in, b_in, u_reg, v_reg;
-    wire        load_enable, write_enable;
+    wire [3:0] lo, hi, lo_reg, hi_reg;
+    wire [4:0] a_in, b_in, u_reg, v_reg;
+    wire load_enable, write_enable;
     wire [79:0] mem_flat;
 
     ntt_controller16 u_ctrl (

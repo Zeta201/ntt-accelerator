@@ -4,7 +4,7 @@
 
 module tb_modular_arithmetic;
 
-    reg  [4:0] a, b;
+    reg [4:0] a, b;
     wire [4:0] sum, diff, v;
 
     mod_add u_add (.a(a), .b(b), .sum(sum));

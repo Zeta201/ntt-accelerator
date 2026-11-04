@@ -9,12 +9,12 @@ module tb_ntt16;
     localparam BUTTERFLIES_PER_STAGE = 8;
     localparam TOTAL_BUTTERFLIES = STAGES * BUTTERFLIES_PER_STAGE;
 
-    reg         clk;
-    reg         rst;
-    reg         start;
-    reg  [79:0] coef_in;
-    wire        busy;
-    wire        done;
+    reg clk;
+    reg rst;
+    reg start;
+    reg [79:0] coef_in;
+    wire busy;
+    wire done;
     wire [79:0] coef_out;
 
     ntt_top16 dut (
@@ -25,7 +25,7 @@ module tb_ntt16;
     always #5 clk = ~clk;
 
     integer cycle_count;
-    // Track clock cycles using a nonblocking assignment to avoid testbench races.
+    // Update the cycle count in the NBA region to avoid races with testbench sampling.
     always @(posedge clk) cycle_count <= cycle_count + 1;
 
     integer error_count;
@@ -33,25 +33,18 @@ module tb_ntt16;
     integer setup_error_count;
     integer vectors_checked;
 
-    // Free-running count of cycles where busy=1, matching the baseline's
-    // busy-cycle latency convention (see waves/dump_waveforms.v): the delta
-    // of this accumulator across a transform counts exactly the cycles the
-    // controller is active (LOAD through the final WRITE), independent of
-    // testbench-side start-pulse-registration overhead.
+    // Count cycles with busy=1, from LOAD through the final WRITE.
+    // This matches the baseline's busy-cycle latency convention.
     integer busy_cycle_accum;
     integer first_busy_cycles_recorded;
     integer first_busy_cycles;
 
-    // Share scratch buffers across tasks.
     reg [4:0] rdbuf [0:15];
     reg [4:0] stage_check_expected [0:15];
 
-    // Define the expected butterfly schedule independently of the DUT
-    // (from experiments/ntt16/reference/ntt16_math_validation.py's
-    // dif_schedule_pairs, verified there against an independent recursive
-    // DIF implementation and the direct NTT definition).
-    reg [3:0] exp_lo   [0:31];
-    reg [3:0] exp_hi   [0:31];
+    // Expected butterfly schedule, defined independently of the DUT.
+    reg [3:0] exp_lo [0:31];
+    reg [3:0] exp_hi [0:31];
     reg [3:0] exp_texp [0:31];
 
     integer butterflies_this_transform;
@@ -64,45 +57,44 @@ module tb_ntt16;
 
     initial begin
         // Stage 0: distance 8.
-        exp_lo[0]=0;  exp_hi[0]=8;   exp_texp[0]=0;
-        exp_lo[1]=1;  exp_hi[1]=9;   exp_texp[1]=1;
-        exp_lo[2]=2;  exp_hi[2]=10;  exp_texp[2]=2;
-        exp_lo[3]=3;  exp_hi[3]=11;  exp_texp[3]=3;
-        exp_lo[4]=4;  exp_hi[4]=12;  exp_texp[4]=4;
-        exp_lo[5]=5;  exp_hi[5]=13;  exp_texp[5]=5;
-        exp_lo[6]=6;  exp_hi[6]=14;  exp_texp[6]=6;
-        exp_lo[7]=7;  exp_hi[7]=15;  exp_texp[7]=7;
+        exp_lo[0] = 0; exp_hi[0] = 8; exp_texp[0] = 0;
+        exp_lo[1] = 1; exp_hi[1] = 9; exp_texp[1] = 1;
+        exp_lo[2] = 2; exp_hi[2] = 10; exp_texp[2] = 2;
+        exp_lo[3] = 3; exp_hi[3] = 11; exp_texp[3] = 3;
+        exp_lo[4] = 4; exp_hi[4] = 12; exp_texp[4] = 4;
+        exp_lo[5] = 5; exp_hi[5] = 13; exp_texp[5] = 5;
+        exp_lo[6] = 6; exp_hi[6] = 14; exp_texp[6] = 6;
+        exp_lo[7] = 7; exp_hi[7] = 15; exp_texp[7] = 7;
         // Stage 1: distance 4.
-        exp_lo[8]=0;  exp_hi[8]=4;   exp_texp[8]=0;
-        exp_lo[9]=1;  exp_hi[9]=5;   exp_texp[9]=2;
-        exp_lo[10]=2; exp_hi[10]=6;  exp_texp[10]=4;
-        exp_lo[11]=3; exp_hi[11]=7;  exp_texp[11]=6;
-        exp_lo[12]=8; exp_hi[12]=12; exp_texp[12]=0;
-        exp_lo[13]=9; exp_hi[13]=13; exp_texp[13]=2;
-        exp_lo[14]=10; exp_hi[14]=14; exp_texp[14]=4;
-        exp_lo[15]=11; exp_hi[15]=15; exp_texp[15]=6;
+        exp_lo[8] = 0; exp_hi[8] = 4; exp_texp[8] = 0;
+        exp_lo[9] = 1; exp_hi[9] = 5; exp_texp[9] = 2;
+        exp_lo[10] = 2; exp_hi[10] = 6; exp_texp[10] = 4;
+        exp_lo[11] = 3; exp_hi[11] = 7; exp_texp[11] = 6;
+        exp_lo[12] = 8; exp_hi[12] = 12; exp_texp[12] = 0;
+        exp_lo[13] = 9; exp_hi[13] = 13; exp_texp[13] = 2;
+        exp_lo[14] = 10; exp_hi[14] = 14; exp_texp[14] = 4;
+        exp_lo[15] = 11; exp_hi[15] = 15; exp_texp[15] = 6;
         // Stage 2: distance 2.
-        exp_lo[16]=0;  exp_hi[16]=2;  exp_texp[16]=0;
-        exp_lo[17]=1;  exp_hi[17]=3;  exp_texp[17]=4;
-        exp_lo[18]=4;  exp_hi[18]=6;  exp_texp[18]=0;
-        exp_lo[19]=5;  exp_hi[19]=7;  exp_texp[19]=4;
-        exp_lo[20]=8;  exp_hi[20]=10; exp_texp[20]=0;
-        exp_lo[21]=9;  exp_hi[21]=11; exp_texp[21]=4;
-        exp_lo[22]=12; exp_hi[22]=14; exp_texp[22]=0;
-        exp_lo[23]=13; exp_hi[23]=15; exp_texp[23]=4;
+        exp_lo[16] = 0; exp_hi[16] = 2; exp_texp[16] = 0;
+        exp_lo[17] = 1; exp_hi[17] = 3; exp_texp[17] = 4;
+        exp_lo[18] = 4; exp_hi[18] = 6; exp_texp[18] = 0;
+        exp_lo[19] = 5; exp_hi[19] = 7; exp_texp[19] = 4;
+        exp_lo[20] = 8; exp_hi[20] = 10; exp_texp[20] = 0;
+        exp_lo[21] = 9; exp_hi[21] = 11; exp_texp[21] = 4;
+        exp_lo[22] = 12; exp_hi[22] = 14; exp_texp[22] = 0;
+        exp_lo[23] = 13; exp_hi[23] = 15; exp_texp[23] = 4;
         // Stage 3: distance 1.
-        exp_lo[24]=0;  exp_hi[24]=1;  exp_texp[24]=0;
-        exp_lo[25]=2;  exp_hi[25]=3;  exp_texp[25]=0;
-        exp_lo[26]=4;  exp_hi[26]=5;  exp_texp[26]=0;
-        exp_lo[27]=6;  exp_hi[27]=7;  exp_texp[27]=0;
-        exp_lo[28]=8;  exp_hi[28]=9;  exp_texp[28]=0;
-        exp_lo[29]=10; exp_hi[29]=11; exp_texp[29]=0;
-        exp_lo[30]=12; exp_hi[30]=13; exp_texp[30]=0;
-        exp_lo[31]=14; exp_hi[31]=15; exp_texp[31]=0;
+        exp_lo[24] = 0; exp_hi[24] = 1; exp_texp[24] = 0;
+        exp_lo[25] = 2; exp_hi[25] = 3; exp_texp[25] = 0;
+        exp_lo[26] = 4; exp_hi[26] = 5; exp_texp[26] = 0;
+        exp_lo[27] = 6; exp_hi[27] = 7; exp_texp[27] = 0;
+        exp_lo[28] = 8; exp_hi[28] = 9; exp_texp[28] = 0;
+        exp_lo[29] = 10; exp_hi[29] = 11; exp_texp[29] = 0;
+        exp_lo[30] = 12; exp_hi[30] = 13; exp_texp[30] = 0;
+        exp_lo[31] = 14; exp_hi[31] = 15; exp_texp[31] = 0;
     end
 
-    // Monitor internal signals without modifying DUT state.
-    // Monitor butterfly sequencing and verify state-dependent control signals.
+    // Verify butterfly sequencing and state-dependent control signals.
     always @(posedge clk) begin
         #1;
         if (busy) busy_cycle_accum = busy_cycle_accum + 1;
@@ -201,7 +193,7 @@ module tb_ntt16;
         integer busy_accum_start, busy_cycles;
         reg checkpoint1_done, checkpoint2_done, checkpoint3_done;
         begin
-            $sformat(input_path,    "experiments/ntt16/reference/test_vectors/input_%0s.txt", name);
+            $sformat(input_path, "experiments/ntt16/reference/test_vectors/input_%0s.txt", name);
             $sformat(expected_path, "experiments/ntt16/reference/test_vectors/expected_%0s.txt", name);
             $sformat(s1_path, "experiments/ntt16/reference/stage_checkpoints/stage1_%0s.txt", name);
             $sformat(s2_path, "experiments/ntt16/reference/stage_checkpoints/stage2_%0s.txt", name);
@@ -228,9 +220,9 @@ module tb_ntt16;
             end else begin
                 vectors_checked = vectors_checked + 1;
                 coef_in = {in_vec[15], in_vec[14], in_vec[13], in_vec[12],
-                           in_vec[11], in_vec[10], in_vec[9],  in_vec[8],
-                           in_vec[7],  in_vec[6],  in_vec[5],  in_vec[4],
-                           in_vec[3],  in_vec[2],  in_vec[1],  in_vec[0]};
+                    in_vec[11], in_vec[10], in_vec[9], in_vec[8],
+                    in_vec[7], in_vec[6], in_vec[5], in_vec[4],
+                    in_vec[3], in_vec[2], in_vec[1], in_vec[0]};
 
                 butterflies_this_transform = 0;
                 checkpoint1_done = 0;
@@ -319,12 +311,6 @@ module tb_ntt16;
                         $display("FAIL: vector '%0s': elapsed cycles %0d differs from first-measured %0d (timing should be data-independent)", name, elapsed, first_elapsed_cycles);
                     end
 
-                    // busy_cycles counts cycles with busy=1 only (LOAD through the
-                    // final WRITE), matching the baseline's documented busy-cycle
-                    // latency convention. elapsed additionally includes the fixed
-                    // cycles between the testbench asserting start and busy actually
-                    // asserting, which is testbench-side handshake overhead, not
-                    // DUT execution time.
                     check_count = check_count + 1;
                     if (first_busy_cycles_recorded == 0) begin
                         first_busy_cycles = busy_cycles;
@@ -377,7 +363,6 @@ module tb_ntt16;
         integer mm;
         reg bad;
         begin
-            // x=[1]*16 -> X = direct_dft([1]*16) = [16,0,0,...,0] (see reference model).
             expected_ones_dft[0] = 5'd16;
             for (k = 1; k < 16; k = k + 1) expected_ones_dft[k] = 5'd0;
 
@@ -392,7 +377,6 @@ module tb_ntt16;
                 error_count = error_count + 1;
                 $display("FAIL: start-while-busy: busy must be 1 after accepted start");
             end
-            // Issue a spurious start pulse mid-transform; it must be ignored.
             start <= 1'b1;
             @(posedge clk); #1;
             start <= 1'b0;
@@ -429,7 +413,6 @@ module tb_ntt16;
             @(posedge clk);
             #1;
             start <= 1'b0;
-            // Run partway through the transform, well before completion.
             for (el = 0; el < 30; el = el + 1) begin
                 @(posedge clk); #1;
             end
@@ -460,7 +443,7 @@ module tb_ntt16;
         end
     endtask
 
-    // Verify that a new transform after the mid-transform reset still completes correctly.
+    // Verify that a fresh transform completes correctly after reset.
     task fresh_after_reset_test;
         integer el, k;
         reg [4:0] rt;

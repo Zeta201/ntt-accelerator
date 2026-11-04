@@ -4,12 +4,12 @@
 
 module tb_ntt_top;
 
-    reg         clk;
-    reg         rst;
-    reg         start;
-    reg  [39:0] coef_in;
-    wire        busy;
-    wire        done;
+    reg clk;
+    reg rst;
+    reg start;
+    reg [39:0] coef_in;
+    wire busy;
+    wire done;
     wire [39:0] coef_out;
 
     ntt_top dut (
@@ -33,8 +33,8 @@ module tb_ntt_top;
     reg [4:0] stage_check_expected [0:7];
 
     // Define the expected butterfly schedule independently of the DUT.
-    reg [2:0] exp_lo   [0:11];
-    reg [2:0] exp_hi   [0:11];
+    reg [2:0] exp_lo [0:11];
+    reg [2:0] exp_hi [0:11];
     reg [2:0] exp_texp [0:11];
 
     integer butterflies_this_transform;
@@ -159,7 +159,7 @@ module tb_ntt_top;
         integer k, cyc_start, cyc_done, elapsed, timeout_limit, mismatch;
         reg checkpoint1_done, checkpoint2_done;
         begin
-            $sformat(input_path,    "reference/test_vectors/input_%0s.txt", name);
+            $sformat(input_path, "reference/test_vectors/input_%0s.txt", name);
             $sformat(expected_path, "reference/test_vectors/expected_%0s.txt", name);
             $sformat(s1_path, "reference/stage_checkpoints/stage1_%0s.txt", name);
             $sformat(s2_path, "reference/stage_checkpoints/stage2_%0s.txt", name);

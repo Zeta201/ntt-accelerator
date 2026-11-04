@@ -2,8 +2,8 @@
 
 // Provide the twiddle factor omega^exponent mod 17.
 module twiddle_rom (
-    input  wire [2:0] exponent,
-    output reg  [4:0] tw
+    input wire [2:0] exponent,
+    output reg [4:0] tw
 );
     always @* begin
         case (exponent)

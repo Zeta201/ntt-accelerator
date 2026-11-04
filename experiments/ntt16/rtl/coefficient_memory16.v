@@ -2,20 +2,20 @@
 
 // Store and provide the sixteen NTT coefficients.
 module coefficient_memory16 (
-    input  wire        clk,
-    input  wire        load_enable,
-    input  wire        write_enable,
-    input  wire [79:0] coef_in,
+    input wire clk,
+    input wire load_enable,
+    input wire write_enable,
+    input wire [79:0] coef_in,
 
-    input  wire [3:0]  lo,
-    input  wire [3:0]  hi,
-    output wire [4:0]  a_out,
-    output wire [4:0]  b_out,
+    input wire [3:0] lo,
+    input wire [3:0] hi,
+    output wire [4:0] a_out,
+    output wire [4:0] b_out,
 
-    input  wire [3:0]  lo_reg,
-    input  wire [3:0]  hi_reg,
-    input  wire [4:0]  u_in,
-    input  wire [4:0]  v_in,
+    input wire [3:0] lo_reg,
+    input wire [3:0] hi_reg,
+    input wire [4:0] u_in,
+    input wire [4:0] v_in,
 
     output wire [79:0] mem_flat
 );

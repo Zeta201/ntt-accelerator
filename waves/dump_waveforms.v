@@ -4,9 +4,9 @@
 // Drives one full transform through ntt_top with the README's worked-example
 // vector and dumps every signal in the hierarchy for waveform inspection.
 module dump_waveforms;
-    reg         clk, rst, start;
-    reg  [39:0] coef_in;
-    wire        busy, done;
+    reg clk, rst, start;
+    reg [39:0] coef_in;
+    wire busy, done;
     wire [39:0] coef_out;
 
     ntt_top dut (
@@ -47,7 +47,7 @@ module dump_waveforms;
 
         // x = [1,2,3,4,5,6,7,8], the README worked-example input.
         coef_in <= {5'd8, 5'd7, 5'd6, 5'd5, 5'd4, 5'd3, 5'd2, 5'd1};
-        start   <= 1'b1;
+        start <= 1'b1;
         @(posedge clk);
         #1;
         start <= 1'b0;

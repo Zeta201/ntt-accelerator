@@ -7,9 +7,9 @@ module tb_intt;
 
     localparam [2:0] S_IDLE = 3'd0;
 
-    reg         clk, rst, start, inv;
-    reg  [39:0] coef_in;
-    wire        busy, done;
+    reg clk, rst, start, inv;
+    reg [39:0] coef_in;
+    wire busy, done;
     wire [39:0] coef_out;
 
     ntt_top dut (
@@ -74,8 +74,8 @@ module tb_intt;
         integer cyc_start, cyc_done, timeout_limit;
         begin
             coef_in = {in7, in6, in5, in4, in3, in2, in1, in0};
-            inv     = mode_inv;
-            start   <= 1'b1;
+            inv = mode_inv;
+            start <= 1'b1;
             @(posedge clk);
             #1;
             cyc_start = cycle_count;
@@ -95,10 +95,14 @@ module tb_intt;
                 ok = 1;
                 cyc_done = cycle_count;
                 elapsed = cyc_done - cyc_start;
-                out0 = coef_out[4:0];   out1 = coef_out[9:5];
-                out2 = coef_out[14:10]; out3 = coef_out[19:15];
-                out4 = coef_out[24:20]; out5 = coef_out[29:25];
-                out6 = coef_out[34:30]; out7 = coef_out[39:35];
+                out0 = coef_out[4:0];
+                out1 = coef_out[9:5];
+                out2 = coef_out[14:10];
+                out3 = coef_out[19:15];
+                out4 = coef_out[24:20];
+                out5 = coef_out[29:25];
+                out6 = coef_out[34:30];
+                out7 = coef_out[39:35];
                 @(posedge clk); #1;
             end
         end
@@ -149,10 +153,9 @@ module tb_intt;
         rst <= 1'b0;
         @(posedge clk); #1;
 
-        // Check that the INTT-enabled design preserves baseline forward results
-        // and latency.
+        // Verify forward compatibility with the baseline.
         for (i = 0; i < n_names; i = i + 1) begin
-            $sformat(input_path,    "reference/test_vectors/input_%0s.txt", names[i]);
+            $sformat(input_path, "reference/test_vectors/input_%0s.txt", names[i]);
             $sformat(expected_path, "reference/test_vectors/expected_%0s.txt", names[i]);
             read_8_vector(input_path, ok_in);
             for (k = 0; k < 8; k = k + 1) in_vec[k] = rdbuf[k];
@@ -165,9 +168,10 @@ module tb_intt;
                 $display("SETUP-ERROR: forward vector '%0s': file load failed", names[i]);
             end else begin
                 fwd_checked = fwd_checked + 1;
-                run_transform(1'b0, in_vec[0],in_vec[1],in_vec[2],in_vec[3],
-                                     in_vec[4],in_vec[5],in_vec[6],in_vec[7],
-                              o0,o1,o2,o3,o4,o5,o6,o7, elapsed, ok_run);
+                run_transform(1'b0,
+                    in_vec[0], in_vec[1], in_vec[2], in_vec[3],
+                    in_vec[4], in_vec[5], in_vec[6], in_vec[7],
+                    o0, o1, o2, o3, o4, o5, o6, o7, elapsed, ok_run);
                 check(ok_run, "forward: done did not assert within timeout");
                 if (ok_run) begin
                     check(elapsed == 37, "forward: busy-cycle latency != 37");
@@ -179,9 +183,9 @@ module tb_intt;
         end
         $display("forward-mode regression: %0d/%0d vectors checked", fwd_checked, n_names);
 
-        // Check inverse-transform outputs against the independent reference.
+        // Verify inverse results against the reference vectors.
         for (i = 0; i < n_names; i = i + 1) begin
-            $sformat(input_path,    "experiments/intt/reference/test_vectors/input_%0s.txt", names[i]);
+            $sformat(input_path, "experiments/intt/reference/test_vectors/input_%0s.txt", names[i]);
             $sformat(expected_path, "experiments/intt/reference/test_vectors/expected_%0s.txt", names[i]);
             read_8_vector(input_path, ok_in);
             for (k = 0; k < 8; k = k + 1) in_vec[k] = rdbuf[k];
@@ -194,9 +198,10 @@ module tb_intt;
                 $display("SETUP-ERROR: inverse vector '%0s': file load failed", names[i]);
             end else begin
                 inv_checked = inv_checked + 1;
-                run_transform(1'b1, in_vec[0],in_vec[1],in_vec[2],in_vec[3],
-                                     in_vec[4],in_vec[5],in_vec[6],in_vec[7],
-                              o0,o1,o2,o3,o4,o5,o6,o7, elapsed, ok_run);
+                run_transform(1'b1,
+                    in_vec[0], in_vec[1], in_vec[2], in_vec[3],
+                    in_vec[4], in_vec[5], in_vec[6], in_vec[7],
+                    o0, o1, o2, o3, o4, o5, o6, o7, elapsed, ok_run);
                 check(ok_run, "inverse: done did not assert within timeout");
                 if (ok_run) begin
                     check(elapsed == 61, "inverse: busy-cycle latency != 61");
@@ -208,7 +213,7 @@ module tb_intt;
         end
         $display("inverse vectors: %0d/%0d vectors checked", inv_checked, n_names);
 
-        // Verify that applying NTT followed by INTT recovers the input.
+        // Verify the NTT-to-INTT round trip.
         for (i = 0; i < n_names; i = i + 2) begin
             $sformat(input_path, "reference/test_vectors/input_%0s.txt", names[i]);
             read_8_vector(input_path, ok_in);
@@ -219,12 +224,13 @@ module tb_intt;
             end else begin : roundtrip_body
                 reg [4:0] m0,m1,m2,m3,m4,m5,m6,m7;
                 roundtrip_checked = roundtrip_checked + 1;
-                run_transform(1'b0, in_vec[0],in_vec[1],in_vec[2],in_vec[3],
-                                     in_vec[4],in_vec[5],in_vec[6],in_vec[7],
-                              m0,m1,m2,m3,m4,m5,m6,m7, elapsed, ok_run);
+                run_transform(1'b0,
+                    in_vec[0], in_vec[1], in_vec[2], in_vec[3],
+                    in_vec[4], in_vec[5], in_vec[6], in_vec[7],
+                    m0, m1, m2, m3, m4, m5, m6, m7, elapsed, ok_run);
                 check(ok_run, "round-trip: forward leg did not complete");
-                run_transform(1'b1, m0,m1,m2,m3,m4,m5,m6,m7,
-                              o0,o1,o2,o3,o4,o5,o6,o7, elapsed, ok_run);
+                run_transform(1'b1, m0, m1, m2, m3, m4, m5, m6, m7,
+                    o0, o1, o2, o3, o4, o5, o6, o7, elapsed, ok_run);
                 check(ok_run, "round-trip: inverse leg did not complete");
                 check(o0===in_vec[0] && o1===in_vec[1] && o2===in_vec[2] && o3===in_vec[3] &&
                       o4===in_vec[4] && o5===in_vec[5] && o6===in_vec[6] && o7===in_vec[7],
@@ -233,7 +239,7 @@ module tb_intt;
         end
         $display("round-trip (NTT then INTT): %0d vectors checked", roundtrip_checked);
 
-        // Verify that the selected transform mode remains unchanged while busy.
+        // Verify that changing inv while busy does not change the active mode.
         begin : stability_test
             reg [4:0] rt0,rt1,rt2,rt3,rt4,rt5,rt6,rt7;
             integer el; reg okr;
@@ -243,7 +249,7 @@ module tb_intt;
             @(posedge clk);
             #1;
             start <= 1'b0;
-            inv = 1'b0; // toggled while busy; must not affect this transform
+            inv = 1'b0;
             el = 0;
             while (!done && el < 200) begin
                 @(posedge clk); #1;
@@ -254,7 +260,6 @@ module tb_intt;
             rt4=coef_out[24:20]; rt5=coef_out[29:25]; rt6=coef_out[34:30]; rt7=coef_out[39:35];
             check(el == 61,
                   "mode stability: latency changed after inv toggled while busy, mode_reg was not captured correctly");
-            // Expected: INTT([1..8]) = [13,1,6,5,8,11,10,15] (INTT(x) != x in general).
             check(rt0===5'd13 && rt1===5'd1 && rt2===5'd6 && rt3===5'd5 &&
                   rt4===5'd8 && rt5===5'd11 && rt6===5'd10 && rt7===5'd15,
                   "mode stability: result changed after inv toggled while busy");
@@ -272,7 +277,7 @@ module tb_intt;
             #1;
             start <= 1'b0;
             check(busy === 1'b1, "start-while-busy: busy must be 1 after accepted start");
-            // Issue a spurious start pulse mid-transform.
+
             start <= 1'b1;
             @(posedge clk); #1;
             start <= 1'b0;
@@ -282,8 +287,6 @@ module tb_intt;
                 el = el + 1;
             end
             check(done, "start-while-busy: transform did not complete");
-            // 60, not 61: the spurious start<=1 pulse consumes one extra edge
-            // before this count starts.
             check(el == 60, "start-while-busy: mid-flight start pulse altered the latency");
             rt0=coef_out[4:0]; rt1=coef_out[9:5]; rt2=coef_out[14:10]; rt3=coef_out[19:15];
             rt4=coef_out[24:20]; rt5=coef_out[29:25]; rt6=coef_out[34:30]; rt7=coef_out[39:35];
@@ -302,8 +305,6 @@ module tb_intt;
             @(posedge clk);
             #1;
             start <= 1'b0;
-            // The 12 butterflies finish at cycle 37, so 40 cycles lands inside
-            // the normalization phase.
             for (el = 0; el < 40; el = el + 1) begin
                 @(posedge clk); #1;
             end
@@ -327,13 +328,13 @@ module tb_intt;
             check(elapsed == 61, "fresh-after-reset: latency incorrect");
         end
 
-        // Verify normalization of every coefficient in the memory.
+        // Verify normalization across all memory locations.
         begin : normalization_per_location
             reg [4:0] rt0,rt1,rt2,rt3,rt4,rt5,rt6,rt7;
             reg [4:0] exp_mem [0:7];
             integer m;
-            exp_mem[0]=5'd14; exp_mem[1]=5'd6;  exp_mem[2]=5'd1;  exp_mem[3]=5'd16;
-            exp_mem[4]=5'd16; exp_mem[5]=5'd10; exp_mem[6]=5'd8;  exp_mem[7]=5'd3;
+            exp_mem[0] = 5'd14; exp_mem[1] = 5'd6; exp_mem[2] = 5'd1; exp_mem[3] = 5'd16;
+            exp_mem[4] = 5'd16; exp_mem[5] = 5'd10; exp_mem[6] = 5'd8; exp_mem[7] = 5'd3;
 
             run_transform(1'b1, 5'd6,5'd10,5'd11,5'd15,5'd0,5'd7,5'd12,5'd0,
                           rt0,rt1,rt2,rt3,rt4,rt5,rt6,rt7, elapsed, ok_run);

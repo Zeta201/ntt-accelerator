@@ -1,10 +1,10 @@
 `default_nettype none
 
-// Provide omega^exponent mod 17 (forward) or omega^-exponent mod 17 (inverse).
+// Select the forward or inverse twiddle factor for the given exponent.
 module twiddle_rom (
-    input  wire [2:0] exponent,
-    input  wire       inv,
-    output reg  [4:0] tw
+    input wire [2:0] exponent,
+    input wire inv,
+    output reg [4:0] tw
 );
     always @* begin
         if (!inv) begin

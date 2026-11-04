@@ -2,18 +2,18 @@
 
 // Assemble the forward/inverse NTT accelerator from the controller and coefficient memory.
 module ntt_top (
-    input  wire        clk,
-    input  wire        rst,
-    input  wire        start,
-    input  wire        inv,
-    input  wire [39:0] coef_in,
-    output wire        busy,
-    output wire        done,
+    input wire clk,
+    input wire rst,
+    input wire start,
+    input wire inv,
+    input wire [39:0] coef_in,
+    output wire busy,
+    output wire done,
     output wire [39:0] coef_out
 );
-    wire [2:0]  lo, hi, lo_reg, hi_reg;
-    wire [4:0]  a_in, b_in, u_reg, v_reg;
-    wire        load_enable, write_enable;
+    wire [2:0] lo, hi, lo_reg, hi_reg;
+    wire [4:0] a_in, b_in, u_reg, v_reg;
+    wire load_enable, write_enable;
     wire [39:0] mem_flat;
 
     ntt_controller u_ctrl (

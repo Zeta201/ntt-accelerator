@@ -3,15 +3,15 @@
 // Verify reset, start detection, busy-time requests, and consecutive NTT executions.
 module tb_control;
 
-    localparam [2:0] S_IDLE    = 3'd0;
-    localparam [2:0] S_LOAD    = 3'd1;
-    localparam [2:0] S_READ    = 3'd2;
+    localparam [2:0] S_IDLE = 3'd0;
+    localparam [2:0] S_LOAD = 3'd1;
+    localparam [2:0] S_READ = 3'd2;
     localparam [2:0] S_COMPUTE = 3'd3;
-    localparam [2:0] S_WRITE   = 3'd4;
+    localparam [2:0] S_WRITE = 3'd4;
 
-    reg         clk, rst, start;
-    reg  [39:0] coef_in;
-    wire        busy, done;
+    reg clk, rst, start;
+    reg [39:0] coef_in;
+    wire busy, done;
     wire [39:0] coef_out;
 
     ntt_top dut (
