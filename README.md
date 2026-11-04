@@ -231,17 +231,19 @@ flowchart TB
                 sub --> mul
             end
             fsm -.->|twiddle exponent| rom
-            rom -->|twiddle| mul
+            rom -->|twiddle| fsm
             fsm -->|operands| add
             fsm -->|operands| sub
+            fsm -->|twiddle| mul
             add -->|sum result| fsm
             mul -->|product result| fsm
         end
 
         mem["coefficient_memory<br/>mem[0:7]"]
         outmap["natural-order output mapping<br/>(bit reversal)"]
-        fsm -.->|addresses and enables| mem
+        fsm -.->|read addresses| mem
         mem -->|coefficient values| fsm
+        fsm -.->|load and write enables, write addresses| mem
         fsm -->|butterfly results| mem
         mem -->|bit-reversed contents| outmap
     end
