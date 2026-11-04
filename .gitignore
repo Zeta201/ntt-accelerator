@@ -10,6 +10,7 @@ a.out
 
 # Keep the captured waveform evidence referenced from README.md
 !waves/ntt_top.vcd
+!experiments/intt/waves/intt_top.vcd
 
 # OS / editor metadata
 .DS_Store

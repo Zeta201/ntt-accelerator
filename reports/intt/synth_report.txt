@@ -1,0 +1,3662 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.70+post (git sha1 0c11ea098be065e585a90a06e7b7da49936cf231, Release, AppleClang clang++ 21.0.0.21000334)
+
+-- Executing script file `synth.ys' --
+
+1. Executing Verilog-2005 frontend: ../../rtl/modular_arithmetic.v
+Parsing SystemVerilog input from `../../rtl/modular_arithmetic.v' to AST representation.
+Generating RTLIL representation for module `\mod_add'.
+Generating RTLIL representation for module `\mod_sub'.
+Generating RTLIL representation for module `\mod_mul'.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: ../../rtl/butterfly_datapath.v
+Parsing SystemVerilog input from `../../rtl/butterfly_datapath.v' to AST representation.
+Generating RTLIL representation for module `\butterfly_datapath'.
+Successfully finished Verilog frontend.
+
+3. Executing Verilog-2005 frontend: ../../rtl/coefficient_memory.v
+Parsing SystemVerilog input from `../../rtl/coefficient_memory.v' to AST representation.
+Generating RTLIL representation for module `\coefficient_memory'.
+Successfully finished Verilog frontend.
+
+4. Executing Verilog-2005 frontend: ../../experiments/intt/rtl/twiddle_rom.v
+Parsing SystemVerilog input from `../../experiments/intt/rtl/twiddle_rom.v' to AST representation.
+Generating RTLIL representation for module `\twiddle_rom'.
+Successfully finished Verilog frontend.
+
+5. Executing Verilog-2005 frontend: ../../experiments/intt/rtl/ntt_controller.v
+Parsing SystemVerilog input from `../../experiments/intt/rtl/ntt_controller.v' to AST representation.
+Generating RTLIL representation for module `\ntt_controller'.
+Successfully finished Verilog frontend.
+
+6. Executing Verilog-2005 frontend: ../../experiments/intt/rtl/ntt_top.v
+Parsing SystemVerilog input from `../../experiments/intt/rtl/ntt_top.v' to AST representation.
+Generating RTLIL representation for module `\ntt_top'.
+Successfully finished Verilog frontend.
+
+7. Executing HIERARCHY pass (managing design hierarchy).
+
+7.1. Analyzing design hierarchy..
+Top module:  \ntt_top
+Used module:     \coefficient_memory
+Used module:     \ntt_controller
+Used module:         \butterfly_datapath
+Used module:             \mod_mul
+Used module:             \mod_sub
+Used module:             \mod_add
+Used module:         \twiddle_rom
+
+7.2. Analyzing design hierarchy..
+Top module:  \ntt_top
+Used module:     \coefficient_memory
+Used module:     \ntt_controller
+Used module:         \butterfly_datapath
+Used module:             \mod_mul
+Used module:             \mod_sub
+Used module:             \mod_add
+Used module:         \twiddle_rom
+Removed 0 unused modules.
+
+8. Executing SYNTH pass.
+
+8.1. Executing HIERARCHY pass (managing design hierarchy).
+
+8.1.1. Analyzing design hierarchy..
+Top module:  \ntt_top
+Used module:     \coefficient_memory
+Used module:     \ntt_controller
+Used module:         \butterfly_datapath
+Used module:             \mod_mul
+Used module:             \mod_sub
+Used module:             \mod_add
+Used module:         \twiddle_rom
+
+8.1.2. Analyzing design hierarchy..
+Top module:  \ntt_top
+Used module:     \coefficient_memory
+Used module:     \ntt_controller
+Used module:         \butterfly_datapath
+Used module:             \mod_mul
+Used module:             \mod_sub
+Used module:             \mod_add
+Used module:         \twiddle_rom
+Removed 0 unused modules.
+
+8.2. Executing PROC pass (convert processes to netlists).
+
+8.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+8.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 7 switch rules as full_case in process $proc$../../experiments/intt/rtl/ntt_controller.v:85$105 in module ntt_controller.
+Removed 2 dead cases from process $proc$../../experiments/intt/rtl/twiddle_rom.v:9$82 in module twiddle_rom.
+Marked 3 switch rules as full_case in process $proc$../../experiments/intt/rtl/twiddle_rom.v:9$82 in module twiddle_rom.
+Marked 2 switch rules as full_case in process $proc$../../rtl/coefficient_memory.v:28$29 in module coefficient_memory.
+Removed a total of 2 dead cases.
+
+8.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 1 redundant assignment.
+Promoted 24 assignments to connections.
+
+8.2.4. Executing PROC_INIT pass (extract init attributes).
+
+8.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+8.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 2 switches.
+<suppressed ~11 debug messages>
+
+8.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\ntt_controller.$proc$../../experiments/intt/rtl/ntt_controller.v:85$105'.
+     1/15: $0\start_d[0:0]
+     2/15: $0\tw_reg[4:0]
+     3/15: $0\b_reg[4:0]
+     4/15: $0\a_reg[4:0]
+     5/15: $0\nidx[2:0]
+     6/15: $0\phase[0:0]
+     7/15: $0\mode_reg[0:0]
+     8/15: $0\bidx[1:0]
+     9/15: $0\stage[1:0]
+    10/15: $0\state[2:0]
+    11/15: $0\v_reg[4:0]
+    12/15: $0\u_reg[4:0]
+    13/15: $0\done[0:0]
+    14/15: $0\hi_reg[2:0]
+    15/15: $0\lo_reg[2:0]
+Creating decoders for process `\twiddle_rom.$proc$../../experiments/intt/rtl/twiddle_rom.v:9$82'.
+     1/3: $3\tw[4:0]
+     2/3: $2\tw[4:0]
+     3/3: $1\tw[4:0]
+Creating decoders for process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+     1/23: $1$memwr$\mem$../../rtl/coefficient_memory.v:35$26_EN[4:0]$73
+     2/23: $1$memwr$\mem$../../rtl/coefficient_memory.v:35$26_DATA[4:0]$72
+     3/23: $1$memwr$\mem$../../rtl/coefficient_memory.v:35$26_ADDR[2:0]$71
+     4/23: $1$memwr$\mem$../../rtl/coefficient_memory.v:34$25_EN[4:0]$70
+     5/23: $1$memwr$\mem$../../rtl/coefficient_memory.v:34$25_DATA[4:0]$69
+     6/23: $1$memwr$\mem$../../rtl/coefficient_memory.v:34$25_ADDR[2:0]$68
+     7/23: $1\li[31:0]
+     8/23: $1$memwr$\mem$../../rtl/coefficient_memory.v:31$24_EN[4:0]$67
+     9/23: $1$memwr$\mem$../../rtl/coefficient_memory.v:31$24_DATA[4:0]$66
+    10/23: $1$memwr$\mem$../../rtl/coefficient_memory.v:31$23_EN[4:0]$65
+    11/23: $1$memwr$\mem$../../rtl/coefficient_memory.v:31$23_DATA[4:0]$64
+    12/23: $1$memwr$\mem$../../rtl/coefficient_memory.v:31$22_EN[4:0]$63
+    13/23: $1$memwr$\mem$../../rtl/coefficient_memory.v:31$22_DATA[4:0]$62
+    14/23: $1$memwr$\mem$../../rtl/coefficient_memory.v:31$21_EN[4:0]$61
+    15/23: $1$memwr$\mem$../../rtl/coefficient_memory.v:31$21_DATA[4:0]$60
+    16/23: $1$memwr$\mem$../../rtl/coefficient_memory.v:31$20_EN[4:0]$59
+    17/23: $1$memwr$\mem$../../rtl/coefficient_memory.v:31$20_DATA[4:0]$58
+    18/23: $1$memwr$\mem$../../rtl/coefficient_memory.v:31$19_EN[4:0]$57
+    19/23: $1$memwr$\mem$../../rtl/coefficient_memory.v:31$19_DATA[4:0]$56
+    20/23: $1$memwr$\mem$../../rtl/coefficient_memory.v:31$18_EN[4:0]$55
+    21/23: $1$memwr$\mem$../../rtl/coefficient_memory.v:31$18_DATA[4:0]$54
+    22/23: $1$memwr$\mem$../../rtl/coefficient_memory.v:31$17_EN[4:0]$53
+    23/23: $1$memwr$\mem$../../rtl/coefficient_memory.v:31$17_DATA[4:0]$52
+
+8.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\twiddle_rom.\tw' from process `\twiddle_rom.$proc$../../experiments/intt/rtl/twiddle_rom.v:9$82'.
+
+8.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\ntt_controller.\lo_reg' using process `\ntt_controller.$proc$../../experiments/intt/rtl/ntt_controller.v:85$105'.
+  created $dff cell `$procdff$396' with positive edge clock.
+Creating register for signal `\ntt_controller.\hi_reg' using process `\ntt_controller.$proc$../../experiments/intt/rtl/ntt_controller.v:85$105'.
+  created $dff cell `$procdff$397' with positive edge clock.
+Creating register for signal `\ntt_controller.\done' using process `\ntt_controller.$proc$../../experiments/intt/rtl/ntt_controller.v:85$105'.
+  created $dff cell `$procdff$398' with positive edge clock.
+Creating register for signal `\ntt_controller.\u_reg' using process `\ntt_controller.$proc$../../experiments/intt/rtl/ntt_controller.v:85$105'.
+  created $dff cell `$procdff$399' with positive edge clock.
+Creating register for signal `\ntt_controller.\v_reg' using process `\ntt_controller.$proc$../../experiments/intt/rtl/ntt_controller.v:85$105'.
+  created $dff cell `$procdff$400' with positive edge clock.
+Creating register for signal `\ntt_controller.\state' using process `\ntt_controller.$proc$../../experiments/intt/rtl/ntt_controller.v:85$105'.
+  created $dff cell `$procdff$401' with positive edge clock.
+Creating register for signal `\ntt_controller.\stage' using process `\ntt_controller.$proc$../../experiments/intt/rtl/ntt_controller.v:85$105'.
+  created $dff cell `$procdff$402' with positive edge clock.
+Creating register for signal `\ntt_controller.\bidx' using process `\ntt_controller.$proc$../../experiments/intt/rtl/ntt_controller.v:85$105'.
+  created $dff cell `$procdff$403' with positive edge clock.
+Creating register for signal `\ntt_controller.\start_d' using process `\ntt_controller.$proc$../../experiments/intt/rtl/ntt_controller.v:85$105'.
+  created $dff cell `$procdff$404' with positive edge clock.
+Creating register for signal `\ntt_controller.\mode_reg' using process `\ntt_controller.$proc$../../experiments/intt/rtl/ntt_controller.v:85$105'.
+  created $dff cell `$procdff$405' with positive edge clock.
+Creating register for signal `\ntt_controller.\phase' using process `\ntt_controller.$proc$../../experiments/intt/rtl/ntt_controller.v:85$105'.
+  created $dff cell `$procdff$406' with positive edge clock.
+Creating register for signal `\ntt_controller.\nidx' using process `\ntt_controller.$proc$../../experiments/intt/rtl/ntt_controller.v:85$105'.
+  created $dff cell `$procdff$407' with positive edge clock.
+Creating register for signal `\ntt_controller.\a_reg' using process `\ntt_controller.$proc$../../experiments/intt/rtl/ntt_controller.v:85$105'.
+  created $dff cell `$procdff$408' with positive edge clock.
+Creating register for signal `\ntt_controller.\b_reg' using process `\ntt_controller.$proc$../../experiments/intt/rtl/ntt_controller.v:85$105'.
+  created $dff cell `$procdff$409' with positive edge clock.
+Creating register for signal `\ntt_controller.\tw_reg' using process `\ntt_controller.$proc$../../experiments/intt/rtl/ntt_controller.v:85$105'.
+  created $dff cell `$procdff$410' with positive edge clock.
+Creating register for signal `\coefficient_memory.\li' using process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+  created $dff cell `$procdff$411' with positive edge clock.
+Creating register for signal `\coefficient_memory.$memwr$\mem$../../rtl/coefficient_memory.v:31$17_DATA' using process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+  created $dff cell `$procdff$412' with positive edge clock.
+Creating register for signal `\coefficient_memory.$memwr$\mem$../../rtl/coefficient_memory.v:31$17_EN' using process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+  created $dff cell `$procdff$413' with positive edge clock.
+Creating register for signal `\coefficient_memory.$memwr$\mem$../../rtl/coefficient_memory.v:31$18_DATA' using process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+  created $dff cell `$procdff$414' with positive edge clock.
+Creating register for signal `\coefficient_memory.$memwr$\mem$../../rtl/coefficient_memory.v:31$18_EN' using process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+  created $dff cell `$procdff$415' with positive edge clock.
+Creating register for signal `\coefficient_memory.$memwr$\mem$../../rtl/coefficient_memory.v:31$19_DATA' using process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+  created $dff cell `$procdff$416' with positive edge clock.
+Creating register for signal `\coefficient_memory.$memwr$\mem$../../rtl/coefficient_memory.v:31$19_EN' using process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+  created $dff cell `$procdff$417' with positive edge clock.
+Creating register for signal `\coefficient_memory.$memwr$\mem$../../rtl/coefficient_memory.v:31$20_DATA' using process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+  created $dff cell `$procdff$418' with positive edge clock.
+Creating register for signal `\coefficient_memory.$memwr$\mem$../../rtl/coefficient_memory.v:31$20_EN' using process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+  created $dff cell `$procdff$419' with positive edge clock.
+Creating register for signal `\coefficient_memory.$memwr$\mem$../../rtl/coefficient_memory.v:31$21_DATA' using process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+  created $dff cell `$procdff$420' with positive edge clock.
+Creating register for signal `\coefficient_memory.$memwr$\mem$../../rtl/coefficient_memory.v:31$21_EN' using process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+  created $dff cell `$procdff$421' with positive edge clock.
+Creating register for signal `\coefficient_memory.$memwr$\mem$../../rtl/coefficient_memory.v:31$22_DATA' using process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+  created $dff cell `$procdff$422' with positive edge clock.
+Creating register for signal `\coefficient_memory.$memwr$\mem$../../rtl/coefficient_memory.v:31$22_EN' using process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+  created $dff cell `$procdff$423' with positive edge clock.
+Creating register for signal `\coefficient_memory.$memwr$\mem$../../rtl/coefficient_memory.v:31$23_DATA' using process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+  created $dff cell `$procdff$424' with positive edge clock.
+Creating register for signal `\coefficient_memory.$memwr$\mem$../../rtl/coefficient_memory.v:31$23_EN' using process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+  created $dff cell `$procdff$425' with positive edge clock.
+Creating register for signal `\coefficient_memory.$memwr$\mem$../../rtl/coefficient_memory.v:31$24_DATA' using process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+  created $dff cell `$procdff$426' with positive edge clock.
+Creating register for signal `\coefficient_memory.$memwr$\mem$../../rtl/coefficient_memory.v:31$24_EN' using process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+  created $dff cell `$procdff$427' with positive edge clock.
+Creating register for signal `\coefficient_memory.$memwr$\mem$../../rtl/coefficient_memory.v:34$25_ADDR' using process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+  created $dff cell `$procdff$428' with positive edge clock.
+Creating register for signal `\coefficient_memory.$memwr$\mem$../../rtl/coefficient_memory.v:34$25_DATA' using process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+  created $dff cell `$procdff$429' with positive edge clock.
+Creating register for signal `\coefficient_memory.$memwr$\mem$../../rtl/coefficient_memory.v:34$25_EN' using process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+  created $dff cell `$procdff$430' with positive edge clock.
+Creating register for signal `\coefficient_memory.$memwr$\mem$../../rtl/coefficient_memory.v:35$26_ADDR' using process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+  created $dff cell `$procdff$431' with positive edge clock.
+Creating register for signal `\coefficient_memory.$memwr$\mem$../../rtl/coefficient_memory.v:35$26_DATA' using process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+  created $dff cell `$procdff$432' with positive edge clock.
+Creating register for signal `\coefficient_memory.$memwr$\mem$../../rtl/coefficient_memory.v:35$26_EN' using process `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+  created $dff cell `$procdff$433' with positive edge clock.
+
+8.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+8.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 8 empty switches in `\ntt_controller.$proc$../../experiments/intt/rtl/ntt_controller.v:85$105'.
+Removing empty process `ntt_controller.$proc$../../experiments/intt/rtl/ntt_controller.v:85$105'.
+Found and cleaned up 3 empty switches in `\twiddle_rom.$proc$../../experiments/intt/rtl/twiddle_rom.v:9$82'.
+Removing empty process `twiddle_rom.$proc$../../experiments/intt/rtl/twiddle_rom.v:9$82'.
+Found and cleaned up 2 empty switches in `\coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+Removing empty process `coefficient_memory.$proc$../../rtl/coefficient_memory.v:28$29'.
+Cleaned up 13 empty switches.
+
+8.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module ntt_top.
+Optimizing module ntt_controller.
+<suppressed ~11 debug messages>
+Optimizing module twiddle_rom.
+<suppressed ~3 debug messages>
+Optimizing module coefficient_memory.
+Optimizing module butterfly_datapath.
+Optimizing module mod_mul.
+Optimizing module mod_sub.
+Optimizing module mod_add.
+
+8.3. Executing OPT_EXPR pass (perform const folding).
+Optimizing module ntt_top.
+Optimizing module ntt_controller.
+<suppressed ~1 debug messages>
+Optimizing module twiddle_rom.
+Optimizing module coefficient_memory.
+Optimizing module butterfly_datapath.
+Optimizing module mod_mul.
+Optimizing module mod_sub.
+Optimizing module mod_add.
+
+8.4. Executing CHECK pass (checking for obvious problems).
+Checking module ntt_top...
+Checking module ntt_controller...
+Checking module twiddle_rom...
+Checking module coefficient_memory...
+Checking module butterfly_datapath...
+Checking module mod_mul...
+Checking module mod_sub...
+Checking module mod_add...
+Found and reported 0 problems.
+
+8.5. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ntt_top..
+Finding unused cells or wires in module \ntt_controller..
+Finding unused cells or wires in module \twiddle_rom..
+Finding unused cells or wires in module \coefficient_memory..
+Finding unused cells or wires in module \butterfly_datapath..
+Finding unused cells or wires in module \mod_mul..
+Finding unused cells or wires in module \mod_sub..
+Finding unused cells or wires in module \mod_add..
+Removed 26 unused cells and 198 unused wires.
+<suppressed ~33 debug messages>
+
+8.6. Executing OPT pass (performing simple optimizations).
+
+8.6.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module ntt_top.
+Optimizing module ntt_controller.
+Optimizing module twiddle_rom.
+Optimizing module coefficient_memory.
+Optimizing module butterfly_datapath.
+Optimizing module mod_mul.
+Optimizing module mod_sub.
+Optimizing module mod_add.
+
+8.6.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\ntt_top'.
+Computing hashes of 2 cells of `\ntt_top'.
+Finding duplicate cells in `\ntt_top'.
+Finding identical cells in module `\ntt_controller'.
+Computing hashes of 125 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+Computing hashes of 105 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+<suppressed ~60 debug messages>
+Finding identical cells in module `\twiddle_rom'.
+Computing hashes of 7 cells of `\twiddle_rom'.
+Finding duplicate cells in `\twiddle_rom'.
+Finding identical cells in module `\coefficient_memory'.
+Computing hashes of 42 cells of `\coefficient_memory'.
+Finding duplicate cells in `\coefficient_memory'.
+Finding identical cells in module `\butterfly_datapath'.
+Computing hashes of 3 cells of `\butterfly_datapath'.
+Finding duplicate cells in `\butterfly_datapath'.
+Finding identical cells in module `\mod_mul'.
+Computing hashes of 6 cells of `\mod_mul'.
+Finding duplicate cells in `\mod_mul'.
+Finding identical cells in module `\mod_sub'.
+Computing hashes of 5 cells of `\mod_sub'.
+Finding duplicate cells in `\mod_sub'.
+Finding identical cells in module `\mod_add'.
+Computing hashes of 4 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+Removed a total of 20 cells.
+
+8.6.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \ntt_top..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \ntt_controller..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+      Replacing known input bits on port A of cell $procmux$174: \phase -> 1'1
+      Replacing known input bits on port A of cell $procmux$184: \phase -> 1'0
+      Replacing known input bits on port A of cell $procmux$182: \phase -> 1'0
+      Replacing known input bits on port A of cell $procmux$180: \phase -> 1'0
+  Analyzing evaluation results.
+Running muxtree optimizer on module \twiddle_rom..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 1/2 on $mux $procmux$322.
+    dead port 2/2 on $mux $procmux$318.
+Running muxtree optimizer on module \coefficient_memory..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \butterfly_datapath..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \mod_mul..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \mod_sub..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \mod_add..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 2 multiplexer ports.
+<suppressed ~133 debug messages>
+
+8.6.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \ntt_top.
+  Optimizing cells in module \ntt_controller.
+  Optimizing cells in module \twiddle_rom.
+  Optimizing cells in module \coefficient_memory.
+    Consolidated identical input bits for $mux cell $procmux$391:
+      Old ports: A=5'00000, B=5'11111, Y=$0$memwr$\mem$../../rtl/coefficient_memory.v:31$17_EN[4:0]$31
+      New ports: A=1'0, B=1'1, Y=$0$memwr$\mem$../../rtl/coefficient_memory.v:31$17_EN[4:0]$31 [0]
+      New connections: $0$memwr$\mem$../../rtl/coefficient_memory.v:31$17_EN[4:0]$31 [4:1] = { $0$memwr$\mem$../../rtl/coefficient_memory.v:31$17_EN[4:0]$31 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$17_EN[4:0]$31 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$17_EN[4:0]$31 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$17_EN[4:0]$31 [0] }
+    Consolidated identical input bits for $mux cell $procmux$385:
+      Old ports: A=5'00000, B=5'11111, Y=$0$memwr$\mem$../../rtl/coefficient_memory.v:31$18_EN[4:0]$33
+      New ports: A=1'0, B=1'1, Y=$0$memwr$\mem$../../rtl/coefficient_memory.v:31$18_EN[4:0]$33 [0]
+      New connections: $0$memwr$\mem$../../rtl/coefficient_memory.v:31$18_EN[4:0]$33 [4:1] = { $0$memwr$\mem$../../rtl/coefficient_memory.v:31$18_EN[4:0]$33 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$18_EN[4:0]$33 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$18_EN[4:0]$33 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$18_EN[4:0]$33 [0] }
+    Consolidated identical input bits for $mux cell $procmux$379:
+      Old ports: A=5'00000, B=5'11111, Y=$0$memwr$\mem$../../rtl/coefficient_memory.v:31$19_EN[4:0]$35
+      New ports: A=1'0, B=1'1, Y=$0$memwr$\mem$../../rtl/coefficient_memory.v:31$19_EN[4:0]$35 [0]
+      New connections: $0$memwr$\mem$../../rtl/coefficient_memory.v:31$19_EN[4:0]$35 [4:1] = { $0$memwr$\mem$../../rtl/coefficient_memory.v:31$19_EN[4:0]$35 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$19_EN[4:0]$35 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$19_EN[4:0]$35 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$19_EN[4:0]$35 [0] }
+    Consolidated identical input bits for $mux cell $procmux$373:
+      Old ports: A=5'00000, B=5'11111, Y=$0$memwr$\mem$../../rtl/coefficient_memory.v:31$20_EN[4:0]$37
+      New ports: A=1'0, B=1'1, Y=$0$memwr$\mem$../../rtl/coefficient_memory.v:31$20_EN[4:0]$37 [0]
+      New connections: $0$memwr$\mem$../../rtl/coefficient_memory.v:31$20_EN[4:0]$37 [4:1] = { $0$memwr$\mem$../../rtl/coefficient_memory.v:31$20_EN[4:0]$37 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$20_EN[4:0]$37 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$20_EN[4:0]$37 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$20_EN[4:0]$37 [0] }
+    Consolidated identical input bits for $mux cell $procmux$367:
+      Old ports: A=5'00000, B=5'11111, Y=$0$memwr$\mem$../../rtl/coefficient_memory.v:31$21_EN[4:0]$39
+      New ports: A=1'0, B=1'1, Y=$0$memwr$\mem$../../rtl/coefficient_memory.v:31$21_EN[4:0]$39 [0]
+      New connections: $0$memwr$\mem$../../rtl/coefficient_memory.v:31$21_EN[4:0]$39 [4:1] = { $0$memwr$\mem$../../rtl/coefficient_memory.v:31$21_EN[4:0]$39 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$21_EN[4:0]$39 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$21_EN[4:0]$39 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$21_EN[4:0]$39 [0] }
+    Consolidated identical input bits for $mux cell $procmux$361:
+      Old ports: A=5'00000, B=5'11111, Y=$0$memwr$\mem$../../rtl/coefficient_memory.v:31$22_EN[4:0]$41
+      New ports: A=1'0, B=1'1, Y=$0$memwr$\mem$../../rtl/coefficient_memory.v:31$22_EN[4:0]$41 [0]
+      New connections: $0$memwr$\mem$../../rtl/coefficient_memory.v:31$22_EN[4:0]$41 [4:1] = { $0$memwr$\mem$../../rtl/coefficient_memory.v:31$22_EN[4:0]$41 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$22_EN[4:0]$41 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$22_EN[4:0]$41 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$22_EN[4:0]$41 [0] }
+    Consolidated identical input bits for $mux cell $procmux$355:
+      Old ports: A=5'00000, B=5'11111, Y=$0$memwr$\mem$../../rtl/coefficient_memory.v:31$23_EN[4:0]$43
+      New ports: A=1'0, B=1'1, Y=$0$memwr$\mem$../../rtl/coefficient_memory.v:31$23_EN[4:0]$43 [0]
+      New connections: $0$memwr$\mem$../../rtl/coefficient_memory.v:31$23_EN[4:0]$43 [4:1] = { $0$memwr$\mem$../../rtl/coefficient_memory.v:31$23_EN[4:0]$43 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$23_EN[4:0]$43 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$23_EN[4:0]$43 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$23_EN[4:0]$43 [0] }
+    Consolidated identical input bits for $mux cell $procmux$349:
+      Old ports: A=5'00000, B=5'11111, Y=$0$memwr$\mem$../../rtl/coefficient_memory.v:31$24_EN[4:0]$45
+      New ports: A=1'0, B=1'1, Y=$0$memwr$\mem$../../rtl/coefficient_memory.v:31$24_EN[4:0]$45 [0]
+      New connections: $0$memwr$\mem$../../rtl/coefficient_memory.v:31$24_EN[4:0]$45 [4:1] = { $0$memwr$\mem$../../rtl/coefficient_memory.v:31$24_EN[4:0]$45 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$24_EN[4:0]$45 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$24_EN[4:0]$45 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:31$24_EN[4:0]$45 [0] }
+    Consolidated identical input bits for $mux cell $procmux$337:
+      Old ports: A=5'00000, B=5'11111, Y=$0$memwr$\mem$../../rtl/coefficient_memory.v:34$25_EN[4:0]$48
+      New ports: A=1'0, B=1'1, Y=$0$memwr$\mem$../../rtl/coefficient_memory.v:34$25_EN[4:0]$48 [0]
+      New connections: $0$memwr$\mem$../../rtl/coefficient_memory.v:34$25_EN[4:0]$48 [4:1] = { $0$memwr$\mem$../../rtl/coefficient_memory.v:34$25_EN[4:0]$48 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:34$25_EN[4:0]$48 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:34$25_EN[4:0]$48 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:34$25_EN[4:0]$48 [0] }
+    Consolidated identical input bits for $mux cell $procmux$328:
+      Old ports: A=5'00000, B=5'11111, Y=$0$memwr$\mem$../../rtl/coefficient_memory.v:35$26_EN[4:0]$51
+      New ports: A=1'0, B=1'1, Y=$0$memwr$\mem$../../rtl/coefficient_memory.v:35$26_EN[4:0]$51 [0]
+      New connections: $0$memwr$\mem$../../rtl/coefficient_memory.v:35$26_EN[4:0]$51 [4:1] = { $0$memwr$\mem$../../rtl/coefficient_memory.v:35$26_EN[4:0]$51 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:35$26_EN[4:0]$51 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:35$26_EN[4:0]$51 [0] $0$memwr$\mem$../../rtl/coefficient_memory.v:35$26_EN[4:0]$51 [0] }
+  Optimizing cells in module \coefficient_memory.
+  Optimizing cells in module \butterfly_datapath.
+  Optimizing cells in module \mod_mul.
+  Optimizing cells in module \mod_sub.
+  Optimizing cells in module \mod_add.
+Performed a total of 10 changes.
+
+8.6.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\ntt_top'.
+Computing hashes of 2 cells of `\ntt_top'.
+Finding duplicate cells in `\ntt_top'.
+Finding identical cells in module `\ntt_controller'.
+Computing hashes of 105 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+Finding identical cells in module `\twiddle_rom'.
+Computing hashes of 5 cells of `\twiddle_rom'.
+Finding duplicate cells in `\twiddle_rom'.
+Finding identical cells in module `\coefficient_memory'.
+Computing hashes of 42 cells of `\coefficient_memory'.
+Finding duplicate cells in `\coefficient_memory'.
+Computing hashes of 34 cells of `\coefficient_memory'.
+Finding duplicate cells in `\coefficient_memory'.
+<suppressed ~24 debug messages>
+Finding identical cells in module `\butterfly_datapath'.
+Computing hashes of 3 cells of `\butterfly_datapath'.
+Finding duplicate cells in `\butterfly_datapath'.
+Finding identical cells in module `\mod_mul'.
+Computing hashes of 6 cells of `\mod_mul'.
+Finding duplicate cells in `\mod_mul'.
+Finding identical cells in module `\mod_sub'.
+Computing hashes of 5 cells of `\mod_sub'.
+Finding duplicate cells in `\mod_sub'.
+Finding identical cells in module `\mod_add'.
+Computing hashes of 4 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+Removed a total of 8 cells.
+
+8.6.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+8.6.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ntt_top..
+Finding unused cells or wires in module \ntt_controller..
+Finding unused cells or wires in module \twiddle_rom..
+Finding unused cells or wires in module \coefficient_memory..
+Finding unused cells or wires in module \butterfly_datapath..
+Finding unused cells or wires in module \mod_mul..
+Finding unused cells or wires in module \mod_sub..
+Finding unused cells or wires in module \mod_add..
+Removed 0 unused cells and 30 unused wires.
+<suppressed ~3 debug messages>
+
+8.6.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module ntt_top.
+Optimizing module ntt_controller.
+Optimizing module twiddle_rom.
+Optimizing module coefficient_memory.
+Optimizing module butterfly_datapath.
+Optimizing module mod_mul.
+Optimizing module mod_sub.
+Optimizing module mod_add.
+
+8.6.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+8.6.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \ntt_top..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \ntt_controller..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \twiddle_rom..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \coefficient_memory..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \butterfly_datapath..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \mod_mul..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \mod_sub..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \mod_add..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~115 debug messages>
+
+8.6.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \ntt_top.
+  Optimizing cells in module \ntt_controller.
+  Optimizing cells in module \twiddle_rom.
+  Optimizing cells in module \coefficient_memory.
+  Optimizing cells in module \butterfly_datapath.
+  Optimizing cells in module \mod_mul.
+  Optimizing cells in module \mod_sub.
+  Optimizing cells in module \mod_add.
+Performed a total of 0 changes.
+
+8.6.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\ntt_top'.
+Computing hashes of 2 cells of `\ntt_top'.
+Finding duplicate cells in `\ntt_top'.
+Finding identical cells in module `\ntt_controller'.
+Computing hashes of 105 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+Finding identical cells in module `\twiddle_rom'.
+Computing hashes of 5 cells of `\twiddle_rom'.
+Finding duplicate cells in `\twiddle_rom'.
+Finding identical cells in module `\coefficient_memory'.
+Computing hashes of 34 cells of `\coefficient_memory'.
+Finding duplicate cells in `\coefficient_memory'.
+Finding identical cells in module `\butterfly_datapath'.
+Computing hashes of 3 cells of `\butterfly_datapath'.
+Finding duplicate cells in `\butterfly_datapath'.
+Finding identical cells in module `\mod_mul'.
+Computing hashes of 6 cells of `\mod_mul'.
+Finding duplicate cells in `\mod_mul'.
+Finding identical cells in module `\mod_sub'.
+Computing hashes of 5 cells of `\mod_sub'.
+Finding duplicate cells in `\mod_sub'.
+Finding identical cells in module `\mod_add'.
+Computing hashes of 4 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+Removed a total of 0 cells.
+
+8.6.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+8.6.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ntt_top..
+Finding unused cells or wires in module \ntt_controller..
+Finding unused cells or wires in module \twiddle_rom..
+Finding unused cells or wires in module \coefficient_memory..
+Finding unused cells or wires in module \butterfly_datapath..
+Finding unused cells or wires in module \mod_mul..
+Finding unused cells or wires in module \mod_sub..
+Finding unused cells or wires in module \mod_add..
+
+8.6.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module ntt_top.
+Optimizing module ntt_controller.
+Optimizing module twiddle_rom.
+Optimizing module coefficient_memory.
+Optimizing module butterfly_datapath.
+Optimizing module mod_mul.
+Optimizing module mod_sub.
+Optimizing module mod_add.
+
+8.6.16. Finished fast OPT passes. (There is nothing left to do.)
+
+8.7. Executing FSM pass (extract and optimize FSM).
+
+8.7.1. Executing FSM_DETECT pass (finding FSMs in design).
+Not marking ntt_controller.state as FSM state register:
+    Users of register don't seem to benefit from recoding.
+
+8.7.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+8.7.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+8.7.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ntt_top..
+Finding unused cells or wires in module \ntt_controller..
+Finding unused cells or wires in module \twiddle_rom..
+Finding unused cells or wires in module \coefficient_memory..
+Finding unused cells or wires in module \butterfly_datapath..
+Finding unused cells or wires in module \mod_mul..
+Finding unused cells or wires in module \mod_sub..
+Finding unused cells or wires in module \mod_add..
+
+8.7.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+8.7.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+8.7.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+8.7.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+8.8. Executing OPT pass (performing simple optimizations).
+
+8.8.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module ntt_top.
+Optimizing module ntt_controller.
+Optimizing module twiddle_rom.
+Optimizing module coefficient_memory.
+Optimizing module butterfly_datapath.
+Optimizing module mod_mul.
+Optimizing module mod_sub.
+Optimizing module mod_add.
+
+8.8.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\ntt_top'.
+Computing hashes of 2 cells of `\ntt_top'.
+Finding duplicate cells in `\ntt_top'.
+Finding identical cells in module `\ntt_controller'.
+Computing hashes of 105 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+Finding identical cells in module `\twiddle_rom'.
+Computing hashes of 5 cells of `\twiddle_rom'.
+Finding duplicate cells in `\twiddle_rom'.
+Finding identical cells in module `\coefficient_memory'.
+Computing hashes of 34 cells of `\coefficient_memory'.
+Finding duplicate cells in `\coefficient_memory'.
+Finding identical cells in module `\butterfly_datapath'.
+Computing hashes of 3 cells of `\butterfly_datapath'.
+Finding duplicate cells in `\butterfly_datapath'.
+Finding identical cells in module `\mod_mul'.
+Computing hashes of 6 cells of `\mod_mul'.
+Finding duplicate cells in `\mod_mul'.
+Finding identical cells in module `\mod_sub'.
+Computing hashes of 5 cells of `\mod_sub'.
+Finding duplicate cells in `\mod_sub'.
+Finding identical cells in module `\mod_add'.
+Computing hashes of 4 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+Removed a total of 0 cells.
+
+8.8.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \ntt_top..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \ntt_controller..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \twiddle_rom..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \coefficient_memory..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \butterfly_datapath..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \mod_mul..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \mod_sub..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \mod_add..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~115 debug messages>
+
+8.8.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \ntt_top.
+  Optimizing cells in module \ntt_controller.
+  Optimizing cells in module \twiddle_rom.
+  Optimizing cells in module \coefficient_memory.
+  Optimizing cells in module \butterfly_datapath.
+  Optimizing cells in module \mod_mul.
+  Optimizing cells in module \mod_sub.
+  Optimizing cells in module \mod_add.
+Performed a total of 0 changes.
+
+8.8.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\ntt_top'.
+Computing hashes of 2 cells of `\ntt_top'.
+Finding duplicate cells in `\ntt_top'.
+Finding identical cells in module `\ntt_controller'.
+Computing hashes of 105 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+Finding identical cells in module `\twiddle_rom'.
+Computing hashes of 5 cells of `\twiddle_rom'.
+Finding duplicate cells in `\twiddle_rom'.
+Finding identical cells in module `\coefficient_memory'.
+Computing hashes of 34 cells of `\coefficient_memory'.
+Finding duplicate cells in `\coefficient_memory'.
+Finding identical cells in module `\butterfly_datapath'.
+Computing hashes of 3 cells of `\butterfly_datapath'.
+Finding duplicate cells in `\butterfly_datapath'.
+Finding identical cells in module `\mod_mul'.
+Computing hashes of 6 cells of `\mod_mul'.
+Finding duplicate cells in `\mod_mul'.
+Finding identical cells in module `\mod_sub'.
+Computing hashes of 5 cells of `\mod_sub'.
+Finding duplicate cells in `\mod_sub'.
+Finding identical cells in module `\mod_add'.
+Computing hashes of 4 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+Removed a total of 0 cells.
+
+8.8.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding EN signal on $procdff$408 ($dff) from module ntt_controller (D = \a_in, Q = \a_reg).
+Adding EN signal on $procdff$410 ($dff) from module ntt_controller (D = $ternary$../../experiments/intt/rtl/ntt_controller.v:117$107_Y, Q = \tw_reg).
+Adding SRST signal on $auto$ff.cc:337:slice$449 ($dffe) from module ntt_controller (D = \tw, Q = \tw_reg, rval = 5'01111).
+Adding EN signal on $procdff$409 ($dff) from module ntt_controller (D = $ternary$../../experiments/intt/rtl/ntt_controller.v:116$106_Y, Q = \b_reg).
+Adding SRST signal on $auto$ff.cc:337:slice$455 ($dffe) from module ntt_controller (D = \b_in, Q = \b_reg, rval = 5'00000).
+Adding EN signal on $procdff$396 ($dff) from module ntt_controller (D = \lo, Q = \lo_reg).
+Adding EN signal on $procdff$397 ($dff) from module ntt_controller (D = \hi, Q = \hi_reg).
+Adding SRST signal on $procdff$398 ($dff) from module ntt_controller (D = $procmux$292_Y, Q = \done, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$471 ($sdff) from module ntt_controller (D = $procmux$292_Y, Q = \done).
+Adding EN signal on $procdff$399 ($dff) from module ntt_controller (D = $ternary$../../experiments/intt/rtl/ntt_controller.v:127$108_Y, Q = \u_reg).
+Adding EN signal on $procdff$400 ($dff) from module ntt_controller (D = \v_c, Q = \v_reg).
+Adding SRST signal on $procdff$401 ($dff) from module ntt_controller (D = $procmux$251_Y, Q = \state, rval = 3'000).
+Adding EN signal on $auto$ff.cc:337:slice$497 ($sdff) from module ntt_controller (D = $procmux$251_Y, Q = \state).
+Adding SRST signal on $procdff$402 ($dff) from module ntt_controller (D = $procmux$229_Y, Q = \stage, rval = 2'00).
+Adding EN signal on $auto$ff.cc:337:slice$501 ($sdff) from module ntt_controller (D = $procmux$229_Y, Q = \stage).
+Adding SRST signal on $procdff$403 ($dff) from module ntt_controller (D = $procmux$213_Y, Q = \bidx, rval = 2'00).
+Adding EN signal on $auto$ff.cc:337:slice$513 ($sdff) from module ntt_controller (D = $procmux$213_Y, Q = \bidx).
+Adding SRST signal on $procdff$404 ($dff) from module ntt_controller (D = \start, Q = \start_d, rval = 1'0).
+Adding SRST signal on $procdff$405 ($dff) from module ntt_controller (D = $procmux$201_Y, Q = \mode_reg, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$522 ($sdff) from module ntt_controller (D = \inv, Q = \mode_reg).
+Adding SRST signal on $procdff$406 ($dff) from module ntt_controller (D = $procmux$188_Y, Q = \phase, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$526 ($sdff) from module ntt_controller (D = $procmux$188_Y, Q = \phase).
+Adding SRST signal on $procdff$407 ($dff) from module ntt_controller (D = $procmux$167_Y, Q = \nidx, rval = 3'000).
+Adding EN signal on $auto$ff.cc:337:slice$530 ($sdff) from module ntt_controller (D = $procmux$165_Y, Q = \nidx).
+
+8.8.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ntt_top..
+Finding unused cells or wires in module \ntt_controller..
+Finding unused cells or wires in module \twiddle_rom..
+Finding unused cells or wires in module \coefficient_memory..
+Finding unused cells or wires in module \butterfly_datapath..
+Finding unused cells or wires in module \mod_mul..
+Finding unused cells or wires in module \mod_sub..
+Finding unused cells or wires in module \mod_add..
+Removed 27 unused cells and 27 unused wires.
+<suppressed ~28 debug messages>
+
+8.8.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module ntt_top.
+Optimizing module ntt_controller.
+<suppressed ~7 debug messages>
+Optimizing module twiddle_rom.
+Optimizing module coefficient_memory.
+Optimizing module butterfly_datapath.
+Optimizing module mod_mul.
+Optimizing module mod_sub.
+Optimizing module mod_add.
+
+8.8.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+8.8.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \ntt_top..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \ntt_controller..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \twiddle_rom..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \coefficient_memory..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \butterfly_datapath..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \mod_mul..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \mod_sub..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \mod_add..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~80 debug messages>
+
+8.8.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \ntt_top.
+  Optimizing cells in module \ntt_controller.
+  Optimizing cells in module \twiddle_rom.
+  Optimizing cells in module \coefficient_memory.
+  Optimizing cells in module \butterfly_datapath.
+  Optimizing cells in module \mod_mul.
+  Optimizing cells in module \mod_sub.
+  Optimizing cells in module \mod_add.
+Performed a total of 0 changes.
+
+8.8.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\ntt_top'.
+Computing hashes of 2 cells of `\ntt_top'.
+Finding duplicate cells in `\ntt_top'.
+Finding identical cells in module `\ntt_controller'.
+Computing hashes of 115 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+Computing hashes of 104 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+Computing hashes of 99 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+<suppressed ~48 debug messages>
+Finding identical cells in module `\twiddle_rom'.
+Computing hashes of 5 cells of `\twiddle_rom'.
+Finding duplicate cells in `\twiddle_rom'.
+Finding identical cells in module `\coefficient_memory'.
+Computing hashes of 34 cells of `\coefficient_memory'.
+Finding duplicate cells in `\coefficient_memory'.
+Finding identical cells in module `\butterfly_datapath'.
+Computing hashes of 3 cells of `\butterfly_datapath'.
+Finding duplicate cells in `\butterfly_datapath'.
+Finding identical cells in module `\mod_mul'.
+Computing hashes of 6 cells of `\mod_mul'.
+Finding duplicate cells in `\mod_mul'.
+Finding identical cells in module `\mod_sub'.
+Computing hashes of 5 cells of `\mod_sub'.
+Finding duplicate cells in `\mod_sub'.
+Finding identical cells in module `\mod_add'.
+Computing hashes of 4 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+Removed a total of 16 cells.
+
+8.8.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+8.8.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ntt_top..
+Finding unused cells or wires in module \ntt_controller..
+Finding unused cells or wires in module \twiddle_rom..
+Finding unused cells or wires in module \coefficient_memory..
+Finding unused cells or wires in module \butterfly_datapath..
+Finding unused cells or wires in module \mod_mul..
+Finding unused cells or wires in module \mod_sub..
+Finding unused cells or wires in module \mod_add..
+Removed 0 unused cells and 16 unused wires.
+<suppressed ~1 debug messages>
+
+8.8.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module ntt_top.
+Optimizing module ntt_controller.
+Optimizing module twiddle_rom.
+Optimizing module coefficient_memory.
+Optimizing module butterfly_datapath.
+Optimizing module mod_mul.
+Optimizing module mod_sub.
+Optimizing module mod_add.
+
+8.8.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+8.8.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \ntt_top..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \ntt_controller..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \twiddle_rom..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \coefficient_memory..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \butterfly_datapath..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \mod_mul..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \mod_sub..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \mod_add..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~80 debug messages>
+
+8.8.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \ntt_top.
+  Optimizing cells in module \ntt_controller.
+  Optimizing cells in module \twiddle_rom.
+  Optimizing cells in module \coefficient_memory.
+  Optimizing cells in module \butterfly_datapath.
+  Optimizing cells in module \mod_mul.
+  Optimizing cells in module \mod_sub.
+  Optimizing cells in module \mod_add.
+Performed a total of 0 changes.
+
+8.8.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\ntt_top'.
+Computing hashes of 2 cells of `\ntt_top'.
+Finding duplicate cells in `\ntt_top'.
+Finding identical cells in module `\ntt_controller'.
+Computing hashes of 99 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+Finding identical cells in module `\twiddle_rom'.
+Computing hashes of 5 cells of `\twiddle_rom'.
+Finding duplicate cells in `\twiddle_rom'.
+Finding identical cells in module `\coefficient_memory'.
+Computing hashes of 34 cells of `\coefficient_memory'.
+Finding duplicate cells in `\coefficient_memory'.
+Finding identical cells in module `\butterfly_datapath'.
+Computing hashes of 3 cells of `\butterfly_datapath'.
+Finding duplicate cells in `\butterfly_datapath'.
+Finding identical cells in module `\mod_mul'.
+Computing hashes of 6 cells of `\mod_mul'.
+Finding duplicate cells in `\mod_mul'.
+Finding identical cells in module `\mod_sub'.
+Computing hashes of 5 cells of `\mod_sub'.
+Finding duplicate cells in `\mod_sub'.
+Finding identical cells in module `\mod_add'.
+Computing hashes of 4 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+Removed a total of 0 cells.
+
+8.8.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+8.8.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ntt_top..
+Finding unused cells or wires in module \ntt_controller..
+Finding unused cells or wires in module \twiddle_rom..
+Finding unused cells or wires in module \coefficient_memory..
+Finding unused cells or wires in module \butterfly_datapath..
+Finding unused cells or wires in module \mod_mul..
+Finding unused cells or wires in module \mod_sub..
+Finding unused cells or wires in module \mod_add..
+
+8.8.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module ntt_top.
+Optimizing module ntt_controller.
+Optimizing module twiddle_rom.
+Optimizing module coefficient_memory.
+Optimizing module butterfly_datapath.
+Optimizing module mod_mul.
+Optimizing module mod_sub.
+Optimizing module mod_add.
+
+8.8.23. Finished fast OPT passes. (There is nothing left to do.)
+
+8.9. Executing WREDUCE pass (reducing word size of cells).
+Removed top 1 bits (of 2) from port B of cell ntt_controller.$auto$simple.cc:194:make_patterns_logic$508 ($ne).
+Removed top 1 bits (of 3) from port B of cell ntt_controller.$auto$simple.cc:194:make_patterns_logic$480 ($ne).
+Removed top 1 bits (of 3) from port B of cell ntt_controller.$auto$simple.cc:194:make_patterns_logic$478 ($ne).
+Removed top 1 bits (of 3) from port B of cell ntt_controller.$auto$simple.cc:194:make_patterns_logic$476 ($ne).
+Removed top 2 bits (of 3) from port B of cell ntt_controller.$sub$../../experiments/intt/rtl/ntt_controller.v:62$96 ($sub).
+Removed top 1 bits (of 3) from port Y of cell ntt_controller.$sub$../../experiments/intt/rtl/ntt_controller.v:62$96 ($sub).
+Removed top 1 bits (of 3) from port A of cell ntt_controller.$sub$../../experiments/intt/rtl/ntt_controller.v:62$96 ($sub).
+Removed top 1 bits (of 7) from port A of cell ntt_controller.$add$../../experiments/intt/rtl/ntt_controller.v:66$100 ($add).
+Removed top 5 bits (of 7) from port B of cell ntt_controller.$add$../../experiments/intt/rtl/ntt_controller.v:66$100 ($add).
+Removed top 4 bits (of 7) from port B of cell ntt_controller.$add$../../experiments/intt/rtl/ntt_controller.v:67$101 ($add).
+Removed top 4 bits (of 7) from port Y of cell ntt_controller.$add$../../experiments/intt/rtl/ntt_controller.v:67$101 ($add).
+Removed top 4 bits (of 7) from port A of cell ntt_controller.$add$../../experiments/intt/rtl/ntt_controller.v:67$101 ($add).
+Removed top 5 bits (of 7) from port A of cell ntt_controller.$shl$../../experiments/intt/rtl/ntt_controller.v:68$102 ($shl).
+Removed top 4 bits (of 7) from port Y of cell ntt_controller.$shl$../../experiments/intt/rtl/ntt_controller.v:68$102 ($shl).
+Removed top 1 bits (of 2) from port B of cell ntt_controller.$add$../../experiments/intt/rtl/ntt_controller.v:146$112 ($add).
+Removed top 1 bits (of 2) from port B of cell ntt_controller.$add$../../experiments/intt/rtl/ntt_controller.v:150$113 ($add).
+Removed top 2 bits (of 3) from port B of cell ntt_controller.$add$../../experiments/intt/rtl/ntt_controller.v:159$115 ($add).
+Removed top 1 bits (of 3) from mux cell ntt_controller.$procmux$237 ($mux).
+Removed top 1 bits (of 3) from mux cell ntt_controller.$procmux$243 ($mux).
+Removed top 1 bits (of 3) from mux cell ntt_controller.$procmux$245 ($mux).
+Removed top 1 bits (of 3) from mux cell ntt_controller.$procmux$247 ($mux).
+Removed top 1 bits (of 3) from mux cell ntt_controller.$procmux$249 ($mux).
+Removed top 2 bits (of 3) from port B of cell ntt_controller.$procmux$255_CMP0 ($eq).
+Removed top 1 bits (of 3) from port B of cell ntt_controller.$procmux$272_CMP0 ($eq).
+Removed top 1 bits (of 3) from port B of cell ntt_controller.$procmux$312_CMP0 ($eq).
+Removed top 4 bits (of 7) from port Y of cell ntt_controller.$add$../../experiments/intt/rtl/ntt_controller.v:66$100 ($add).
+Removed top 3 bits (of 6) from port A of cell ntt_controller.$add$../../experiments/intt/rtl/ntt_controller.v:66$100 ($add).
+Removed top 3 bits (of 5) from port Y of cell ntt_controller.$mul$../../experiments/intt/rtl/ntt_controller.v:65$99 ($mul).
+Removed top 1 bits (of 3) from wire ntt_controller.$procmux$245_Y.
+Removed top 1 bits (of 3) from wire ntt_controller.$procmux$243_Y.
+Removed top 1 bits (of 3) from wire ntt_controller.$procmux$247_Y.
+Removed top 1 bits (of 3) from wire ntt_controller.$procmux$237_Y.
+Removed top 1 bits (of 3) from wire ntt_controller.$procmux$249_Y.
+Removed top 3 bits (of 6) from wire ntt_controller.prod.
+Removed top 1 bits (of 3) from wire ntt_controller.half_m1.
+Removed top 29 address bits (of 32) from memory init port twiddle_rom.$auto$mem.cc:351:emit$123 ($auto$proc_rom.cc:155:do_switch$121).
+Removed top 29 address bits (of 32) from memory init port twiddle_rom.$auto$mem.cc:351:emit$119 ($auto$proc_rom.cc:155:do_switch$117).
+Removed top 29 address bits (of 32) from memory init port coefficient_memory.$auto$proc_memwr.cc:45:proc_memwr$434 (mem).
+Removed top 29 address bits (of 32) from memory init port coefficient_memory.$auto$proc_memwr.cc:45:proc_memwr$435 (mem).
+Removed top 29 address bits (of 32) from memory init port coefficient_memory.$auto$proc_memwr.cc:45:proc_memwr$436 (mem).
+Removed top 29 address bits (of 32) from memory init port coefficient_memory.$auto$proc_memwr.cc:45:proc_memwr$437 (mem).
+Removed top 29 address bits (of 32) from memory init port coefficient_memory.$auto$proc_memwr.cc:45:proc_memwr$438 (mem).
+Removed top 29 address bits (of 32) from memory init port coefficient_memory.$auto$proc_memwr.cc:45:proc_memwr$439 (mem).
+Removed top 29 address bits (of 32) from memory init port coefficient_memory.$auto$proc_memwr.cc:45:proc_memwr$440 (mem).
+Removed top 29 address bits (of 32) from memory init port coefficient_memory.$auto$proc_memwr.cc:45:proc_memwr$441 (mem).
+Removed top 29 address bits (of 32) from memory read port coefficient_memory.$memrd$\mem$../../rtl/coefficient_memory.v:42$81 (mem).
+Removed top 29 address bits (of 32) from memory read port coefficient_memory.$memrd$\mem$../../rtl/coefficient_memory.v:42$80 (mem).
+Removed top 29 address bits (of 32) from memory read port coefficient_memory.$memrd$\mem$../../rtl/coefficient_memory.v:42$79 (mem).
+Removed top 29 address bits (of 32) from memory read port coefficient_memory.$memrd$\mem$../../rtl/coefficient_memory.v:42$78 (mem).
+Removed top 29 address bits (of 32) from memory read port coefficient_memory.$memrd$\mem$../../rtl/coefficient_memory.v:42$77 (mem).
+Removed top 29 address bits (of 32) from memory read port coefficient_memory.$memrd$\mem$../../rtl/coefficient_memory.v:42$76 (mem).
+Removed top 29 address bits (of 32) from memory read port coefficient_memory.$memrd$\mem$../../rtl/coefficient_memory.v:42$75 (mem).
+Removed top 29 address bits (of 32) from memory read port coefficient_memory.$memrd$\mem$../../rtl/coefficient_memory.v:42$74 (mem).
+Removed top 2 bits (of 6) from port A of cell mod_mul.$add$../../rtl/modular_arithmetic.v:35$11 ($add).
+Removed top 1 bits (of 6) from port B of cell mod_mul.$add$../../rtl/modular_arithmetic.v:35$11 ($add).
+Removed top 2 bits (of 6) from port A of cell mod_mul.$sub$../../rtl/modular_arithmetic.v:36$12 ($sub).
+Removed top 1 bits (of 6) from port B of cell mod_mul.$sub$../../rtl/modular_arithmetic.v:36$12 ($sub).
+Removed top 1 bits (of 6) from port Y of cell mod_mul.$sub$../../rtl/modular_arithmetic.v:36$12 ($sub).
+Removed top 1 bits (of 6) from port B of cell mod_mul.$sub$../../rtl/modular_arithmetic.v:37$13 ($sub).
+Removed top 1 bits (of 6) from port Y of cell mod_mul.$sub$../../rtl/modular_arithmetic.v:37$13 ($sub).
+Removed top 1 bits (of 6) from port A of cell mod_mul.$sub$../../rtl/modular_arithmetic.v:37$13 ($sub).
+Removed top 2 bits (of 6) from port A of cell mod_mul.$ge$../../rtl/modular_arithmetic.v:38$14 ($ge).
+Removed top 1 bits (of 6) from port B of cell mod_mul.$ge$../../rtl/modular_arithmetic.v:38$14 ($ge).
+Removed top 1 bits (of 6) from port Y of cell mod_mul.$add$../../rtl/modular_arithmetic.v:35$11 ($add).
+Removed top 1 bits (of 6) from wire mod_mul.lt_result.
+Removed top 1 bits (of 6) from wire mod_mul.ge_result.
+Removed top 1 bits (of 6) from wire mod_mul.l_ext.
+Removed top 1 bits (of 6) from port A of cell mod_sub.$add$../../rtl/modular_arithmetic.v:20$5 ($add).
+Removed top 1 bits (of 6) from port B of cell mod_sub.$add$../../rtl/modular_arithmetic.v:20$5 ($add).
+Removed top 1 bits (of 6) from port B of cell mod_sub.$sub$../../rtl/modular_arithmetic.v:21$6 ($sub).
+Removed top 1 bits (of 6) from port Y of cell mod_sub.$sub$../../rtl/modular_arithmetic.v:21$6 ($sub).
+Removed top 1 bits (of 6) from port A of cell mod_sub.$sub$../../rtl/modular_arithmetic.v:21$6 ($sub).
+Removed top 1 bits (of 6) from port Y of cell mod_sub.$add$../../rtl/modular_arithmetic.v:20$5 ($add).
+Removed top 1 bits (of 6) from wire mod_sub.sub_result.
+Removed top 1 bits (of 6) from wire mod_sub.a_ext.
+Removed top 1 bits (of 6) from port A of cell mod_add.$add$../../rtl/modular_arithmetic.v:9$1 ($add).
+Removed top 1 bits (of 6) from port B of cell mod_add.$add$../../rtl/modular_arithmetic.v:9$1 ($add).
+Removed top 1 bits (of 6) from port B of cell mod_add.$sub$../../rtl/modular_arithmetic.v:10$2 ($sub).
+Removed top 1 bits (of 6) from port Y of cell mod_add.$sub$../../rtl/modular_arithmetic.v:10$2 ($sub).
+Removed top 1 bits (of 6) from port A of cell mod_add.$sub$../../rtl/modular_arithmetic.v:10$2 ($sub).
+Removed top 1 bits (of 6) from port B of cell mod_add.$ge$../../rtl/modular_arithmetic.v:11$3 ($ge).
+Removed top 1 bits (of 6) from wire mod_add.sum_corrected.
+
+8.10. Executing PEEPOPT pass (run peephole optimizers).
+
+8.11. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ntt_top..
+Finding unused cells or wires in module \ntt_controller..
+Finding unused cells or wires in module \twiddle_rom..
+Finding unused cells or wires in module \coefficient_memory..
+Finding unused cells or wires in module \butterfly_datapath..
+Finding unused cells or wires in module \mod_mul..
+Finding unused cells or wires in module \mod_sub..
+Finding unused cells or wires in module \mod_add..
+Removed 0 unused cells and 13 unused wires.
+<suppressed ~4 debug messages>
+
+8.12. Executing ALUMACC pass (create $alu and $macc cells).
+Extracting $alu and $macc cells in module ntt_top:
+  created 0 $alu and 0 $macc cells.
+Extracting $alu and $macc cells in module ntt_controller:
+  creating $macc model for $add$../../experiments/intt/rtl/ntt_controller.v:159$115 ($add).
+  creating $macc model for $add$../../experiments/intt/rtl/ntt_controller.v:150$113 ($add).
+  creating $macc model for $add$../../experiments/intt/rtl/ntt_controller.v:146$112 ($add).
+  creating $macc model for $add$../../experiments/intt/rtl/ntt_controller.v:67$101 ($add).
+  creating $macc model for $add$../../experiments/intt/rtl/ntt_controller.v:66$100 ($add).
+  creating $macc model for $mul$../../experiments/intt/rtl/ntt_controller.v:65$99 ($mul).
+  creating $macc model for $sub$../../experiments/intt/rtl/ntt_controller.v:62$96 ($sub).
+  creating $macc model for $sub$../../experiments/intt/rtl/ntt_controller.v:60$94 ($sub).
+  creating $alu model for $macc $sub$../../experiments/intt/rtl/ntt_controller.v:60$94.
+  creating $alu model for $macc $sub$../../experiments/intt/rtl/ntt_controller.v:62$96.
+  creating $alu model for $macc $add$../../experiments/intt/rtl/ntt_controller.v:66$100.
+  creating $alu model for $macc $add$../../experiments/intt/rtl/ntt_controller.v:67$101.
+  creating $alu model for $macc $add$../../experiments/intt/rtl/ntt_controller.v:146$112.
+  creating $alu model for $macc $add$../../experiments/intt/rtl/ntt_controller.v:150$113.
+  creating $alu model for $macc $add$../../experiments/intt/rtl/ntt_controller.v:159$115.
+  creating $macc cell for $mul$../../experiments/intt/rtl/ntt_controller.v:65$99: $auto$alumacc.cc:427:replace_macc$555
+  creating $alu model for $eq$../../experiments/intt/rtl/ntt_controller.v:136$111 ($eq): merged with $sub$../../experiments/intt/rtl/ntt_controller.v:60$94.
+  creating $alu cell for $add$../../experiments/intt/rtl/ntt_controller.v:159$115: $auto$alumacc.cc:578:replace_alu$556
+  creating $alu cell for $add$../../experiments/intt/rtl/ntt_controller.v:150$113: $auto$alumacc.cc:578:replace_alu$559
+  creating $alu cell for $add$../../experiments/intt/rtl/ntt_controller.v:146$112: $auto$alumacc.cc:578:replace_alu$562
+  creating $alu cell for $add$../../experiments/intt/rtl/ntt_controller.v:67$101: $auto$alumacc.cc:578:replace_alu$565
+  creating $alu cell for $add$../../experiments/intt/rtl/ntt_controller.v:66$100: $auto$alumacc.cc:578:replace_alu$568
+  creating $alu cell for $sub$../../experiments/intt/rtl/ntt_controller.v:62$96: $auto$alumacc.cc:578:replace_alu$571
+  creating $alu cell for $sub$../../experiments/intt/rtl/ntt_controller.v:60$94, $eq$../../experiments/intt/rtl/ntt_controller.v:136$111: $auto$alumacc.cc:578:replace_alu$574
+  created 7 $alu and 1 $macc cells.
+Extracting $alu and $macc cells in module twiddle_rom:
+  created 0 $alu and 0 $macc cells.
+Extracting $alu and $macc cells in module coefficient_memory:
+  created 0 $alu and 0 $macc cells.
+Extracting $alu and $macc cells in module butterfly_datapath:
+  created 0 $alu and 0 $macc cells.
+Extracting $alu and $macc cells in module mod_mul:
+  creating $macc model for $sub$../../rtl/modular_arithmetic.v:37$13 ($sub).
+  creating $macc model for $sub$../../rtl/modular_arithmetic.v:36$12 ($sub).
+  creating $macc model for $add$../../rtl/modular_arithmetic.v:35$11 ($add).
+  creating $macc model for $mul$../../rtl/modular_arithmetic.v:31$10 ($mul).
+  merging $macc model for $add$../../rtl/modular_arithmetic.v:35$11 into $sub$../../rtl/modular_arithmetic.v:37$13.
+  creating $alu model for $macc $sub$../../rtl/modular_arithmetic.v:36$12.
+  creating $macc cell for $mul$../../rtl/modular_arithmetic.v:31$10: $auto$alumacc.cc:427:replace_macc$579
+  creating $macc cell for $sub$../../rtl/modular_arithmetic.v:37$13: $auto$alumacc.cc:427:replace_macc$580
+  creating $alu model for $ge$../../rtl/modular_arithmetic.v:38$14 ($ge): merged with $sub$../../rtl/modular_arithmetic.v:36$12.
+  creating $alu cell for $sub$../../rtl/modular_arithmetic.v:36$12, $ge$../../rtl/modular_arithmetic.v:38$14: $auto$alumacc.cc:578:replace_alu$581
+  created 1 $alu and 2 $macc cells.
+Extracting $alu and $macc cells in module mod_sub:
+  creating $macc model for $sub$../../rtl/modular_arithmetic.v:22$8 ($sub).
+  creating $macc model for $sub$../../rtl/modular_arithmetic.v:21$6 ($sub).
+  creating $macc model for $add$../../rtl/modular_arithmetic.v:20$5 ($add).
+  merging $macc model for $add$../../rtl/modular_arithmetic.v:20$5 into $sub$../../rtl/modular_arithmetic.v:21$6.
+  creating $alu model for $macc $sub$../../rtl/modular_arithmetic.v:22$8.
+  creating $macc cell for $sub$../../rtl/modular_arithmetic.v:21$6: $auto$alumacc.cc:427:replace_macc$594
+  creating $alu model for $ge$../../rtl/modular_arithmetic.v:22$7 ($ge): merged with $sub$../../rtl/modular_arithmetic.v:22$8.
+  creating $alu cell for $sub$../../rtl/modular_arithmetic.v:22$8, $ge$../../rtl/modular_arithmetic.v:22$7: $auto$alumacc.cc:578:replace_alu$595
+  created 1 $alu and 1 $macc cells.
+Extracting $alu and $macc cells in module mod_add:
+  creating $macc model for $sub$../../rtl/modular_arithmetic.v:10$2 ($sub).
+  creating $macc model for $add$../../rtl/modular_arithmetic.v:9$1 ($add).
+  creating $alu model for $macc $add$../../rtl/modular_arithmetic.v:9$1.
+  creating $alu model for $macc $sub$../../rtl/modular_arithmetic.v:10$2.
+  creating $alu model for $ge$../../rtl/modular_arithmetic.v:11$3 ($ge): new $alu
+  creating $alu cell for $ge$../../rtl/modular_arithmetic.v:11$3: $auto$alumacc.cc:578:replace_alu$609
+  creating $alu cell for $sub$../../rtl/modular_arithmetic.v:10$2: $auto$alumacc.cc:578:replace_alu$622
+  creating $alu cell for $add$../../rtl/modular_arithmetic.v:9$1: $auto$alumacc.cc:578:replace_alu$625
+  created 3 $alu and 0 $macc cells.
+
+8.13. Executing SHARE pass (SAT-based resource sharing).
+Found 2 cells in module twiddle_rom that may be considered for resource sharing.
+  Analyzing resource sharing options for $auto$mem.cc:305:emit$118 ($memrd_v2):
+    Found 1 activation_patterns using ctrl signal \inv.
+    No candidates found.
+  Analyzing resource sharing options for $auto$mem.cc:305:emit$122 ($memrd_v2):
+    Found 1 activation_patterns using ctrl signal \inv.
+    No candidates found.
+
+8.14. Executing OPT pass (performing simple optimizations).
+
+8.14.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module ntt_top.
+Optimizing module ntt_controller.
+Optimizing module twiddle_rom.
+Optimizing module coefficient_memory.
+Optimizing module butterfly_datapath.
+Optimizing module mod_mul.
+Optimizing module mod_sub.
+Optimizing module mod_add.
+
+8.14.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\ntt_top'.
+Computing hashes of 2 cells of `\ntt_top'.
+Finding duplicate cells in `\ntt_top'.
+Finding identical cells in module `\ntt_controller'.
+Computing hashes of 99 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+Finding identical cells in module `\twiddle_rom'.
+Computing hashes of 5 cells of `\twiddle_rom'.
+Finding duplicate cells in `\twiddle_rom'.
+Finding identical cells in module `\coefficient_memory'.
+Computing hashes of 34 cells of `\coefficient_memory'.
+Finding duplicate cells in `\coefficient_memory'.
+Finding identical cells in module `\butterfly_datapath'.
+Computing hashes of 3 cells of `\butterfly_datapath'.
+Finding duplicate cells in `\butterfly_datapath'.
+Finding identical cells in module `\mod_mul'.
+Computing hashes of 10 cells of `\mod_mul'.
+Finding duplicate cells in `\mod_mul'.
+Finding identical cells in module `\mod_sub'.
+Computing hashes of 9 cells of `\mod_sub'.
+Finding duplicate cells in `\mod_sub'.
+Finding identical cells in module `\mod_add'.
+Computing hashes of 9 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+Removed a total of 0 cells.
+
+8.14.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \ntt_top..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \ntt_controller..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \twiddle_rom..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \coefficient_memory..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \butterfly_datapath..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \mod_mul..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \mod_sub..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \mod_add..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~80 debug messages>
+
+8.14.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \ntt_top.
+  Optimizing cells in module \ntt_controller.
+  Optimizing cells in module \twiddle_rom.
+  Optimizing cells in module \coefficient_memory.
+  Optimizing cells in module \butterfly_datapath.
+  Optimizing cells in module \mod_mul.
+  Optimizing cells in module \mod_sub.
+  Optimizing cells in module \mod_add.
+Performed a total of 0 changes.
+
+8.14.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\ntt_top'.
+Computing hashes of 2 cells of `\ntt_top'.
+Finding duplicate cells in `\ntt_top'.
+Finding identical cells in module `\ntt_controller'.
+Computing hashes of 99 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+Finding identical cells in module `\twiddle_rom'.
+Computing hashes of 5 cells of `\twiddle_rom'.
+Finding duplicate cells in `\twiddle_rom'.
+Finding identical cells in module `\coefficient_memory'.
+Computing hashes of 34 cells of `\coefficient_memory'.
+Finding duplicate cells in `\coefficient_memory'.
+Finding identical cells in module `\butterfly_datapath'.
+Computing hashes of 3 cells of `\butterfly_datapath'.
+Finding duplicate cells in `\butterfly_datapath'.
+Finding identical cells in module `\mod_mul'.
+Computing hashes of 10 cells of `\mod_mul'.
+Finding duplicate cells in `\mod_mul'.
+Finding identical cells in module `\mod_sub'.
+Computing hashes of 9 cells of `\mod_sub'.
+Finding duplicate cells in `\mod_sub'.
+Finding identical cells in module `\mod_add'.
+Computing hashes of 9 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+Removed a total of 0 cells.
+
+8.14.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+8.14.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ntt_top..
+Finding unused cells or wires in module \ntt_controller..
+Finding unused cells or wires in module \twiddle_rom..
+Finding unused cells or wires in module \coefficient_memory..
+Finding unused cells or wires in module \butterfly_datapath..
+Finding unused cells or wires in module \mod_mul..
+Finding unused cells or wires in module \mod_sub..
+Finding unused cells or wires in module \mod_add..
+Removed 2 unused cells and 6 unused wires.
+<suppressed ~8 debug messages>
+
+8.14.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module ntt_top.
+Optimizing module ntt_controller.
+Optimizing module twiddle_rom.
+Optimizing module coefficient_memory.
+Optimizing module butterfly_datapath.
+Optimizing module mod_mul.
+Optimizing module mod_sub.
+Optimizing module mod_add.
+
+8.14.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+8.14.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \ntt_top..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \ntt_controller..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \twiddle_rom..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \coefficient_memory..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \butterfly_datapath..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \mod_mul..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \mod_sub..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \mod_add..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~80 debug messages>
+
+8.14.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \ntt_top.
+  Optimizing cells in module \ntt_controller.
+  Optimizing cells in module \twiddle_rom.
+  Optimizing cells in module \coefficient_memory.
+  Optimizing cells in module \butterfly_datapath.
+  Optimizing cells in module \mod_mul.
+  Optimizing cells in module \mod_sub.
+  Optimizing cells in module \mod_add.
+Performed a total of 0 changes.
+
+8.14.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\ntt_top'.
+Computing hashes of 2 cells of `\ntt_top'.
+Finding duplicate cells in `\ntt_top'.
+Finding identical cells in module `\ntt_controller'.
+Computing hashes of 99 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+Finding identical cells in module `\twiddle_rom'.
+Computing hashes of 5 cells of `\twiddle_rom'.
+Finding duplicate cells in `\twiddle_rom'.
+Finding identical cells in module `\coefficient_memory'.
+Computing hashes of 34 cells of `\coefficient_memory'.
+Finding duplicate cells in `\coefficient_memory'.
+Finding identical cells in module `\butterfly_datapath'.
+Computing hashes of 3 cells of `\butterfly_datapath'.
+Finding duplicate cells in `\butterfly_datapath'.
+Finding identical cells in module `\mod_mul'.
+Computing hashes of 9 cells of `\mod_mul'.
+Finding duplicate cells in `\mod_mul'.
+Finding identical cells in module `\mod_sub'.
+Computing hashes of 8 cells of `\mod_sub'.
+Finding duplicate cells in `\mod_sub'.
+Finding identical cells in module `\mod_add'.
+Computing hashes of 9 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+Removed a total of 0 cells.
+
+8.14.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+8.14.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ntt_top..
+Finding unused cells or wires in module \ntt_controller..
+Finding unused cells or wires in module \twiddle_rom..
+Finding unused cells or wires in module \coefficient_memory..
+Finding unused cells or wires in module \butterfly_datapath..
+Finding unused cells or wires in module \mod_mul..
+Finding unused cells or wires in module \mod_sub..
+Finding unused cells or wires in module \mod_add..
+
+8.14.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module ntt_top.
+Optimizing module ntt_controller.
+Optimizing module twiddle_rom.
+Optimizing module coefficient_memory.
+Optimizing module butterfly_datapath.
+Optimizing module mod_mul.
+Optimizing module mod_sub.
+Optimizing module mod_add.
+
+8.14.16. Finished fast OPT passes. (There is nothing left to do.)
+
+8.15. Executing MEMORY pass.
+
+8.15.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+8.15.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 28 transformations.
+
+8.15.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+  Analyzing coefficient_memory.mem write port 0.
+  Analyzing coefficient_memory.mem write port 1.
+  Analyzing coefficient_memory.mem write port 2.
+  Analyzing coefficient_memory.mem write port 3.
+  Analyzing coefficient_memory.mem write port 4.
+  Analyzing coefficient_memory.mem write port 5.
+  Analyzing coefficient_memory.mem write port 6.
+  Analyzing coefficient_memory.mem write port 7.
+  Analyzing coefficient_memory.mem write port 8.
+  Analyzing coefficient_memory.mem write port 9.
+
+8.15.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+8.15.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+Checking read port `$auto$proc_rom.cc:155:do_switch$121'[0] in module `\twiddle_rom':
+    no output FF found.
+Checking read port `$auto$proc_rom.cc:155:do_switch$117'[0] in module `\twiddle_rom':
+    no output FF found.
+Checking read port address `$auto$proc_rom.cc:155:do_switch$121'[0] in module `\twiddle_rom':
+    no address FF found.
+Checking read port address `$auto$proc_rom.cc:155:do_switch$117'[0] in module `\twiddle_rom':
+    no address FF found.
+Checking read port `\mem'[0] in module `\coefficient_memory':
+    no output FF found.
+Checking read port `\mem'[1] in module `\coefficient_memory':
+    no output FF found.
+Checking read port `\mem'[2] in module `\coefficient_memory':
+    no output FF found.
+Checking read port `\mem'[3] in module `\coefficient_memory':
+    no output FF found.
+Checking read port `\mem'[4] in module `\coefficient_memory':
+    no output FF found.
+Checking read port `\mem'[5] in module `\coefficient_memory':
+    no output FF found.
+Checking read port `\mem'[6] in module `\coefficient_memory':
+    no output FF found.
+Checking read port `\mem'[7] in module `\coefficient_memory':
+    no output FF found.
+Checking read port `\mem'[8] in module `\coefficient_memory':
+    no output FF found.
+Checking read port `\mem'[9] in module `\coefficient_memory':
+    no output FF found.
+Checking read port address `\mem'[0] in module `\coefficient_memory':
+    no address FF found.
+Checking read port address `\mem'[1] in module `\coefficient_memory':
+    no address FF found.
+Checking read port address `\mem'[2] in module `\coefficient_memory':
+    no address FF found.
+Checking read port address `\mem'[3] in module `\coefficient_memory':
+    no address FF found.
+Checking read port address `\mem'[4] in module `\coefficient_memory':
+    no address FF found.
+Checking read port address `\mem'[5] in module `\coefficient_memory':
+    no address FF found.
+Checking read port address `\mem'[6] in module `\coefficient_memory':
+    no address FF found.
+Checking read port address `\mem'[7] in module `\coefficient_memory':
+    no address FF found.
+Checking read port address `\mem'[8] in module `\coefficient_memory':
+    no address FF found.
+Checking read port address `\mem'[9] in module `\coefficient_memory':
+    no address FF found.
+
+8.15.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ntt_top..
+Finding unused cells or wires in module \ntt_controller..
+Finding unused cells or wires in module \twiddle_rom..
+Finding unused cells or wires in module \coefficient_memory..
+Finding unused cells or wires in module \butterfly_datapath..
+Finding unused cells or wires in module \mod_mul..
+Finding unused cells or wires in module \mod_sub..
+Finding unused cells or wires in module \mod_add..
+
+8.15.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+Consolidating read ports of memory coefficient_memory.mem by address:
+  Merging ports 2, 3 (address 3'000).
+  Merging ports 2, 4 (address 3'000).
+  Merging ports 2, 5 (address 3'000).
+  Merging ports 2, 6 (address 3'000).
+  Merging ports 8, 9 (address 3'110).
+Consolidating read ports of memory coefficient_memory.mem by address:
+  Merging ports 3, 4 (address 3'101).
+Consolidating read ports of memory coefficient_memory.mem by address:
+Consolidating write ports of memory coefficient_memory.mem by address:
+  Merging ports 0, 1 (address 3'000).
+  Merging ports 0, 2 (address 3'000).
+  Merging ports 0, 3 (address 3'000).
+  Merging ports 0, 4 (address 3'000).
+  Merging ports 6, 7 (address 3'110).
+Consolidating write ports of memory coefficient_memory.mem by address:
+  Merging ports 1, 2 (address 3'101).
+Consolidating write ports of memory coefficient_memory.mem by address:
+Consolidating write ports of memory coefficient_memory.mem using sat-based resource sharing:
+  Checking group clocked with posedge \clk, width 5: ports 2, 3.
+  Common input cone for all EN signals: 1 cells.
+  Size of unconstrained SAT problem: 9 variables, 18 clauses
+  According to SAT solver sharing of port 2 with port 3 is not possible.
+
+8.15.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+8.15.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ntt_top..
+Finding unused cells or wires in module \ntt_controller..
+Finding unused cells or wires in module \twiddle_rom..
+Finding unused cells or wires in module \coefficient_memory..
+Finding unused cells or wires in module \butterfly_datapath..
+Finding unused cells or wires in module \mod_mul..
+Finding unused cells or wires in module \mod_sub..
+Finding unused cells or wires in module \mod_add..
+Removed 0 unused cells and 4 unused wires.
+<suppressed ~1 debug messages>
+
+8.15.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+8.16. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ntt_top..
+Finding unused cells or wires in module \ntt_controller..
+Finding unused cells or wires in module \twiddle_rom..
+Finding unused cells or wires in module \coefficient_memory..
+Finding unused cells or wires in module \butterfly_datapath..
+Finding unused cells or wires in module \mod_mul..
+Finding unused cells or wires in module \mod_sub..
+Finding unused cells or wires in module \mod_add..
+
+8.17. Executing OPT pass (performing simple optimizations).
+
+8.17.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module ntt_top.
+Optimizing module ntt_controller.
+<suppressed ~36 debug messages>
+Optimizing module twiddle_rom.
+Optimizing module coefficient_memory.
+<suppressed ~14 debug messages>
+Optimizing module butterfly_datapath.
+Optimizing module mod_mul.
+Optimizing module mod_sub.
+Optimizing module mod_add.
+
+8.17.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\ntt_top'.
+Computing hashes of 2 cells of `\ntt_top'.
+Finding duplicate cells in `\ntt_top'.
+Finding identical cells in module `\ntt_controller'.
+Computing hashes of 83 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+Finding identical cells in module `\twiddle_rom'.
+Computing hashes of 3 cells of `\twiddle_rom'.
+Finding duplicate cells in `\twiddle_rom'.
+Finding identical cells in module `\coefficient_memory'.
+Computing hashes of 1 cells of `\coefficient_memory'.
+Finding duplicate cells in `\coefficient_memory'.
+Finding identical cells in module `\butterfly_datapath'.
+Computing hashes of 3 cells of `\butterfly_datapath'.
+Finding duplicate cells in `\butterfly_datapath'.
+Finding identical cells in module `\mod_mul'.
+Computing hashes of 9 cells of `\mod_mul'.
+Finding duplicate cells in `\mod_mul'.
+Finding identical cells in module `\mod_sub'.
+Computing hashes of 8 cells of `\mod_sub'.
+Finding duplicate cells in `\mod_sub'.
+Finding identical cells in module `\mod_add'.
+Computing hashes of 9 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+Removed a total of 0 cells.
+
+8.17.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+8.17.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ntt_top..
+Finding unused cells or wires in module \ntt_controller..
+Finding unused cells or wires in module \twiddle_rom..
+Finding unused cells or wires in module \coefficient_memory..
+Finding unused cells or wires in module \butterfly_datapath..
+Finding unused cells or wires in module \mod_mul..
+Finding unused cells or wires in module \mod_sub..
+Finding unused cells or wires in module \mod_add..
+Removed 0 unused cells and 30 unused wires.
+<suppressed ~2 debug messages>
+
+8.17.5. Finished fast OPT passes.
+
+8.18. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+Mapping memory $auto$proc_rom.cc:155:do_switch$121 in module \twiddle_rom:
+  created 8 $dff cells and 0 static cells of width 5.
+  read interface: 0 $dff and 7 $mux cells.
+  write interface: 0 write mux blocks.
+Mapping memory $auto$proc_rom.cc:155:do_switch$117 in module \twiddle_rom:
+  created 8 $dff cells and 0 static cells of width 5.
+  read interface: 0 $dff and 7 $mux cells.
+  write interface: 0 write mux blocks.
+Mapping memory \mem in module \coefficient_memory:
+  created 8 $dff cells and 0 static cells of width 5.
+  read interface: 0 $dff and 15 $mux cells.
+  write interface: 32 write mux blocks.
+
+8.19. Executing OPT pass (performing simple optimizations).
+
+8.19.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module ntt_top.
+Optimizing module ntt_controller.
+<suppressed ~1 debug messages>
+Optimizing module twiddle_rom.
+Optimizing module coefficient_memory.
+<suppressed ~40 debug messages>
+Optimizing module butterfly_datapath.
+Optimizing module mod_mul.
+Optimizing module mod_sub.
+Optimizing module mod_add.
+
+8.19.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\ntt_top'.
+Computing hashes of 2 cells of `\ntt_top'.
+Finding duplicate cells in `\ntt_top'.
+Finding identical cells in module `\ntt_controller'.
+Computing hashes of 82 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+Finding identical cells in module `\twiddle_rom'.
+Computing hashes of 15 cells of `\twiddle_rom'.
+Finding duplicate cells in `\twiddle_rom'.
+Finding identical cells in module `\coefficient_memory'.
+Computing hashes of 92 cells of `\coefficient_memory'.
+Finding duplicate cells in `\coefficient_memory'.
+Finding identical cells in module `\butterfly_datapath'.
+Computing hashes of 3 cells of `\butterfly_datapath'.
+Finding duplicate cells in `\butterfly_datapath'.
+Finding identical cells in module `\mod_mul'.
+Computing hashes of 9 cells of `\mod_mul'.
+Finding duplicate cells in `\mod_mul'.
+Finding identical cells in module `\mod_sub'.
+Computing hashes of 8 cells of `\mod_sub'.
+Finding duplicate cells in `\mod_sub'.
+Finding identical cells in module `\mod_add'.
+Computing hashes of 9 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+Removed a total of 0 cells.
+
+8.19.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \ntt_top..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \ntt_controller..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \twiddle_rom..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \coefficient_memory..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \butterfly_datapath..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \mod_mul..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \mod_sub..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \mod_add..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~92 debug messages>
+
+8.19.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \ntt_top.
+  Optimizing cells in module \ntt_controller.
+    Consolidated identical input bits for $mux cell $procmux$243:
+      Old ports: A=2'00, B=2'10, Y=$auto$wreduce.cc:513:run$543 [1:0]
+      New ports: A=1'0, B=1'1, Y=$auto$wreduce.cc:513:run$543 [1]
+      New connections: $auto$wreduce.cc:513:run$543 [0] = 1'0
+    Consolidated identical input bits for $mux cell $procmux$237:
+      Old ports: A=2'10, B=2'00, Y=$auto$wreduce.cc:513:run$545 [1:0]
+      New ports: A=1'1, B=1'0, Y=$auto$wreduce.cc:513:run$545 [1]
+      New connections: $auto$wreduce.cc:513:run$545 [0] = 1'0
+  Optimizing cells in module \ntt_controller.
+    Consolidated identical input bits for $mux cell $procmux$245:
+      Old ports: A=2'10, B=$auto$wreduce.cc:513:run$543 [1:0], Y=$auto$wreduce.cc:513:run$542 [1:0]
+      New ports: A=1'1, B=$auto$wreduce.cc:513:run$543 [1], Y=$auto$wreduce.cc:513:run$542 [1]
+      New connections: $auto$wreduce.cc:513:run$542 [0] = 1'0
+  Optimizing cells in module \ntt_controller.
+    Consolidated identical input bits for $mux cell $procmux$247:
+      Old ports: A=2'10, B=$auto$wreduce.cc:513:run$542 [1:0], Y=$auto$wreduce.cc:513:run$544 [1:0]
+      New ports: A=1'1, B=$auto$wreduce.cc:513:run$542 [1], Y=$auto$wreduce.cc:513:run$544 [1]
+      New connections: $auto$wreduce.cc:513:run$544 [0] = 1'0
+  Optimizing cells in module \ntt_controller.
+    Consolidated identical input bits for $mux cell $procmux$249:
+      Old ports: A=$auto$wreduce.cc:513:run$544 [1:0], B=$auto$wreduce.cc:513:run$545 [1:0], Y=$auto$wreduce.cc:513:run$546 [1:0]
+      New ports: A=$auto$wreduce.cc:513:run$544 [1], B=$auto$wreduce.cc:513:run$545 [1], Y=$auto$wreduce.cc:513:run$546 [1]
+      New connections: $auto$wreduce.cc:513:run$546 [0] = 1'0
+  Optimizing cells in module \ntt_controller.
+  Optimizing cells in module \twiddle_rom.
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][2][2]$694:
+      Old ports: A=5'10000, B=5'01000, Y=$memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][1]$a$686
+      New ports: A=2'10, B=2'01, Y=$memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][1]$a$686 [4:3]
+      New connections: $memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][1]$a$686 [2:0] = 3'000
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][2][1]$691:
+      Old ports: A=5'01101, B=5'01111, Y=$memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][0]$b$684
+      New ports: A=1'0, B=1'1, Y=$memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][0]$b$684 [1]
+      New connections: { $memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][0]$b$684 [4:2] $memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][0]$b$684 [0] } = 4'0111
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][2][0]$688:
+      Old ports: A=5'00001, B=5'01001, Y=$memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][0]$a$683
+      New ports: A=1'0, B=1'1, Y=$memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][0]$a$683 [3]
+      New connections: { $memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][0]$a$683 [4] $memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][0]$a$683 [2:0] } = 4'0001
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][2][2]$673:
+      Old ports: A=5'10000, B=5'01111, Y=$memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][1]$a$665
+      New ports: A=2'10, B=2'01, Y={ $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][1]$a$665 [4] $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][1]$a$665 [0] }
+      New connections: $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][1]$a$665 [3:1] = { $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][1]$a$665 [0] $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][1]$a$665 [0] $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][1]$a$665 [0] }
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][2][1]$670:
+      Old ports: A=5'00100, B=5'01000, Y=$memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][0]$b$663
+      New ports: A=2'01, B=2'10, Y=$memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][0]$b$663 [3:2]
+      New connections: { $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][0]$b$663 [4] $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][0]$b$663 [1:0] } = 3'000
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][2][0]$667:
+      Old ports: A=5'00001, B=5'00010, Y=$memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][0]$a$662
+      New ports: A=2'01, B=2'10, Y=$memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][0]$a$662 [1:0]
+      New connections: $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][0]$a$662 [4:2] = 3'000
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][2][3]$676:
+      Old ports: A=5'01101, B=5'01001, Y=$memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][1]$b$666
+      New ports: A=1'1, B=1'0, Y=$memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][1]$b$666 [2]
+      New connections: { $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][1]$b$666 [4:3] $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][1]$b$666 [1:0] } = 4'0101
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][2][3]$697:
+      Old ports: A=5'00100, B=5'00010, Y=$memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][1]$b$687
+      New ports: A=2'10, B=2'01, Y=$memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][1]$b$687 [2:1]
+      New connections: { $memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][1]$b$687 [4:3] $memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][1]$b$687 [0] } = 3'000
+  Optimizing cells in module \twiddle_rom.
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][1]$685:
+      Old ports: A=$memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][1]$a$686, B=$memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][1]$b$687, Y=$memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][0][0]$b$681
+      New ports: A={ $memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][1]$a$686 [4:3] 2'00 }, B={ 2'00 $memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][1]$b$687 [2:1] }, Y=$memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][0][0]$b$681 [4:1]
+      New connections: $memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][0][0]$b$681 [0] = 1'0
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][0]$682:
+      Old ports: A=$memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][0]$a$683, B=$memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][0]$b$684, Y=$memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][0][0]$a$680
+      New ports: A={ $memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][0]$a$683 [3] 2'00 }, B={ 2'11 $memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][1][0]$b$684 [1] }, Y=$memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][0][0]$a$680 [3:1]
+      New connections: { $memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][0][0]$a$680 [4] $memory$auto$proc_rom.cc:155:do_switch$117$rdmux[0][0][0]$a$680 [0] } = 2'01
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][1]$664:
+      Old ports: A=$memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][1]$a$665, B=$memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][1]$b$666, Y=$memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][0][0]$b$660
+      New ports: A={ $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][1]$a$665 [4] $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][1]$a$665 [0] $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][1]$a$665 [0] $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][1]$a$665 [0] }, B={ 1'0 $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][1]$b$666 [2] 2'01 }, Y={ $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][0][0]$b$660 [4] $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][0][0]$b$660 [2:0] }
+      New connections: $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][0][0]$b$660 [3] = $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][0][0]$b$660 [0]
+    Consolidated identical input bits for $mux cell $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][0]$661:
+      Old ports: A=$memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][0]$a$662, B=$memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][0]$b$663, Y=$memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][0][0]$a$659
+      New ports: A={ 2'00 $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][0]$a$662 [1:0] }, B={ $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][1][0]$b$663 [3:2] 2'00 }, Y=$memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][0][0]$a$659 [3:0]
+      New connections: $memory$auto$proc_rom.cc:155:do_switch$121$rdmux[0][0][0]$a$659 [4] = 1'0
+  Optimizing cells in module \twiddle_rom.
+  Optimizing cells in module \coefficient_memory.
+  Optimizing cells in module \butterfly_datapath.
+  Optimizing cells in module \mod_mul.
+  Optimizing cells in module \mod_sub.
+  Optimizing cells in module \mod_add.
+Performed a total of 17 changes.
+
+8.19.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\ntt_top'.
+Computing hashes of 2 cells of `\ntt_top'.
+Finding duplicate cells in `\ntt_top'.
+Finding identical cells in module `\ntt_controller'.
+Computing hashes of 82 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+Finding identical cells in module `\twiddle_rom'.
+Computing hashes of 15 cells of `\twiddle_rom'.
+Finding duplicate cells in `\twiddle_rom'.
+Computing hashes of 11 cells of `\twiddle_rom'.
+Finding duplicate cells in `\twiddle_rom'.
+<suppressed ~12 debug messages>
+Finding identical cells in module `\coefficient_memory'.
+Computing hashes of 92 cells of `\coefficient_memory'.
+Finding duplicate cells in `\coefficient_memory'.
+Finding identical cells in module `\butterfly_datapath'.
+Computing hashes of 3 cells of `\butterfly_datapath'.
+Finding duplicate cells in `\butterfly_datapath'.
+Finding identical cells in module `\mod_mul'.
+Computing hashes of 9 cells of `\mod_mul'.
+Finding duplicate cells in `\mod_mul'.
+Finding identical cells in module `\mod_sub'.
+Computing hashes of 8 cells of `\mod_sub'.
+Finding duplicate cells in `\mod_sub'.
+Finding identical cells in module `\mod_add'.
+Computing hashes of 9 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+Removed a total of 4 cells.
+
+8.19.6. Executing OPT_SHARE pass.
+
+8.19.7. Executing OPT_DFF pass (perform DFF optimizations).
+
+8.19.8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ntt_top..
+Finding unused cells or wires in module \ntt_controller..
+Finding unused cells or wires in module \twiddle_rom..
+Finding unused cells or wires in module \coefficient_memory..
+Finding unused cells or wires in module \butterfly_datapath..
+Finding unused cells or wires in module \mod_mul..
+Finding unused cells or wires in module \mod_sub..
+Finding unused cells or wires in module \mod_add..
+Removed 0 unused cells and 82 unused wires.
+<suppressed ~3 debug messages>
+
+8.19.9. Executing OPT_EXPR pass (perform const folding).
+Optimizing module ntt_top.
+Optimizing module ntt_controller.
+<suppressed ~2 debug messages>
+Optimizing module twiddle_rom.
+<suppressed ~2 debug messages>
+Optimizing module coefficient_memory.
+Optimizing module butterfly_datapath.
+Optimizing module mod_mul.
+Optimizing module mod_sub.
+Optimizing module mod_add.
+
+8.19.10. Rerunning OPT passes. (Maybe there is more to do..)
+
+8.19.11. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \ntt_top..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \ntt_controller..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \twiddle_rom..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \coefficient_memory..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \butterfly_datapath..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \mod_mul..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \mod_sub..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \mod_add..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~91 debug messages>
+
+8.19.12. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \ntt_top.
+  Optimizing cells in module \ntt_controller.
+  Optimizing cells in module \twiddle_rom.
+  Optimizing cells in module \coefficient_memory.
+  Optimizing cells in module \butterfly_datapath.
+  Optimizing cells in module \mod_mul.
+  Optimizing cells in module \mod_sub.
+  Optimizing cells in module \mod_add.
+Performed a total of 0 changes.
+
+8.19.13. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\ntt_top'.
+Computing hashes of 2 cells of `\ntt_top'.
+Finding duplicate cells in `\ntt_top'.
+Finding identical cells in module `\ntt_controller'.
+Computing hashes of 81 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+Computing hashes of 80 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+<suppressed ~3 debug messages>
+Finding identical cells in module `\twiddle_rom'.
+Computing hashes of 10 cells of `\twiddle_rom'.
+Finding duplicate cells in `\twiddle_rom'.
+Finding identical cells in module `\coefficient_memory'.
+Computing hashes of 92 cells of `\coefficient_memory'.
+Finding duplicate cells in `\coefficient_memory'.
+Finding identical cells in module `\butterfly_datapath'.
+Computing hashes of 3 cells of `\butterfly_datapath'.
+Finding duplicate cells in `\butterfly_datapath'.
+Finding identical cells in module `\mod_mul'.
+Computing hashes of 9 cells of `\mod_mul'.
+Finding duplicate cells in `\mod_mul'.
+Finding identical cells in module `\mod_sub'.
+Computing hashes of 8 cells of `\mod_sub'.
+Finding duplicate cells in `\mod_sub'.
+Finding identical cells in module `\mod_add'.
+Computing hashes of 9 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+Removed a total of 1 cells.
+
+8.19.14. Executing OPT_SHARE pass.
+
+8.19.15. Executing OPT_DFF pass (perform DFF optimizations).
+Adding EN signal on $memory\mem[0]$700 ($dff) from module coefficient_memory (D = $memory\mem$wrmux[0][3][0]$y$800, Q = \mem[0]).
+Adding EN signal on $memory\mem[1]$702 ($dff) from module coefficient_memory (D = $memory\mem$wrmux[1][3][0]$y$824, Q = \mem[1]).
+Adding EN signal on $memory\mem[2]$704 ($dff) from module coefficient_memory (D = $memory\mem$wrmux[2][3][0]$y$852, Q = \mem[2]).
+Adding EN signal on $memory\mem[3]$706 ($dff) from module coefficient_memory (D = $memory\mem$wrmux[3][3][0]$y$872, Q = \mem[3]).
+Adding EN signal on $memory\mem[4]$708 ($dff) from module coefficient_memory (D = $memory\mem$wrmux[4][3][0]$y$902, Q = \mem[4]).
+Adding EN signal on $memory\mem[5]$710 ($dff) from module coefficient_memory (D = $memory\mem$wrmux[5][3][0]$y$922, Q = \mem[5]).
+Adding EN signal on $memory\mem[6]$712 ($dff) from module coefficient_memory (D = $memory\mem$wrmux[6][3][0]$y$946, Q = \mem[6]).
+Adding EN signal on $memory\mem[7]$714 ($dff) from module coefficient_memory (D = $memory\mem$wrmux[7][3][0]$y$966, Q = \mem[7]).
+
+8.19.16. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ntt_top..
+Finding unused cells or wires in module \ntt_controller..
+Finding unused cells or wires in module \twiddle_rom..
+Finding unused cells or wires in module \coefficient_memory..
+Finding unused cells or wires in module \butterfly_datapath..
+Finding unused cells or wires in module \mod_mul..
+Finding unused cells or wires in module \mod_sub..
+Finding unused cells or wires in module \mod_add..
+Removed 0 unused cells and 3 unused wires.
+<suppressed ~2 debug messages>
+
+8.19.17. Executing OPT_EXPR pass (perform const folding).
+Optimizing module ntt_top.
+Optimizing module ntt_controller.
+Optimizing module twiddle_rom.
+Optimizing module coefficient_memory.
+<suppressed ~16 debug messages>
+Optimizing module butterfly_datapath.
+Optimizing module mod_mul.
+Optimizing module mod_sub.
+Optimizing module mod_add.
+
+8.19.18. Rerunning OPT passes. (Maybe there is more to do..)
+
+8.19.19. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \ntt_top..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \ntt_controller..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \twiddle_rom..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \coefficient_memory..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \butterfly_datapath..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \mod_mul..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \mod_sub..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \mod_add..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~83 debug messages>
+
+8.19.20. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \ntt_top.
+  Optimizing cells in module \ntt_controller.
+  Optimizing cells in module \twiddle_rom.
+  Optimizing cells in module \coefficient_memory.
+  Optimizing cells in module \butterfly_datapath.
+  Optimizing cells in module \mod_mul.
+  Optimizing cells in module \mod_sub.
+  Optimizing cells in module \mod_add.
+Performed a total of 0 changes.
+
+8.19.21. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\ntt_top'.
+Computing hashes of 2 cells of `\ntt_top'.
+Finding duplicate cells in `\ntt_top'.
+Finding identical cells in module `\ntt_controller'.
+Computing hashes of 80 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+Finding identical cells in module `\twiddle_rom'.
+Computing hashes of 10 cells of `\twiddle_rom'.
+Finding duplicate cells in `\twiddle_rom'.
+Finding identical cells in module `\coefficient_memory'.
+Computing hashes of 92 cells of `\coefficient_memory'.
+Finding duplicate cells in `\coefficient_memory'.
+Finding identical cells in module `\butterfly_datapath'.
+Computing hashes of 3 cells of `\butterfly_datapath'.
+Finding duplicate cells in `\butterfly_datapath'.
+Finding identical cells in module `\mod_mul'.
+Computing hashes of 9 cells of `\mod_mul'.
+Finding duplicate cells in `\mod_mul'.
+Finding identical cells in module `\mod_sub'.
+Computing hashes of 8 cells of `\mod_sub'.
+Finding duplicate cells in `\mod_sub'.
+Finding identical cells in module `\mod_add'.
+Computing hashes of 9 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+Removed a total of 0 cells.
+
+8.19.22. Executing OPT_SHARE pass.
+
+8.19.23. Executing OPT_DFF pass (perform DFF optimizations).
+
+8.19.24. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ntt_top..
+Finding unused cells or wires in module \ntt_controller..
+Finding unused cells or wires in module \twiddle_rom..
+Finding unused cells or wires in module \coefficient_memory..
+Finding unused cells or wires in module \butterfly_datapath..
+Finding unused cells or wires in module \mod_mul..
+Finding unused cells or wires in module \mod_sub..
+Finding unused cells or wires in module \mod_add..
+Removed 0 unused cells and 8 unused wires.
+<suppressed ~1 debug messages>
+
+8.19.25. Executing OPT_EXPR pass (perform const folding).
+Optimizing module ntt_top.
+Optimizing module ntt_controller.
+Optimizing module twiddle_rom.
+Optimizing module coefficient_memory.
+Optimizing module butterfly_datapath.
+Optimizing module mod_mul.
+Optimizing module mod_sub.
+Optimizing module mod_add.
+
+8.19.26. Rerunning OPT passes. (Maybe there is more to do..)
+
+8.19.27. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \ntt_top..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \ntt_controller..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \twiddle_rom..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \coefficient_memory..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \butterfly_datapath..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \mod_mul..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \mod_sub..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \mod_add..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~83 debug messages>
+
+8.19.28. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \ntt_top.
+  Optimizing cells in module \ntt_controller.
+  Optimizing cells in module \twiddle_rom.
+  Optimizing cells in module \coefficient_memory.
+  Optimizing cells in module \butterfly_datapath.
+  Optimizing cells in module \mod_mul.
+  Optimizing cells in module \mod_sub.
+  Optimizing cells in module \mod_add.
+Performed a total of 0 changes.
+
+8.19.29. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\ntt_top'.
+Computing hashes of 2 cells of `\ntt_top'.
+Finding duplicate cells in `\ntt_top'.
+Finding identical cells in module `\ntt_controller'.
+Computing hashes of 80 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+Finding identical cells in module `\twiddle_rom'.
+Computing hashes of 10 cells of `\twiddle_rom'.
+Finding duplicate cells in `\twiddle_rom'.
+Finding identical cells in module `\coefficient_memory'.
+Computing hashes of 92 cells of `\coefficient_memory'.
+Finding duplicate cells in `\coefficient_memory'.
+Finding identical cells in module `\butterfly_datapath'.
+Computing hashes of 3 cells of `\butterfly_datapath'.
+Finding duplicate cells in `\butterfly_datapath'.
+Finding identical cells in module `\mod_mul'.
+Computing hashes of 9 cells of `\mod_mul'.
+Finding duplicate cells in `\mod_mul'.
+Finding identical cells in module `\mod_sub'.
+Computing hashes of 8 cells of `\mod_sub'.
+Finding duplicate cells in `\mod_sub'.
+Finding identical cells in module `\mod_add'.
+Computing hashes of 9 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+Removed a total of 0 cells.
+
+8.19.30. Executing OPT_SHARE pass.
+
+8.19.31. Executing OPT_DFF pass (perform DFF optimizations).
+
+8.19.32. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ntt_top..
+Finding unused cells or wires in module \ntt_controller..
+Finding unused cells or wires in module \twiddle_rom..
+Finding unused cells or wires in module \coefficient_memory..
+Finding unused cells or wires in module \butterfly_datapath..
+Finding unused cells or wires in module \mod_mul..
+Finding unused cells or wires in module \mod_sub..
+Finding unused cells or wires in module \mod_add..
+
+8.19.33. Executing OPT_EXPR pass (perform const folding).
+Optimizing module ntt_top.
+Optimizing module ntt_controller.
+Optimizing module twiddle_rom.
+Optimizing module coefficient_memory.
+Optimizing module butterfly_datapath.
+Optimizing module mod_mul.
+Optimizing module mod_sub.
+Optimizing module mod_add.
+
+8.19.34. Finished fast OPT passes. (There is nothing left to do.)
+
+8.20. Executing TECHMAP pass (map to technology primitives).
+
+8.20.1. Executing Verilog-2005 frontend: /opt/homebrew/Cellar/yosys/0.70/bin/../share/yosys/techmap.v
+Parsing Verilog input from `/opt/homebrew/Cellar/yosys/0.70/bin/../share/yosys/techmap.v' to AST representation.
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `$__div_mod_u'.
+Generating RTLIL representation for module `$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `$connect'.
+Generating RTLIL representation for module `$input_port'.
+Successfully finished Verilog frontend.
+
+8.20.2. Continuing TECHMAP pass.
+Using template $paramod$719aadea7a94d31a13cd25a777432aacb0e462b5\_90_alu for cells of type $alu.
+Using template $paramod$b18e16801adf491a64caa0542270798e5d4ac6b6\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $reduce_or.
+Using extmapper simplemap for cells of type $not.
+Using extmapper simplemap for cells of type $or.
+Using extmapper simplemap for cells of type $reduce_and.
+Using template $paramod$a40b3a69ab2154dca9743e30e1e84efb03b892b4\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $mux.
+Using extmapper simplemap for cells of type $pos.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000110 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000110 for cells of type $lcu.
+Using extmapper simplemap for cells of type $xor.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000101 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000101 for cells of type $lcu.
+Using extmapper simplemap for cells of type $and.
+Using extmapper maccmap for cells of type $macc_v2.
+  add \a (5 bits, unsigned)
+  sub \b (5 bits, unsigned)
+  add 5'10001 (5 bits, unsigned)
+Using template $paramod$83dd457849c736323edf2edb15923eb27f99c683\_90_alu for cells of type $alu.
+  add \p [3:0] (4 bits, unsigned)
+  sub \p [8:4] (5 bits, unsigned)
+  add 5'10001 (5 bits, unsigned)
+  add \diff * \tw (5x5 bits, unsigned)
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000001001 for cells of type $fa.
+Using template $paramod$d2fa05d38998afabc6d4f34471305d0af4b8b2df\_90_alu for cells of type $alu.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000001001 for cells of type $lcu.
+Using extmapper simplemap for cells of type $reduce_bool.
+Using extmapper simplemap for cells of type $dffe.
+Using template $paramod$7e708ae28ab761f11d0fb59d3ffc72f6a4baf5d9\_90_alu for cells of type $alu.
+Using template $paramod$constmap:feedf79ea35e16ffcea1f9fbf0100a04e67c8cee$paramod$97d5c16b9c72c92bd44426086f21ed0b83fe157b\_90_shift_ops_shr_shl_sshl_sshr for cells of type $shr.
+Using template $paramod$ba698a254f9a5947e85cbe7beae6b161eefc5386\_90_alu for cells of type $alu.
+Using template $paramod$175e67c02b86e96b1288b9dc100122520d7240d8\_90_alu for cells of type $alu.
+Using template $paramod$78e969f2586efcf3a5b0b0440bcca0db83d5cca2\_90_alu for cells of type $alu.
+Using template $paramod$3ef7d3dd227da7627a99c5e5a6a4deb817573e39\_90_alu for cells of type $alu.
+  add \half * \group (3x2 bits, unsigned)
+Using extmapper simplemap for cells of type $ne.
+Using extmapper simplemap for cells of type $sdffe.
+Using extmapper simplemap for cells of type $sdff.
+Using extmapper simplemap for cells of type $sdffce.
+Using template $paramod$constmap:4c09f7292c4cb8460a4490f8c548a9045758ffcd$paramod$81a8669dc663614820da193a4f58a994c0f07c67\_90_shift_ops_shr_shl_sshl_sshr for cells of type $shr.
+Using template $paramod$constmap:c01e56db35a32880c08c5e042ae07f7787b32703$paramod$3cf512d89acafa5c03019f110fef25f26aa82c02\_90_shift_ops_shr_shl_sshl_sshr for cells of type $shl.
+Using extmapper simplemap for cells of type $eq.
+Using extmapper simplemap for cells of type $pmux.
+Using extmapper simplemap for cells of type $logic_not.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000010 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000010 for cells of type $lcu.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000011 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000011 for cells of type $lcu.
+No more expansions possible.
+<suppressed ~1689 debug messages>
+
+8.21. Executing OPT pass (performing simple optimizations).
+
+8.21.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module ntt_top.
+Optimizing module ntt_controller.
+<suppressed ~222 debug messages>
+Optimizing module twiddle_rom.
+<suppressed ~3 debug messages>
+Optimizing module coefficient_memory.
+Optimizing module butterfly_datapath.
+Optimizing module mod_mul.
+<suppressed ~222 debug messages>
+Optimizing module mod_sub.
+<suppressed ~68 debug messages>
+Optimizing module mod_add.
+<suppressed ~126 debug messages>
+
+8.21.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\ntt_top'.
+Computing hashes of 2 cells of `\ntt_top'.
+Finding duplicate cells in `\ntt_top'.
+Finding identical cells in module `\ntt_controller'.
+Computing hashes of 234 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+Computing hashes of 212 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+Computing hashes of 210 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+<suppressed ~72 debug messages>
+Finding identical cells in module `\twiddle_rom'.
+Computing hashes of 32 cells of `\twiddle_rom'.
+Finding duplicate cells in `\twiddle_rom'.
+Computing hashes of 24 cells of `\twiddle_rom'.
+Finding duplicate cells in `\twiddle_rom'.
+Computing hashes of 21 cells of `\twiddle_rom'.
+Finding duplicate cells in `\twiddle_rom'.
+<suppressed ~33 debug messages>
+Finding identical cells in module `\coefficient_memory'.
+Computing hashes of 252 cells of `\coefficient_memory'.
+Finding duplicate cells in `\coefficient_memory'.
+Finding identical cells in module `\butterfly_datapath'.
+Computing hashes of 3 cells of `\butterfly_datapath'.
+Finding duplicate cells in `\butterfly_datapath'.
+Finding identical cells in module `\mod_mul'.
+Computing hashes of 215 cells of `\mod_mul'.
+Finding duplicate cells in `\mod_mul'.
+Computing hashes of 209 cells of `\mod_mul'.
+Finding duplicate cells in `\mod_mul'.
+Computing hashes of 203 cells of `\mod_mul'.
+Finding duplicate cells in `\mod_mul'.
+Computing hashes of 202 cells of `\mod_mul'.
+Finding duplicate cells in `\mod_mul'.
+<suppressed ~39 debug messages>
+Finding identical cells in module `\mod_sub'.
+Computing hashes of 86 cells of `\mod_sub'.
+Finding duplicate cells in `\mod_sub'.
+Computing hashes of 80 cells of `\mod_sub'.
+Finding duplicate cells in `\mod_sub'.
+Computing hashes of 74 cells of `\mod_sub'.
+Finding duplicate cells in `\mod_sub'.
+Computing hashes of 73 cells of `\mod_sub'.
+Finding duplicate cells in `\mod_sub'.
+<suppressed ~39 debug messages>
+Finding identical cells in module `\mod_add'.
+Computing hashes of 85 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+Computing hashes of 78 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+Computing hashes of 74 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+Computing hashes of 72 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+Computing hashes of 69 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+Computing hashes of 67 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+Computing hashes of 64 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+<suppressed ~63 debug messages>
+Removed a total of 82 cells.
+
+8.21.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+8.21.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ntt_top..
+Finding unused cells or wires in module \ntt_controller..
+Finding unused cells or wires in module \twiddle_rom..
+Finding unused cells or wires in module \coefficient_memory..
+Finding unused cells or wires in module \butterfly_datapath..
+Finding unused cells or wires in module \mod_mul..
+Finding unused cells or wires in module \mod_sub..
+Finding unused cells or wires in module \mod_add..
+Removed 54 unused cells and 884 unused wires.
+<suppressed ~60 debug messages>
+
+8.21.5. Finished fast OPT passes.
+
+8.22. Executing ABC pass (technology mapping using ABC).
+
+8.22.1. Summary of detected clock domains:
+  30 cells in clk=\clk, en=$auto$simple.cc:193:make_patterns_logic$989, arst={ }, srst={ }
+  27 cells in clk=\clk, en=$auto$simple.cc:193:make_patterns_logic$986, arst={ }, srst={ }
+  46 cells in clk=\clk, en=$auto$simple.cc:193:make_patterns_logic$983, arst={ }, srst={ }
+  25 cells in clk=\clk, en=$auto$simple.cc:193:make_patterns_logic$980, arst={ }, srst={ }
+  30 cells in clk=\clk, en=$auto$simple.cc:193:make_patterns_logic$977, arst={ }, srst={ }
+  29 cells in clk=\clk, en=$auto$simple.cc:193:make_patterns_logic$974, arst={ }, srst={ }
+  40 cells in clk=\clk, en=$auto$simple.cc:193:make_patterns_logic$971, arst={ }, srst={ }
+  25 cells in clk=\clk, en=$auto$simple.cc:193:make_patterns_logic$968, arst={ }, srst={ }
+
+8.22.2. Extracting gate netlist of module `\coefficient_memory' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clk, enabled by $auto$simple.cc:193:make_patterns_logic$989
+
+8.22.3. Extracting gate netlist of module `\coefficient_memory' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clk, enabled by $auto$simple.cc:193:make_patterns_logic$986
+
+8.22.4. Extracting gate netlist of module `\coefficient_memory' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clk, enabled by $auto$simple.cc:193:make_patterns_logic$983
+
+8.22.5. Extracting gate netlist of module `\coefficient_memory' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clk, enabled by $auto$simple.cc:193:make_patterns_logic$980
+
+8.22.6. Extracting gate netlist of module `\coefficient_memory' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clk, enabled by $auto$simple.cc:193:make_patterns_logic$977
+
+8.22.7. Extracting gate netlist of module `\coefficient_memory' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clk, enabled by $auto$simple.cc:193:make_patterns_logic$974
+
+8.22.8. Extracting gate netlist of module `\coefficient_memory' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clk, enabled by $auto$simple.cc:193:make_patterns_logic$971
+
+8.22.9. Extracting gate netlist of module `\coefficient_memory' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clk, enabled by $auto$simple.cc:193:make_patterns_logic$968
+
+8.22.10. Summary of detected clock domains:
+  8 cells in clk=\clk, en=$auto$simple.cc:210:make_patterns_logic$524, arst={ }, srst=\rst
+  2 cells in clk=\clk, en={ }, arst={ }, srst=\rst
+  49 cells in clk=\clk, en=$auto$simple.cc:193:make_patterns_logic$505, arst={ }, srst=\rst
+  14 cells in clk=\clk, en=$auto$simple.cc:210:make_patterns_logic$485, arst={ }, srst=\rst
+  14 cells in clk=\clk, en=$auto$simple.cc:210:make_patterns_logic$540, arst={ }, srst=\rst
+  18 cells in clk=\clk, en=$auto$simple.cc:210:make_patterns_logic$519, arst={ }, srst=\rst
+  23 cells in clk=\clk, en=$auto$simple.cc:210:make_patterns_logic$511, arst={ }, srst=\rst
+  28 cells in clk=\clk, en=$auto$simple.cc:193:make_patterns_logic$481, arst={ }, srst=\rst
+  12 cells in clk=\clk, en=$auto$simple.cc:210:make_patterns_logic$490, arst={ }, srst={ }
+  10 cells in clk=\clk, en=$auto$simple.cc:210:make_patterns_logic$447, arst={ }, srst=\phase
+  14 cells in clk=\clk, en=$auto$simple.cc:210:make_patterns_logic$447, arst={ }, srst={ }
+
+8.22.11. Extracting gate netlist of module `\ntt_controller' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clk, enabled by $auto$simple.cc:210:make_patterns_logic$524, synchronously reset by \rst
+
+8.22.12. Extracting gate netlist of module `\ntt_controller' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clk, synchronously reset by \rst
+
+8.22.13. Extracting gate netlist of module `\ntt_controller' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clk, enabled by $auto$simple.cc:193:make_patterns_logic$505, synchronously reset by \rst
+
+8.22.14. Extracting gate netlist of module `\ntt_controller' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clk, enabled by $auto$simple.cc:210:make_patterns_logic$485, synchronously reset by \rst
+
+8.22.15. Extracting gate netlist of module `\ntt_controller' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clk, enabled by $auto$simple.cc:210:make_patterns_logic$540, synchronously reset by \rst
+
+8.22.16. Extracting gate netlist of module `\ntt_controller' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clk, enabled by $auto$simple.cc:210:make_patterns_logic$519, synchronously reset by \rst
+
+8.22.17. Extracting gate netlist of module `\ntt_controller' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clk, enabled by $auto$simple.cc:210:make_patterns_logic$511, synchronously reset by \rst
+
+8.22.18. Extracting gate netlist of module `\ntt_controller' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clk, enabled by $auto$simple.cc:193:make_patterns_logic$481, synchronously reset by \rst
+
+8.22.19. Extracting gate netlist of module `\ntt_controller' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clk, enabled by $auto$simple.cc:210:make_patterns_logic$490
+
+8.22.20. Extracting gate netlist of module `\ntt_controller' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clk, enabled by $auto$simple.cc:210:make_patterns_logic$447, synchronously reset by \phase
+
+8.22.21. Extracting gate netlist of module `\ntt_controller' to `<abc-temp-dir>/input.blif'..
+Found matching posedge clock domain: \clk, enabled by $auto$simple.cc:210:make_patterns_logic$447
+
+8.22.22. Summary of detected clock domains:
+  182 cells in clk={ }, en={ }, arst={ }, srst={ }
+
+8.22.23. Extracting gate netlist of module `\mod_mul' to `<abc-temp-dir>/input.blif'..
+No matching clock domain found. Not extracting any FF cells.
+
+8.22.24. Summary of detected clock domains:
+  64 cells in clk={ }, en={ }, arst={ }, srst={ }
+
+8.22.25. Extracting gate netlist of module `\mod_sub' to `<abc-temp-dir>/input.blif'..
+No matching clock domain found. Not extracting any FF cells.
+
+8.22.26. Summary of detected clock domains:
+  57 cells in clk={ }, en={ }, arst={ }, srst={ }
+
+8.22.27. Extracting gate netlist of module `\mod_add' to `<abc-temp-dir>/input.blif'..
+No matching clock domain found. Not extracting any FF cells.
+
+8.22.28. Summary of detected clock domains:
+  21 cells in clk={ }, en={ }, arst={ }, srst={ }
+
+8.22.29. Extracting gate netlist of module `\twiddle_rom' to `<abc-temp-dir>/input.blif'..
+No matching clock domain found. Not extracting any FF cells.
+
+8.22.30. Summary of detected clock domains:
+  3 cells in clk={ }, en={ }, arst={ }, srst={ }
+
+8.22.31. Extracting gate netlist of module `\butterfly_datapath' to `<abc-temp-dir>/input.blif'..
+No matching clock domain found. Not extracting any FF cells.
+
+8.22.32. Summary of detected clock domains:
+  2 cells in clk={ }, en={ }, arst={ }, srst={ }
+
+8.22.33. Extracting gate netlist of module `\ntt_top' to `<abc-temp-dir>/input.blif'..
+No matching clock domain found. Not extracting any FF cells.
+
+8.22.33.1. Executed ABC.
+Extracted 25 gates and 57 wires to a netlist network with 32 inputs and 15 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+8.22.33.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        4
+ABC RESULTS:               MUX cells:       18
+ABC RESULTS:              NAND cells:        2
+ABC RESULTS:               NOR cells:        1
+ABC RESULTS:        internal signals:       10
+ABC RESULTS:           input signals:       32
+ABC RESULTS:          output signals:       15
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 22 gates and 52 wires to a netlist network with 30 inputs and 10 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+8.22.33.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        4
+ABC RESULTS:               MUX cells:       14
+ABC RESULTS:              NAND cells:        2
+ABC RESULTS:               NOR cells:        1
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:        internal signals:       12
+ABC RESULTS:           input signals:       30
+ABC RESULTS:          output signals:       10
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 41 gates and 93 wires to a netlist network with 52 inputs and 15 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+8.22.33.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        4
+ABC RESULTS:               MUX cells:       34
+ABC RESULTS:              NAND cells:        2
+ABC RESULTS:               NOR cells:        1
+ABC RESULTS:        internal signals:       26
+ABC RESULTS:           input signals:       52
+ABC RESULTS:          output signals:       15
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 20 gates and 46 wires to a netlist network with 26 inputs and 10 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+8.22.33.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        3
+ABC RESULTS:            ANDNOT cells:        1
+ABC RESULTS:               MUX cells:       12
+ABC RESULTS:              NAND cells:        2
+ABC RESULTS:               NOR cells:        1
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:        internal signals:       10
+ABC RESULTS:           input signals:       26
+ABC RESULTS:          output signals:       10
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 25 gates and 57 wires to a netlist network with 32 inputs and 15 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+8.22.33.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        4
+ABC RESULTS:               MUX cells:       18
+ABC RESULTS:              NAND cells:        2
+ABC RESULTS:               NOR cells:        1
+ABC RESULTS:        internal signals:       10
+ABC RESULTS:           input signals:       32
+ABC RESULTS:          output signals:       15
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 24 gates and 58 wires to a netlist network with 34 inputs and 10 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+8.22.33.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        3
+ABC RESULTS:            ANDNOT cells:        1
+ABC RESULTS:               MUX cells:       16
+ABC RESULTS:              NAND cells:        2
+ABC RESULTS:               NOR cells:        1
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:        internal signals:       14
+ABC RESULTS:           input signals:       34
+ABC RESULTS:          output signals:       10
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 35 gates and 77 wires to a netlist network with 42 inputs and 17 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+8.22.33.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        3
+ABC RESULTS:               MUX cells:       26
+ABC RESULTS:              NAND cells:        2
+ABC RESULTS:               NOR cells:        2
+ABC RESULTS:               NOT cells:        2
+ABC RESULTS:        internal signals:       18
+ABC RESULTS:           input signals:       42
+ABC RESULTS:          output signals:       17
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 20 gates and 46 wires to a netlist network with 26 inputs and 10 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+8.22.33.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        3
+ABC RESULTS:            ANDNOT cells:        1
+ABC RESULTS:               MUX cells:       12
+ABC RESULTS:              NAND cells:        2
+ABC RESULTS:               NOR cells:        1
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:        internal signals:       10
+ABC RESULTS:           input signals:       26
+ABC RESULTS:          output signals:       10
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 6 gates and 12 wires to a netlist network with 5 inputs and 6 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+8.22.33.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        1
+ABC RESULTS:            ANDNOT cells:        1
+ABC RESULTS:               NOT cells:        2
+ABC RESULTS:                OR cells:        1
+ABC RESULTS:             ORNOT cells:        1
+ABC RESULTS:        internal signals:        1
+ABC RESULTS:           input signals:        5
+ABC RESULTS:          output signals:        6
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 1 gates and 2 wires to a netlist network with 1 inputs and 1 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+8.22.33.2. Re-integrating ABC results.
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:        internal signals:        0
+ABC RESULTS:           input signals:        1
+ABC RESULTS:          output signals:        1
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 48 gates and 86 wires to a netlist network with 36 inputs and 26 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+8.22.33.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        6
+ABC RESULTS:            ANDNOT cells:        2
+ABC RESULTS:               MUX cells:       12
+ABC RESULTS:              NAND cells:       10
+ABC RESULTS:               NOR cells:        3
+ABC RESULTS:               NOT cells:        3
+ABC RESULTS:                OR cells:        7
+ABC RESULTS:             ORNOT cells:        2
+ABC RESULTS:              XNOR cells:        4
+ABC RESULTS:               XOR cells:        3
+ABC RESULTS:        internal signals:       24
+ABC RESULTS:           input signals:       36
+ABC RESULTS:          output signals:       26
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 13 gates and 23 wires to a netlist network with 10 inputs and 3 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+8.22.33.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        4
+ABC RESULTS:            ANDNOT cells:        1
+ABC RESULTS:               MUX cells:        1
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:                OR cells:        1
+ABC RESULTS:             ORNOT cells:        1
+ABC RESULTS:        internal signals:       10
+ABC RESULTS:           input signals:       10
+ABC RESULTS:          output signals:        3
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 11 gates and 20 wires to a netlist network with 9 inputs and 6 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+8.22.33.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        5
+ABC RESULTS:               NOT cells:        3
+ABC RESULTS:                OR cells:        1
+ABC RESULTS:              XNOR cells:        1
+ABC RESULTS:               XOR cells:        1
+ABC RESULTS:        internal signals:        5
+ABC RESULTS:           input signals:        9
+ABC RESULTS:          output signals:        6
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 16 gates and 26 wires to a netlist network with 9 inputs and 10 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+8.22.33.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        4
+ABC RESULTS:            ANDNOT cells:        3
+ABC RESULTS:               MUX cells:        1
+ABC RESULTS:               NOT cells:        2
+ABC RESULTS:                OR cells:        1
+ABC RESULTS:              XNOR cells:        1
+ABC RESULTS:               XOR cells:        1
+ABC RESULTS:        internal signals:        7
+ABC RESULTS:           input signals:        9
+ABC RESULTS:          output signals:       10
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 21 gates and 30 wires to a netlist network with 8 inputs and 12 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+8.22.33.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        2
+ABC RESULTS:            ANDNOT cells:        5
+ABC RESULTS:              NAND cells:        7
+ABC RESULTS:               NOR cells:        3
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:             ORNOT cells:        1
+ABC RESULTS:        internal signals:       10
+ABC RESULTS:           input signals:        8
+ABC RESULTS:          output signals:       12
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 25 gates and 37 wires to a netlist network with 11 inputs and 12 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+8.22.33.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        4
+ABC RESULTS:            ANDNOT cells:        1
+ABC RESULTS:              NAND cells:        3
+ABC RESULTS:               NOR cells:        2
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:                OR cells:        4
+ABC RESULTS:             ORNOT cells:        1
+ABC RESULTS:        internal signals:       14
+ABC RESULTS:           input signals:       11
+ABC RESULTS:          output signals:       12
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 2 gates and 4 wires to a netlist network with 2 inputs and 2 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+8.22.33.2. Re-integrating ABC results.
+ABC RESULTS:            ANDNOT cells:        1
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:        internal signals:        0
+ABC RESULTS:           input signals:        2
+ABC RESULTS:          output signals:        2
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 0 gates and 0 wires to a netlist network with 0 inputs and 0 outputs.
+Don't call ABC as there is nothing to map.
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 2 gates and 4 wires to a netlist network with 2 inputs and 2 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+8.22.33.2. Re-integrating ABC results.
+ABC RESULTS:            ANDNOT cells:        1
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:        internal signals:        0
+ABC RESULTS:           input signals:        2
+ABC RESULTS:          output signals:        2
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 182 gates and 192 wires to a netlist network with 10 inputs and 5 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+8.22.33.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:       42
+ABC RESULTS:            ANDNOT cells:        1
+ABC RESULTS:               MUX cells:        2
+ABC RESULTS:              NAND cells:       52
+ABC RESULTS:               NOR cells:        2
+ABC RESULTS:                OR cells:        4
+ABC RESULTS:             ORNOT cells:        4
+ABC RESULTS:              XNOR cells:       10
+ABC RESULTS:               XOR cells:       37
+ABC RESULTS:        internal signals:      177
+ABC RESULTS:           input signals:       10
+ABC RESULTS:          output signals:        5
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 64 gates and 74 wires to a netlist network with 10 inputs and 5 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+8.22.33.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        2
+ABC RESULTS:            ANDNOT cells:        5
+ABC RESULTS:               MUX cells:        3
+ABC RESULTS:              NAND cells:       14
+ABC RESULTS:               NOR cells:        2
+ABC RESULTS:                OR cells:        1
+ABC RESULTS:             ORNOT cells:        4
+ABC RESULTS:              XNOR cells:        7
+ABC RESULTS:               XOR cells:        6
+ABC RESULTS:        internal signals:       59
+ABC RESULTS:           input signals:       10
+ABC RESULTS:          output signals:        5
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 57 gates and 67 wires to a netlist network with 10 inputs and 5 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+8.22.33.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        6
+ABC RESULTS:            ANDNOT cells:        1
+ABC RESULTS:               MUX cells:        1
+ABC RESULTS:              NAND cells:       19
+ABC RESULTS:                OR cells:        2
+ABC RESULTS:             ORNOT cells:        2
+ABC RESULTS:              XNOR cells:        5
+ABC RESULTS:               XOR cells:        5
+ABC RESULTS:        internal signals:       52
+ABC RESULTS:           input signals:       10
+ABC RESULTS:          output signals:        5
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 21 gates and 27 wires to a netlist network with 4 inputs and 5 outputs.
+Running ABC script: <abc-temp-dir>/abc.script
+ABC: ======== ABC command line "source <abc-temp-dir>/abc.script"
+ABC: + read_blif <abc-temp-dir>/input.blif 
+ABC: + read_library <abc-temp-dir>/stdcells.genlib 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &fraig -x 
+ABC: + &put 
+ABC: + scorr 
+ABC: Warning: The network is combinational (run "fraig" or "fraig_sweep").
+ABC: + dc2 
+ABC: + dretime 
+ABC: + strash 
+ABC: + &get -n 
+ABC: + &dch -f 
+ABC: + &nf 
+ABC: + &put 
+ABC: + write_blif <abc-temp-dir>/output.blif 
+
+8.22.33.2. Re-integrating ABC results.
+ABC RESULTS:               AND cells:        7
+ABC RESULTS:            ANDNOT cells:        2
+ABC RESULTS:               MUX cells:        1
+ABC RESULTS:              NAND cells:        2
+ABC RESULTS:               NOT cells:        1
+ABC RESULTS:                OR cells:        4
+ABC RESULTS:             ORNOT cells:        2
+ABC RESULTS:               XOR cells:        1
+ABC RESULTS:        internal signals:       18
+ABC RESULTS:           input signals:        4
+ABC RESULTS:          output signals:        5
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 0 gates and 0 wires to a netlist network with 0 inputs and 0 outputs.
+Don't call ABC as there is nothing to map.
+Removing temp directory.
+
+8.22.33.1. Executed ABC.
+Extracted 0 gates and 0 wires to a netlist network with 0 inputs and 0 outputs.
+Don't call ABC as there is nothing to map.
+Removing temp directory.
+Removing global temp directory.
+
+8.23. Executing OPT pass (performing simple optimizations).
+
+8.23.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module ntt_top.
+Optimizing module ntt_controller.
+<suppressed ~8 debug messages>
+Optimizing module twiddle_rom.
+Optimizing module coefficient_memory.
+Optimizing module butterfly_datapath.
+Optimizing module mod_mul.
+Optimizing module mod_sub.
+Optimizing module mod_add.
+
+8.23.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\ntt_top'.
+Computing hashes of 2 cells of `\ntt_top'.
+Finding duplicate cells in `\ntt_top'.
+Finding identical cells in module `\ntt_controller'.
+Computing hashes of 177 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+Computing hashes of 175 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+Computing hashes of 174 cells of `\ntt_controller'.
+Finding duplicate cells in `\ntt_controller'.
+<suppressed ~9 debug messages>
+Finding identical cells in module `\twiddle_rom'.
+Computing hashes of 20 cells of `\twiddle_rom'.
+Finding duplicate cells in `\twiddle_rom'.
+Finding identical cells in module `\coefficient_memory'.
+Computing hashes of 252 cells of `\coefficient_memory'.
+Finding duplicate cells in `\coefficient_memory'.
+Computing hashes of 242 cells of `\coefficient_memory'.
+Finding duplicate cells in `\coefficient_memory'.
+<suppressed ~30 debug messages>
+Finding identical cells in module `\butterfly_datapath'.
+Computing hashes of 3 cells of `\butterfly_datapath'.
+Finding duplicate cells in `\butterfly_datapath'.
+Finding identical cells in module `\mod_mul'.
+Computing hashes of 154 cells of `\mod_mul'.
+Finding duplicate cells in `\mod_mul'.
+Finding identical cells in module `\mod_sub'.
+Computing hashes of 44 cells of `\mod_sub'.
+Finding duplicate cells in `\mod_sub'.
+Finding identical cells in module `\mod_add'.
+Computing hashes of 41 cells of `\mod_add'.
+Finding duplicate cells in `\mod_add'.
+Removed a total of 13 cells.
+
+8.23.3. Executing OPT_DFF pass (perform DFF optimizations).
+
+8.23.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \ntt_top..
+Finding unused cells or wires in module \ntt_controller..
+Finding unused cells or wires in module \twiddle_rom..
+Finding unused cells or wires in module \coefficient_memory..
+Finding unused cells or wires in module \butterfly_datapath..
+Finding unused cells or wires in module \mod_mul..
+Finding unused cells or wires in module \mod_sub..
+Finding unused cells or wires in module \mod_add..
+Removed 0 unused cells and 781 unused wires.
+<suppressed ~17 debug messages>
+
+8.23.5. Finished fast OPT passes.
+
+8.24. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `ntt_top'. Setting top module to ntt_top.
+
+8.24.1. Analyzing design hierarchy..
+Top module:  \ntt_top
+Used module:     \coefficient_memory
+Used module:     \ntt_controller
+Used module:         \butterfly_datapath
+Used module:             \mod_mul
+Used module:             \mod_sub
+Used module:             \mod_add
+Used module:         \twiddle_rom
+
+8.24.2. Analyzing design hierarchy..
+Top module:  \ntt_top
+Used module:     \coefficient_memory
+Used module:     \ntt_controller
+Used module:         \butterfly_datapath
+Used module:             \mod_mul
+Used module:             \mod_sub
+Used module:             \mod_add
+Used module:         \twiddle_rom
+Removed 0 unused modules.
+
+8.25. Printing statistics.
+
+=== ntt_top ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       19 wires
+      160 wire bits
+       19 public wires
+      160 public wire bits
+        8 ports
+       86 port bits
+        2 submodules
+        1   coefficient_memory
+        1   ntt_controller
+
+=== ntt_controller ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      147 wires
+      237 wire bits
+       40 public wires
+      125 public wire bits
+       16 ports
+       40 port bits
+      172 cells
+       14   $_ANDNOT_
+       25   $_AND_
+       21   $_DFFE_PP_
+       14   $_MUX_
+       19   $_NAND_
+        8   $_NOR_
+       15   $_NOT_
+        6   $_ORNOT_
+       15   $_OR_
+        6   $_SDFFCE_PP0P_
+        4   $_SDFFCE_PP1P_
+       13   $_SDFFE_PP0P_
+        1   $_SDFF_PP0_
+        6   $_XNOR_
+        5   $_XOR_
+        2 submodules
+        1   butterfly_datapath
+        1   twiddle_rom
+
+=== twiddle_rom ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       18 wires
+       24 wire bits
+        3 public wires
+        9 public wire bits
+        3 ports
+        9 port bits
+       20 cells
+        2   $_ANDNOT_
+        7   $_AND_
+        1   $_MUX_
+        2   $_NAND_
+        1   $_NOT_
+        2   $_ORNOT_
+        4   $_OR_
+        1   $_XOR_
+
+=== coefficient_memory ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      213 wires
+      347 wire bits
+       21 public wires
+      155 public wire bits
+       13 ports
+      115 port bits
+      242 cells
+        3   $_ANDNOT_
+       18   $_AND_
+       40   $_DFFE_PP_
+      150   $_MUX_
+       16   $_NAND_
+        9   $_NOR_
+        6   $_NOT_
+
+=== butterfly_datapath ===
+
+        +----------Local Count, excluding submodules.
+        | 
+        6 wires
+       30 wire bits
+        6 public wires
+       30 public wire bits
+        5 ports
+       25 port bits
+        3 submodules
+        1   mod_add
+        1   mod_mul
+        1   mod_sub
+
+=== mod_mul ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      152 wires
+      164 wire bits
+        3 public wires
+       15 public wire bits
+        3 ports
+       15 port bits
+      154 cells
+        1   $_ANDNOT_
+       42   $_AND_
+        2   $_MUX_
+       52   $_NAND_
+        2   $_NOR_
+        4   $_ORNOT_
+        4   $_OR_
+       10   $_XNOR_
+       37   $_XOR_
+
+=== mod_sub ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       42 wires
+       54 wire bits
+        3 public wires
+       15 public wire bits
+        3 ports
+       15 port bits
+       44 cells
+        5   $_ANDNOT_
+        2   $_AND_
+        3   $_MUX_
+       14   $_NAND_
+        2   $_NOR_
+        4   $_ORNOT_
+        1   $_OR_
+        7   $_XNOR_
+        6   $_XOR_
+
+=== mod_add ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       39 wires
+       51 wire bits
+        3 public wires
+       15 public wire bits
+        3 ports
+       15 port bits
+       41 cells
+        1   $_ANDNOT_
+        6   $_AND_
+        1   $_MUX_
+       19   $_NAND_
+        2   $_ORNOT_
+        2   $_OR_
+        5   $_XNOR_
+        5   $_XOR_
+
+=== design hierarchy ===
+
+        +----------Count including submodules.
+        | 
+      673 ntt_top
+      242 coefficient_memory
+      172 ntt_controller
+       41     mod_add
+      154     mod_mul
+       44     mod_sub
+       20   twiddle_rom
+
+        +----------Count including submodules.
+        | 
+      636 wires
+     1067 wire bits
+       98 public wires
+      524 public wire bits
+       54 ports
+      320 port bits
+        - memories
+        - memory bits
+        - processes
+      673 cells
+       26   $_ANDNOT_
+      100   $_AND_
+       61   $_DFFE_PP_
+      171   $_MUX_
+      122   $_NAND_
+       21   $_NOR_
+       22   $_NOT_
+       18   $_ORNOT_
+       26   $_OR_
+        6   $_SDFFCE_PP0P_
+        4   $_SDFFCE_PP1P_
+       13   $_SDFFE_PP0P_
+        1   $_SDFF_PP0_
+       28   $_XNOR_
+       54   $_XOR_
+        2 submodules
+        1   coefficient_memory
+        1   ntt_controller
+
+8.26. Executing CHECK pass (checking for obvious problems).
+Checking module ntt_top...
+Checking module ntt_controller...
+Checking module twiddle_rom...
+Checking module coefficient_memory...
+Checking module butterfly_datapath...
+Checking module mod_mul...
+Checking module mod_sub...
+Checking module mod_add...
+Found and reported 0 problems.
+
+9. Printing statistics.
+
+=== ntt_top ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       19 wires
+      160 wire bits
+       19 public wires
+      160 public wire bits
+        8 ports
+       86 port bits
+        2 submodules
+        1   coefficient_memory
+        1   ntt_controller
+
+=== ntt_controller ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      147 wires
+      237 wire bits
+       40 public wires
+      125 public wire bits
+       16 ports
+       40 port bits
+      172 cells
+       14   $_ANDNOT_
+       25   $_AND_
+       21   $_DFFE_PP_
+       14   $_MUX_
+       19   $_NAND_
+        8   $_NOR_
+       15   $_NOT_
+        6   $_ORNOT_
+       15   $_OR_
+        6   $_SDFFCE_PP0P_
+        4   $_SDFFCE_PP1P_
+       13   $_SDFFE_PP0P_
+        1   $_SDFF_PP0_
+        6   $_XNOR_
+        5   $_XOR_
+        2 submodules
+        1   butterfly_datapath
+        1   twiddle_rom
+
+=== twiddle_rom ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       18 wires
+       24 wire bits
+        3 public wires
+        9 public wire bits
+        3 ports
+        9 port bits
+       20 cells
+        2   $_ANDNOT_
+        7   $_AND_
+        1   $_MUX_
+        2   $_NAND_
+        1   $_NOT_
+        2   $_ORNOT_
+        4   $_OR_
+        1   $_XOR_
+
+=== coefficient_memory ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      213 wires
+      347 wire bits
+       21 public wires
+      155 public wire bits
+       13 ports
+      115 port bits
+      242 cells
+        3   $_ANDNOT_
+       18   $_AND_
+       40   $_DFFE_PP_
+      150   $_MUX_
+       16   $_NAND_
+        9   $_NOR_
+        6   $_NOT_
+
+=== butterfly_datapath ===
+
+        +----------Local Count, excluding submodules.
+        | 
+        6 wires
+       30 wire bits
+        6 public wires
+       30 public wire bits
+        5 ports
+       25 port bits
+        3 submodules
+        1   mod_add
+        1   mod_mul
+        1   mod_sub
+
+=== mod_mul ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      152 wires
+      164 wire bits
+        3 public wires
+       15 public wire bits
+        3 ports
+       15 port bits
+      154 cells
+        1   $_ANDNOT_
+       42   $_AND_
+        2   $_MUX_
+       52   $_NAND_
+        2   $_NOR_
+        4   $_ORNOT_
+        4   $_OR_
+       10   $_XNOR_
+       37   $_XOR_
+
+=== mod_sub ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       42 wires
+       54 wire bits
+        3 public wires
+       15 public wire bits
+        3 ports
+       15 port bits
+       44 cells
+        5   $_ANDNOT_
+        2   $_AND_
+        3   $_MUX_
+       14   $_NAND_
+        2   $_NOR_
+        4   $_ORNOT_
+        1   $_OR_
+        7   $_XNOR_
+        6   $_XOR_
+
+=== mod_add ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       39 wires
+       51 wire bits
+        3 public wires
+       15 public wire bits
+        3 ports
+       15 port bits
+       41 cells
+        1   $_ANDNOT_
+        6   $_AND_
+        1   $_MUX_
+       19   $_NAND_
+        2   $_ORNOT_
+        2   $_OR_
+        5   $_XNOR_
+        5   $_XOR_
+
+=== design hierarchy ===
+
+        +----------Count including submodules.
+        | 
+      673 ntt_top
+      242 coefficient_memory
+      172 ntt_controller
+       41     mod_add
+      154     mod_mul
+       44     mod_sub
+       20   twiddle_rom
+
+        +----------Count including submodules.
+        | 
+      636 wires
+     1067 wire bits
+       98 public wires
+      524 public wire bits
+       54 ports
+      320 port bits
+        - memories
+        - memory bits
+        - processes
+      673 cells
+       26   $_ANDNOT_
+      100   $_AND_
+       61   $_DFFE_PP_
+      171   $_MUX_
+      122   $_NAND_
+       21   $_NOR_
+       22   $_NOT_
+       18   $_ORNOT_
+       26   $_OR_
+        6   $_SDFFCE_PP0P_
+        4   $_SDFFCE_PP1P_
+       13   $_SDFFE_PP0P_
+        1   $_SDFF_PP0_
+       28   $_XNOR_
+       54   $_XOR_
+        2 submodules
+        1   coefficient_memory
+        1   ntt_controller
+
+End of script. Logfile hash: 14a8d914de, time: 0.39s, user: 0.12s, system: 0.05s, MEM: 25.75 MB peak
+Yosys 0.70+post (git sha1 0c11ea098be065e585a90a06e7b7da49936cf231, Release, AppleClang clang++ 21.0.0.21000334)
+Time spent: 93% 1x abc (1 sec), 1% 36x opt_expr (0 sec), ...

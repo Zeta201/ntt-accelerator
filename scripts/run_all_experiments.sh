@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Run the baseline verification suite plus every completed experiment's suite.
+
+set -u
+
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$HERE" || exit 1
+
+fail_count=0
+
+echo "########## BASELINE ##########"
+bash scripts/run_all_tests.sh
+baseline_status=$?
+if [ "$baseline_status" -ne 0 ]; then
+    fail_count=$((fail_count + 1))
+fi
+
+echo
+echo "########## EXPERIMENT: INTT ##########"
+bash experiments/intt/scripts/run_intt_tests.sh
+intt_status=$?
+if [ "$intt_status" -ne 0 ]; then
+    fail_count=$((fail_count + 1))
+fi
+
+echo
+echo "=== overall summary ==="
+echo "baseline:        $([ "$baseline_status" -eq 0 ] && echo PASS || echo FAIL)"
+echo "experiment INTT: $([ "$intt_status" -eq 0 ] && echo PASS || echo FAIL)"
+
+if [ "$fail_count" -eq 0 ]; then
+    echo "ALL SUITES PASSED"
+else
+    echo "$fail_count SUITE(S) FAILED"
+fi
+
+exit "$fail_count"
