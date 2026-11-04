@@ -179,7 +179,7 @@ The latency follows directly from the controller's execution sequence:
 
 Each butterfly uses three controller cycles: `READ`, `COMPUTE`, and `WRITE`. The same datapath is reused for all 12 operations rather than executing them in parallel.
 
-The 37-cycle measurement is taken from the accepted start edge through the completion edge of the final `WRITE` operation. It represents the simulated controller latency for one transform, not a measured maximum operating frequency or physical hardware performance. See [Architecture: Latency](architecture.md#latency) for the derivation.
+The 37-cycle measurement is taken from the accepted start edge through the completion edge of the final `WRITE` operation. It represents the simulated controller latency for one transform, not a measured maximum operating frequency or physical hardware performance. See [Transform execution: Latency](../README.md#latency) in the main README for the derivation.
 
 ## Test-vector and stage-checkpoint generation
 
