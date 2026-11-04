@@ -3423,6 +3423,6 @@ Found and reported 0 problems.
         1   coefficient_memory
         1   ntt_controller
 
-End of script. Logfile hash: 12fa85452c, time: 2.31s, user: 0.10s, system: 0.03s, MEM: 25.11 MB peak
+End of script. Logfile hash: 12fa85452c, time: 0.80s, user: 0.11s, system: 0.04s, MEM: 25.09 MB peak
 Yosys 0.70+post (git sha1 0c11ea098be065e585a90a06e7b7da49936cf231, Release, AppleClang clang++ 21.0.0.21000334)
-Time spent: 91% 1x abc (1 sec), 1% 1x techmap (0 sec), ...
+Time spent: 92% 1x abc (1 sec), 1% 1x techmap (0 sec), ...

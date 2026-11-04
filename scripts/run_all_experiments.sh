@@ -17,7 +17,7 @@ fi
 
 echo
 echo "########## EXPERIMENT: INTT ##########"
-bash experiments/intt/scripts/run_intt_tests.sh
+bash scripts/run_intt.sh
 intt_status=$?
 if [ "$intt_status" -ne 0 ]; then
     fail_count=$((fail_count + 1))

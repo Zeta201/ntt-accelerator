@@ -3,7 +3,7 @@
 
 set -u
 
-HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$HERE" || exit 1
 
 RTL="rtl/modular_arithmetic.v rtl/butterfly_datapath.v rtl/coefficient_memory.v \
