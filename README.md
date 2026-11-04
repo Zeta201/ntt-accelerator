@@ -601,7 +601,7 @@ The iterative DIF algorithm produces its final coefficients in bit-reversed orde
 For an 8-point transform, the three-bit index is reversed when selecting the output coefficient:
 
 $$
-\text{coef\_out}[k]=\text{mem}[\text{bitrev}_3(k)]
+coef\_out[k]=mem[bitrev3(k)]
 $$
 
 This keeps the internal transform schedule unchanged and avoids additional clock cycles and memory writes for output reordering. The trade-off is that the output mapping is tied to the fixed 8-point transform size.
