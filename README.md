@@ -374,7 +374,7 @@ The subtractor calculates $a-b$. If $a\geq b$, the difference is already in the 
 $$
 (a-b)\bmod 17 =
 \begin{cases}
-a-b, & a\geq b\\
+a-b, & a\geq b\\\\
 a+17-b, & a<b
 \end{cases}
 $$
