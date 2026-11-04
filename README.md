@@ -1168,16 +1168,33 @@ The tests also cover operation-mode stability, start requests while busy, and re
 
 **Results**
 
+Both implementations were synthesized using the same generic Yosys flow (`synth -top ntt_top; stat`). The results are compared below.
+
 | Metric | Baseline | INTT implementation |
 |---|---:|---:|
 | Forward latency | 37 cycles | 37 cycles |
 | Inverse latency | — | 61 cycles |
 | Generic synthesis cells | 603 | 673 |
-| Flip-flops | 80 | 85 |
-| Forward correctness | Passed | Passed |
-| Inverse correctness | — | Passed |
+| — combinational cells | 364 | 417 |
+| — multiplexers | 159 | 171 |
+| — flip-flops | 80 | 85 |
 
-The INTT extension adds 70 generic synthesis cells (11.6%) and 5 flip-flops. Forward-transform correctness and latency remain unchanged. The inverse transform reuses the existing butterfly datapath and coefficient memory, avoiding duplicated arithmetic hardware. The main trade-off is the additional 24 cycles required for sequential normalization.
+The INTT implementation uses 70 more generic synthesis cells than the baseline, an increase of 11.6%. This comprises 53 additional combinational cells, 12 additional multiplexers, and 5 additional flip-flops. Forward-transform correctness and latency remain unchanged. The existing butterfly datapath and coefficient memory are reused, so no separate arithmetic datapath is required. Inverse-transform latency increases by 24 cycles because normalization is performed sequentially.
+
+These five additional flip-flops are associated with the inverse-mode register (`mode_reg`), normalization control (`phase`), and the 3-bit normalization index (`nidx`) — the only new registers declared in the controller. No additional sequential datapath registers are required.
+
+The module-level synthesis results show where the additional cells are used:
+
+| Module | Baseline cells | INTT cells |
+|---|---:|---:|
+| Controller | 117 | 172 |
+| Twiddle ROM | 7 | 20 |
+| Coefficient memory | 242 | 242 |
+| Modular arithmetic (combined) | 237 | 239 |
+
+Nearly all of the overhead is in the controller (+55 cells, for the normalization-phase state machine and `phase`/`nidx` logic) and the twiddle ROM (+13 cells, for the added inverse-twiddle table and the `inv` select). The coefficient memory implementation remains unchanged, with the same synthesized cell count in both designs. The combined modular-arithmetic total shifts by 2 cells even though none of `mod_add.v`, `mod_sub.v`, or `mod_mul.v` were modified — a reminder that Yosys optimizes each module in the context of the whole design, so per-module counts are not strictly additive to the design total.
+
+These figures are generic synthesis results rather than target-specific FPGA resource estimates. Physical timing and maximum operating frequency were not evaluated.
 
 **Run commands**
 
@@ -1190,6 +1207,95 @@ python3 intt_math_validation.py
 # RTL verification
 cd ../../..
 bash scripts/run_intt.sh
+
+# Full regression
+bash scripts/run_all_experiments.sh
+
+# Synthesis comparison
+bash scripts/run_synthesis.sh
+```
+
+### Experiment 2: Larger Transform Size (N=16)
+
+**Objective**
+
+Evaluate how doubling the transform size from $N=8$ to $N=16$ affects the architecture, execution latency, and hardware resource requirements, while reusing the existing design approach.
+
+**Design changes**
+
+The $N=16$ transform reuses the same radix-2 DIF structure, FSM, and shared-datapath approach as the baseline, scaled to 4 stages of 8 butterflies each (32 butterflies total, versus 3 stages of 4 butterflies, 12 total, for $N=8$).
+
+For $q=17$ and $N=16$:
+
+- Primitive root: $\omega=3$, since $3^{16}\equiv1\pmod{17}$ and $3^8\not\equiv1\pmod{17}$ (order exactly 16).
+- Twiddle table: `[1, 3, 9, 10, 13, 5, 15, 11, 16, 14, 8, 7, 4, 12, 2, 6]`.
+
+The implementation, kept entirely under `experiments/ntt16/` with the baseline and INTT experiment untouched, adds:
+
+- `coefficient_memory16.v` — a 16-entry coefficient memory (versus 8 entries), widening the read/write addresses from 3 to 4 bits.
+- `twiddle_rom16.v` — a 16-entry twiddle ROM addressed by a 4-bit exponent (versus an 8-entry, 3-bit-addressed ROM).
+- `ntt_controller16.v` — the same shift/mask address-generation construction as the baseline, generalized from a 2-bit to a 3-bit butterfly index and from 3 to 4 stages; the algebraic bound on the twiddle exponent (`j<half ⟹ j<<stage<N/2`) generalizes the same way.
+- `ntt_top16.v` — the same assembly pattern as `ntt_top.v`, with an 80-bit coefficient bus and 4-bit output bit-reversal (versus 40 bits and 3-bit reversal).
+
+`butterfly_datapath.v` and `modular_arithmetic.v` are reused unchanged directly from `rtl/`: both operate on operands in the canonical range 0–16 regardless of transform size, so nothing about doubling $N$ requires any arithmetic change.
+
+**Verification**
+
+The implementation was checked using an independent Python reference model and RTL simulation, following the same structure as the baseline and Experiment 1.
+
+| Verification | Result |
+|---|---:|
+| Python mathematical validation | 5,014 checks, 0 failures |
+| RTL verification | 11,096 checks, 0 failures |
+| Test vectors | 39/39 passed |
+| Intermediate-stage checkpoints | All 4 stages verified per vector |
+| Butterfly schedule | All 32 butterflies/transform verified per vector |
+
+Test vectors cover all-zero, all-one, an impulse at each of the 16 positions, all-maximum, alternating, increasing, decreasing, and boundary inputs, plus 16 seeded-random vectors. The RTL testbench also covers start requests while busy and reset mid-transform, mirroring the baseline's `tb_ntt_top.v` conventions.
+
+**Results**
+
+Both implementations were synthesized using the same generic Yosys flow (`synth -top <top>; stat`).
+
+| Metric | N=8 baseline | N=16 implementation |
+|---|---:|---:|
+| Transform size | 8 | 16 |
+| Number of stages | 3 | 4 |
+| Butterfly operations | 12 | 32 |
+| Transform latency | 37 cycles | 99 cycles |
+| Coefficient memory entries | 8 | 16 |
+| Coefficient memory bits | 40 | 80 |
+| Generic synthesis cells | 603 | 952 |
+| — combinational cells | 364 | 536 |
+| — multiplexers | 159 | 293 |
+| — flip-flops | 80 | 123 |
+
+Doubling the transform size increases generic synthesis cells by 349 (57.9%) and flip-flops by 43 (53.8%). Latency increases from 37 to 99 cycles — close to, but not exactly, proportional to the increase in butterfly operations (12 to 32, a 2.67× increase, versus a 2.68× latency increase), since both include the same fixed one-cycle load overhead.
+
+Module-level cell counts (from the same reports) show where this overhead comes from:
+
+| Module | N=8 baseline | N=16 implementation |
+|---|---:|---:|
+| Controller | 117 | 151 |
+| Twiddle ROM | 7 | 16 |
+| Coefficient memory | 242 | 548 |
+| Modular arithmetic (combined) | 237 | 237 |
+
+Most of the added cells are in the coefficient memory: its read ports (`mem[lo]`, `mem[hi]`) become 16-to-1 multiplexers instead of 8-to-1, and its storage doubles from 40 to 80 flip-flops — accounting for all 43 of the design's added flip-flops together with the controller's 3 extra address-bit registers (`bidx`, `lo_reg`, `hi_reg` each gain one bit: 40→43 controller flip-flops). The controller and twiddle ROM grow modestly for the same reason — wider addresses and twiddle exponents — while the shared butterfly datapath and modular arithmetic are reused unchanged. As in Experiment 1, per-module counts are not strictly additive to the design total, since Yosys optimizes each module in the context of the whole design.
+
+These figures are generic synthesis results rather than target-specific FPGA resource estimates. Physical timing and maximum operating frequency were not evaluated.
+
+**Run commands**
+
+```bash
+# Python mathematical validation
+cd experiments/ntt16/reference
+python3 ntt16_reference_model.py
+python3 ntt16_math_validation.py
+
+# RTL verification
+cd ../../..
+bash scripts/run_ntt16.sh
 
 # Full regression
 bash scripts/run_all_experiments.sh

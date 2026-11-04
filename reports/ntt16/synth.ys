@@ -1,0 +1,14 @@
+# Generic (technology-independent) synthesis of the N=16 ntt_top16 for a
+# gate/cell-count comparison against the N=8 baseline, under the same flow
+# and settings. No FPGA target or timing library is used, so this produces
+# generic synthesis statistics only -- no LUT/FF/BRAM counts and no timing
+# (Fmax / critical path) are available from this flow.
+read_verilog -sv ../../rtl/modular_arithmetic.v
+read_verilog -sv ../../rtl/butterfly_datapath.v
+read_verilog -sv ../../experiments/ntt16/rtl/twiddle_rom16.v
+read_verilog -sv ../../experiments/ntt16/rtl/coefficient_memory16.v
+read_verilog -sv ../../experiments/ntt16/rtl/ntt_controller16.v
+read_verilog -sv ../../experiments/ntt16/rtl/ntt_top16.v
+hierarchy -top ntt_top16
+synth -top ntt_top16
+stat
