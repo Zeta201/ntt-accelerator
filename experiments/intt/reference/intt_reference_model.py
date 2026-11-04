@@ -7,8 +7,8 @@ import random
 Q = 17
 OMEGA = 9
 N = 8
-OMEGA_INV = pow(OMEGA, Q - 2, Q)  # 2, via Fermat's little theorem (Q is prime)
-N_INV = pow(N, Q - 2, Q)          # 15
+OMEGA_INV = pow(OMEGA, Q - 2, Q)
+N_INV = pow(N, Q - 2, Q)
 
 
 def direct_idft(X):

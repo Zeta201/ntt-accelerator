@@ -26,7 +26,7 @@ def check(cond, msg):
 
 
 def verify_omega_order():
-    """Verify the multiplicative order and power table of omega."""
+    """Verify that omega has order 16 and check its power table."""
     powers = [pow(OMEGA, i, Q) for i in range(N + 1)]
     expected = [1, 3, 9, 10, 13, 5, 15, 11, 16, 14, 8, 7, 4, 12, 2, 6, 1]
     check(powers == expected,
@@ -84,7 +84,7 @@ def verify_schedule():
             check(0 <= texp <= N - 1,
                   f"stage {s}: twiddle exponent {texp} out of ROM range 0..{N - 1} for pair ({lo},{hi})")
             check(texp <= 7,
-                  f"stage {s}: twiddle exponent {texp} exceeds the algebraic bound N/2-1=7 for pair ({lo},{hi})")
+                  f"stage {s}: twiddle exponent {texp} exceeds the maximum exponent used by this DIF schedule")
             check(hi == lo + ((N // 2) >> s), f"stage {s}: pair ({lo},{hi}) distance is not {(N // 2) >> s}")
 
     return schedule
@@ -151,7 +151,7 @@ def recursive_dif(x, w=OMEGA):
 
 
 def verify_dif_against_recursive(x):
-    """Cross-check the flat DIF schedule against an independently written recursive DIF."""
+    """Compare the flat DIF schedule with an independent recursive implementation."""
     schedule = dif_schedule_pairs()
     intermediates, final_bitrev, natural = dif_transform(x, schedule)
 
@@ -208,7 +208,7 @@ def read_vector_file(path, label):
 
 
 def _report_vector_mismatch(name, source_label, natural, other):
-    """Format a coefficient mismatch report."""
+    """Format a report identifying mismatched coefficients."""
     diffs = [(k, natural[k], other[k]) for k in range(N) if natural[k] != other[k]]
     return (f"{name}: computed result does not match {source_label}; "
             f"mismatched position(s) [(index, computed, {source_label})]={diffs}; "
@@ -216,7 +216,7 @@ def _report_vector_mismatch(name, source_label, natural, other):
 
 
 def verify_against_test_vectors(vecdir):
-    """Validate test vector files against independent NTT results."""
+    """Validate the test vectors against independently computed NTT results."""
     if not os.path.isdir(vecdir):
         check(False, f"test_vectors directory does not exist: {vecdir} "
                       f"(run 'python3 ntt16_reference_model.py' to generate it)")
@@ -261,13 +261,7 @@ def verify_against_test_vectors(vecdir):
 
 
 def verify_modular_arithmetic_reused():
-    """Re-confirm the baseline's exhaustive mod-17 arithmetic identities.
-
-    The N=16 experiment reuses rtl/modular_arithmetic.v unchanged (operands
-    stay in 0..16 regardless of N), so this re-checks the same hardware
-    reduction identities the baseline already verifies exhaustively, rather
-    than assuming they still hold.
-    """
+    """Re-verify the exhaustive mod-17 arithmetic identities used by the hardware."""
     n = 0
     for a in range(17):
         for b in range(17):
@@ -300,7 +294,7 @@ def main():
     for s, pairs in enumerate(schedule):
         print(f"stage {s} (distance {(N // 2) >> s}): {pairs}")
 
-    print("\n=== 4/5: bit-reversal mapping ===")
+    print("\n=== 4: bit-reversal mapping ===")
     verify_bitrev4()
     print(f"bitrev4 table (i -> bitrev4(i)): {_BITREV4_TABLE}")
 
@@ -308,14 +302,13 @@ def main():
     print(f"reading existing files from {vecdir}; run 'python3 ntt16_reference_model.py' "
           f"separately to (re)generate them -- validation never regenerates or repairs them")
     n_checked = verify_against_test_vectors(vecdir)
-    print(f"checked {n_checked} existing test vector pairs: DIF intermediates (independently "
-          f"cross-derived via a separate recursive implementation), final DIF vs direct NTT, "
-          f"and vs the on-disk expected files")
+    print(f"checked {n_checked} existing vector pairs: recursive DIF cross-check, "
+          f"direct NTT comparison, and expected-output comparison")
 
     print("\n=== 7: exhaustive modular arithmetic (add/sub/mul), re-confirmed for reuse ===")
     n_pairs = verify_modular_arithmetic_reused()
-    print(f"checked {n_pairs} (a,b) pairs (a,b in 0..16) for mod_add, mod_sub, and mod_mul, "
-          f"each against Python's native % as the independent reference")
+    print(f"checked {n_pairs} operand pairs for modular addition, subtraction, and "
+          f"multiplication against Python's modulo operator")
 
     print(f"\n=== summary ===")
     print(f"total individual checks executed: {check_count}")

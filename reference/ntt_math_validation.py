@@ -184,7 +184,7 @@ def independent_stage3(stage2_bank):
 
 
 def verify_dif_against_independent_derivations(x):
-    """Cross-check the DIF stages against independent derivations."""
+    """Cross check the DIF stages against independent derivations."""
     schedule = dif_schedule_pairs()
     intermediates, final_bitrev, natural = dif_transform(x, schedule)
 

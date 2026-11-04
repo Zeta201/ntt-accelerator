@@ -2,12 +2,13 @@
 """Validate the INTT mathematics, hardware schedule model, and on-disk test vectors."""
 
 import os
+import random
 import sys
 
 import intt_reference_model as intt_ref
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "reference"))
-import ntt_reference_model as fwd_ref  # noqa: E402
+import ntt_reference_model as fwd_ref
 
 Q = 17
 OMEGA = 9
@@ -63,9 +64,9 @@ def bitrev3(i):
 
 
 def hw_intt_network(X):
-    """Model the hardware's INTT datapath: same DIF network and schedule as
-    the forward transform, natural-order input, inverse twiddles, the same
-    bitrev3 output read, and a final N^-1 scaling pass over all 8 locations."""
+    """Model the hardware INTT datapath using the forward DIF schedule,
+    inverse twiddles, and bit-reversed output read, followed by N^-1
+    normalization of all eight coefficients modulo Q."""
     bank = list(X)
     for stage in range(3):
         new = [None] * 8
@@ -85,7 +86,6 @@ def hw_intt_network(X):
 
 def verify_hw_schedule_model():
     """Verify the hardware INTT schedule model against the direct inverse definition."""
-    import random
     rng = random.Random(7)
     for _ in range(500):
         X = [rng.randint(0, 16) for _ in range(8)]
@@ -96,8 +96,7 @@ def verify_hw_schedule_model():
 
 
 def verify_round_trips():
-    """Verify INTT(NTT(x)) == x and NTT(INTT(X)) == X for many vectors."""
-    import random
+    """Verify both NTT and INTT round-trip identities using 500 random vectors."""
     rng = random.Random(11)
     for _ in range(500):
         x = [rng.randint(0, 16) for _ in range(8)]

@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
-"""Render PNG waveform screenshots from waves/ntt_top.vcd via headless Chrome.
+"""Render PNG waveform screenshots from the NTT VCD using headless Chrome.
 
-Parses the actual VCD produced by dump_waveforms.v (no external VCD library
-is available in this environment), builds per-signal value timelines from
-the real recorded transitions, lays them out as SVG, and rasterizes each
-view with headless Chrome. Every value shown is read from the VCD; nothing
-is invented or approximated.
+Parse recorded signal transitions, generate SVG waveform views, and
+rasterize them as PNG images.
 """
 
 import os
@@ -141,9 +138,7 @@ def render_view(name_to_id, id_to_width, id_to_timeline,
     def x_of(t):
         return LABEL_W + LEFT_PAD + (t - t_start) * px_per_unit
 
-    # time axis ticks every clk period (10 units); label only every Nth
-    # tick, skipping as many as needed to keep adjacent labels from
-    # overlapping at the current zoom level.
+    # Label every Nth clock tick to avoid overlapping timestamps.
     tick = 10
     min_label_gap_px = 34
     ticks_per_label = max(1, -(-min_label_gap_px // max(1, int(tick * px_per_unit))))
@@ -234,8 +229,7 @@ def main():
 
     views = []
 
-    # (A) Complete execution: clk, rst, start, busy, done, plus state/stage/
-    # bidx so the stage progression and completion are visible in one view.
+    # Complete transform, including control signals and stage progression.
     views.append((
         "ntt_top: complete transform (x = [1,2,3,4,5,6,7,8])",
         0, 440, 1.6,
@@ -252,8 +246,7 @@ def main():
         "ntt-complete-execution",
     ))
 
-    # (B) Butterfly operation: stage 0, bidx 1 (t=86..116), already-loaded
-    # operands, no undefined regions.
+    # One butterfly operation, showing its READ, COMPUTE, and WRITE phases.
     views.append((
         "ntt_controller: one butterfly, READ / COMPUTE / WRITE (stage 0, bidx 1)",
         86, 116, 9.0,
@@ -274,8 +267,7 @@ def main():
         "butterfly-operation",
     ))
 
-    # (C) Modular arithmetic datapath: same butterfly (stage 0, bidx 1) as
-    # view B, zoomed into mod_add / mod_sub / mod_mul's own ports.
+    # Modular arithmetic signals for the butterfly shown above.
     views.append((
         "butterfly_datapath: modular arithmetic (mod_add, mod_sub, mod_mul)",
         86, 116, 9.0,
