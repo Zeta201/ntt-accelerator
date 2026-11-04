@@ -767,7 +767,7 @@ It validates:
 - The radix-2 DIF butterfly schedule.
 - The bit-reversal permutation.
 - The modular arithmetic operations.
-- The on-disk test vectors in `reference/test_vectors/`, checking each one's expected output against both the direct NTT definition and independently-derived DIF computations.
+- The on-disk test vectors in `reference/test_vectors/`, checking each one's expected output against both the direct NTT definition and independently derived DIF computations.
 
 This establishes that the mathematical conventions and expected intermediate values used by the project are internally consistent. It does not read `reference/stage_checkpoints/`; those files are consumed only by `tb_ntt_top.v` for the RTL-level intermediate-stage checks described below.
 
@@ -802,7 +802,7 @@ The intermediate-stage checks are particularly useful because they can identify 
 The remaining testbenches check behavior that is not covered by the normal transform-vector sweep.
 
 - `tb/tb_control.v` tests reset behavior, start-edge detection, and the `busy`/`done` handshake.
-- `tb/tb_negative.v` tests that its own file-reading logic (not the RTL) correctly classifies missing, malformed, wrong-count, and out-of-range input fixtures as setup errors — the hardware itself does not parse or validate input files. Separately, it verifies that the DUT's `done` output never asserts and the FSM stays in `IDLE` during a bounded polling window while reset is held.
+- `tb/tb_negative.v` tests that its own file-reading logic (not the RTL) correctly classifies missing, malformed, wrong-count, and out-of-range input fixtures as setup errors. The hardware itself does not parse or validate input files. Separately, it verifies that the DUT's `done` output never asserts and the FSM stays in `IDLE` during a bounded polling window while reset is held.
 
 Together, these tests cover both normal operation and the handling of invalid or incomplete test inputs.
 
@@ -811,7 +811,7 @@ Together, these tests cover both normal operation and the handling of invalid or
 Compiles and runs all four testbenches against `rtl/` in order and
 aggregates pass/fail, using the command shown above. The script resolves
 the repository root from its own location and changes into it before
-running, so it can be invoked from any working directory — for example,
+running, so it can be invoked from any working directory. For example,
 `bash /path/to/ntt_accelerator/scripts/run_all_tests.sh` from elsewhere
 works the same way. This matters because the testbenches open fixture
 and vector files using paths relative to the repository root, which the
@@ -1086,7 +1086,7 @@ stat
 
 Each experiment's `reports/<name>/synth.ys` follows the same flow, loading that experiment's own RTL files (plus the unmodified baseline files it reuses) and selecting its own top module (`ntt_top`, `ntt_top16`, or `ntt_top_pipelined`). Running `bash scripts/run_synthesis.sh` executes all four `synth.ys` scripts and regenerates their `synth_report.txt` files.
 
-No FPGA or ASIC target, timing constraints, or technology library is specified. The reported results are therefore generic synthesis cell counts, not device-specific LUT, BRAM, or DSP utilization, ASIC physical area, critical-path delay, maximum operating frequency, or power consumption — none of these were measured.
+No FPGA or ASIC target, timing constraints, or technology library is specified. The reported results are therefore generic synthesis cell counts, not device-specific LUT, BRAM, or DSP utilization, ASIC physical area, critical-path delay, maximum operating frequency, or power consumption. None of these were measured.
 
 Raw reports are stored under `reports/`. The same synthesis settings are used for baseline and experimental comparisons.
 
@@ -1146,7 +1146,7 @@ Both implementations were synthesized using the same generic Yosys flow (`synth 
 
 The INTT implementation uses 70 more generic synthesis cells than the baseline, an increase of 11.6%. This comprises 53 additional combinational cells, 12 additional multiplexers, and 5 additional flip-flops. Forward-transform correctness and latency remain unchanged. The existing butterfly datapath and coefficient memory are reused, so no separate arithmetic datapath is required. Inverse-transform latency increases by 24 cycles because normalization is performed sequentially.
 
-These five additional flip-flops are associated with the inverse-mode register (`mode_reg`), normalization control (`phase`), and the 3-bit normalization index (`nidx`) — the only new registers declared in the controller. No additional sequential datapath registers are required.
+These five additional flip-flops are associated with the inverse-mode register (`mode_reg`), normalization control (`phase`), and the 3-bit normalization index (`nidx`), the only new registers declared in the controller. No additional sequential datapath registers are required.
 
 The module-level synthesis results show where the additional cells are used:
 
@@ -1195,10 +1195,10 @@ For $q=17$ and $N=16$:
 
 The implementation, kept entirely under `experiments/ntt16/` with the baseline and INTT experiment untouched, adds:
 
-- `coefficient_memory16.v` — a 16-entry coefficient memory, doubling the storage and widening the read/write addresses from 3 to 4 bits.
-- `twiddle_rom16.v` — a 16-entry twiddle ROM addressed by a 4-bit exponent, compared with the baseline's 8-entry ROM and 3-bit address.
-- `ntt_controller16.v` — generalizes the baseline's shift-and-mask address generation to four stages and eight butterflies per stage, using a 3-bit butterfly index.
-- `ntt_top16.v` — follows the same assembly pattern as `ntt_top.v`, with an 80-bit coefficient bus and 4-bit output bit reversal, compared with 40 bits and 3-bit reversal in the baseline.
+- `coefficient_memory16.v`: a 16-entry coefficient memory, doubling the storage and widening the read/write addresses from 3 to 4 bits.
+- `twiddle_rom16.v`: a 16-entry twiddle ROM addressed by a 4-bit exponent, compared with the baseline's 8-entry ROM and 3-bit address.
+- `ntt_controller16.v`: generalizes the baseline's shift-and-mask address generation to four stages and eight butterflies per stage, using a 3-bit butterfly index.
+- `ntt_top16.v`: follows the same assembly pattern as `ntt_top.v`, with an 80-bit coefficient bus and 4-bit output bit reversal, compared with 40 bits and 3-bit reversal in the baseline.
 
 `butterfly_datapath.v` and `modular_arithmetic.v` are reused unchanged directly from `rtl/`. Both operate on operands in the canonical range 0–16, regardless of transform size, so increasing $N$ does not require changes to the arithmetic datapath.
 
@@ -1247,7 +1247,7 @@ The module-level cell counts show how this overhead is distributed:
 | Modular arithmetic (combined) | 237 | 237 |
 | Total | 603 | 952 |
 
-Unlike Experiment 1, these module counts add up exactly to the reported design totals in both cases, with no synthesis-context-dependent drift.
+Unlike Experiment 1, these module counts add up exactly to the reported design totals in both cases. They do not drift depending on the synthesis context.
 
 The largest increase occurs in the coefficient memory module. Its storage doubles from 40 to 80 bits, while its read ports (`mem[lo]` and `mem[hi]`) require larger 16-to-1 multiplexers instead of the baseline's 8-to-1 multiplexers.
 
@@ -1286,9 +1286,9 @@ Investigate whether pipelining the $N=8$ forward butterfly datapath reduces exec
 
 Within each DIF stage, the four butterflies access disjoint coefficient-address pairs. This allows a new butterfly to be issued every cycle while earlier butterflies are still in flight. The pipeline has three stages, corresponding to the baseline's `READ`, `COMPUTE`, and `WRITE` phases, but overlaps their execution:
 
-1. **Issue** — generates the address and twiddle exponent for the next butterfly using the same combinational formulas as the baseline's `ntt_controller.v`. The operands, twiddle factor, and destination addresses are registered.
-2. **Compute** — the reused `butterfly_datapath.v` combinationally computes `u` and `v` from the registered operands and twiddle factor.
-3. **Write** — writes `u` and `v` to their destination addresses, with writes enabled only for valid pipeline entries.
+1. **Issue**: generates the address and twiddle exponent for the next butterfly using the same combinational formulas as the baseline's `ntt_controller.v`. The operands, twiddle factor, and destination addresses are registered.
+2. **Compute**: the reused `butterfly_datapath.v` combinationally computes `u` and `v` from the registered operands and twiddle factor.
+3. **Write**: writes `u` and `v` to their destination addresses, with writes enabled only for valid pipeline entries.
 
 A valid bit is carried at each register boundary (`valid1` after issue and `valid2` after compute) and advances with the corresponding data. `write_enable` is driven directly by `valid2`, preventing invalid pipeline entries from modifying coefficient memory.
 
@@ -1354,7 +1354,7 @@ $$
 
 The measured improvement reduces execution latency from 37 to 16 cycles, giving a **2.31× speedup**. This approaches the 3× asymptotic throughput improvement expected from overlapping the three baseline operations, although pipeline fill and drain overhead and the single required stall limit the improvement for this 12-butterfly transform.
 
-**Synthesis and hardware-resource evaluation**
+**Synthesis and hardware resource evaluation**
 
 Both implementations were synthesized using the same generic Yosys flow (`synth -top <top>; stat`).
 
