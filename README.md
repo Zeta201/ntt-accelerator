@@ -1107,191 +1107,93 @@ For other moduli, this specific reduction is not generally applicable. Supportin
 
 ## Experiments and evaluation
 
-Everything above this section documents the required 8-point forward NTT
-submission. This section documents additional, optional experiments built
-on top of that baseline, kept in `experiments/` so the baseline RTL in
-`rtl/` stays untouched and independently verifiable. Experiments are
-implemented and verified one at a time; this README section is updated only
-for experiments that have actually been completed, verified, and committed.
+The baseline implementation documented above is the required 8-point forward NTT accelerator. The following experiments extend it independently. All experimental RTL is kept under `experiments/`; the original baseline under `rtl/` remains unchanged.
 
-### Baseline implementation
+Each experiment is implemented, verified, evaluated, and committed separately.
 
-The baseline is the forward-only 8-point NTT accelerator documented in the
-rest of this README: `N=8`, `q=17`, `ω=9`, a single shared butterfly
-datapath, a 5-state FSM (`IDLE`/`LOAD`/`READ`/`COMPUTE`/`WRITE`), 37 busy
-cycles per transform, 5363 RTL verification checks and 3579 independent
-Python mathematical checks, both at 0 failures. See
-[Architecture](#architecture), [Transform execution](#transform-execution),
-and [Verification results](#verification-results) for the full
-documentation; it is not repeated here.
+### Synthesis methodology
+
+All designs use the same generic Yosys synthesis flow:
+
+```text
+hierarchy -top ntt_top
+synth -top ntt_top
+stat
+```
+
+No FPGA or ASIC target, timing constraints, or technology library is specified. Therefore, the reported results are generic synthesis statistics, not device-specific LUT, BRAM, or DSP utilization. Critical-path delay and maximum frequency are not measured.
+
+Raw reports are stored under `reports/`. The same synthesis settings are used for baseline and experimental comparisons.
 
 ### Experiment 1: Inverse NTT (INTT)
 
-**Objective.** Add inverse-transform support (`INTT`) to the accelerator
-while leaving the forward transform's RTL, behavior, and verification
-results completely unchanged, and reusing the existing butterfly datapath
-and memory ports rather than duplicating hardware.
+**Objective**
 
-**Implementation.** The inverse transform turned out to be computable with
-the *same* DIF network, the *same* address schedule, and the *same*
-butterfly shape as the forward transform — only the twiddle source and one
-extra post-processing pass differ. This was derived and verified in Python
-before any RTL was written: feeding the frequency-domain coefficients `X`
-in natural order through the unmodified forward schedule, using inverse
-twiddles (`ω⁻¹=2`) instead of forward twiddles, reading the result through
-the same `bitrev3` output mapping, and scaling every coefficient by
-`N⁻¹=15 mod 17`, exactly reproduces the direct inverse-DFT definition
-(verified against 500 random vectors before touching RTL).
+Extend the accelerator to support inverse NTT while preserving forward-transform behavior and minimizing additional hardware through reuse of the existing butterfly datapath and coefficient memory.
 
-Three new files implement this, kept in `experiments/intt/rtl/` rather than
-modifying `rtl/`:
+**Design changes**
 
-- `twiddle_rom.v` — adds an `inv` select input and a second ROM table
-  (`ω⁻¹` powers: `[1,2,4,8,16,15,13,9]`) alongside the unchanged forward
-  table.
-- `ntt_controller.v` — adds an `inv` input, a `mode_reg` (captured once, at
-  the accepted-start edge, exactly like the existing start-pulse
-  edge-detection — so changing `inv` while busy cannot affect an in-flight
-  transform), and a `phase`/`nidx` pair implementing one extra pass after
-  the 12 inverse butterflies: `phase=1` revisits all 8 memory locations
-  (`nidx=0..7`), and for each one drives the *same* `a_reg`/`b_reg`/`tw_reg`
-  registers and the *same* `butterfly_datapath` instance with
-  `(mem[nidx], 0, 15)`. With `b=0`, the datapath's two outputs are **not**
-  equal: `u = a+b = mem[nidx]` (the unscaled value) and
-  `v = (a-b)×tw = mem[nidx]×15 mod 17` (the scaled value) — `u` and `v`
-  only differ by a factor of 15, so they are not interchangeable. The
-  controller's `S_COMPUTE` logic explicitly accounts for this: in
-  normalization mode it registers `v_c` into **both** `u_reg` and `v_reg`
-  (`u_reg <= phase ? v_c : u_c;`), discarding the datapath's own `u_c`
-  rather than using it. Only because of that explicit override are
-  `u_reg` and `v_reg` guaranteed identical before the write; the result is
-  then committed through the existing two-port memory write
-  (`lo_reg=hi_reg=nidx`), which is race-free because both ports present
-  the same data, not because the datapath happened to produce matching
-  outputs on its own. This was traced in simulation for a concrete
-  nontrivial value (`x=3` at a memory location, forced via direct
-  hierarchical assignment): the datapath computed `u_c=3, v_c=11`
-  exactly as the raw equations predict, the controller's override placed
-  `11` in both `u_reg` and `v_reg`, and `mem[nidx]` ended up `11`
-  (`15×3 mod 17`), confirming the override — not the arithmetic alone —
-  is what makes this correct.
-- `ntt_top.v` — adds the `inv` port and wires it through; otherwise
-  identical to `rtl/ntt_top.v`.
+The inverse transform uses the same DIF butterfly schedule and address generation as the forward transform, with inverse twiddle factors and a final normalization pass.
 
-`coefficient_memory.v`, `butterfly_datapath.v`, and `modular_arithmetic.v`
-are reused unchanged directly from `rtl/`.
+For $q=17$ and $N=8$:
 
-Forward-mode behavior (`inv=0`) is unchanged by construction: the
-`phase`/`nidx` extension only activates `if (mode_reg)` at the point where
-the baseline FSM would otherwise assert `done`, so the forward path's
-states, transitions, and 37-cycle latency are bit-for-bit identical to the
-baseline.
+- Inverse primitive root: $\omega^{-1}=2$.
+- Normalization factor: $N^{-1}=15 \pmod{17}$.
+- Inverse twiddle table: `[1, 2, 4, 8, 16, 15, 13, 9]`.
 
-**Verification.** Two independent layers, mirroring the baseline's
-structure:
+The implementation adds:
 
-- `experiments/intt/reference/intt_math_validation.py`: verifies
-  `ω⁻¹=2` and `N⁻¹=15`, the inverse twiddle table, the hardware schedule
-  model against the direct inverse-DFT definition (500 random vectors),
-  round-trip identities `INTT(NTT(x))=x` and `NTT(INTT(X))=X` (500 vectors
-  each), and the 31 on-disk INTT test vectors — **1661 checks, 0
-  failures**.
-- `experiments/intt/tb/tb_intt.v`: forward-mode regression (the INTT-capable
-  `ntt_top` reproduces all 31 baseline forward vectors and the exact
-  37-cycle latency), the 31 independently-generated INTT vectors (checked
-  against the 61-cycle latency and the Python reference), 16 round-trip
-  vectors, operation-mode stability while busy, start-pulse-while-busy
-  immunity, reset recovery mid-normalization-phase, and an explicit
-  per-location check that all 8 in-place memory locations individually
-  hold `coefficient × 15 mod 17` after a real (non-forced) inverse
-  transform of a nontrivial vector — **335 checks, 0 failures**.
+- An inverse-mode input captured when a transform starts.
+- An inverse twiddle table in the twiddle ROM.
+- A normalization phase that scales all eight output coefficients by 15.
 
-A deliberate testbench bug was found and fixed during this work: the
-initial `run_transform` task checked `done` immediately after a clock edge
-without the settling delay this project's other testbenches consistently
-use, and separately, `cycle_count` was never explicitly initialized,
-leaving it `X` at simulation start. Both were root-caused by tracing a
-minimal single-call reproduction rather than guessing, fixed, and
-re-verified; this did not require any RTL change.
+During normalization, the controller selects the butterfly's `v` output for both memory write ports. This is necessary because the ordinary `u` output is unscaled, whereas `v` contains the required multiplication by 15 modulo 17.
 
-**Evaluation.**
+The existing butterfly datapath, modular arithmetic, and coefficient memory are reused. The changes are isolated in `experiments/intt/rtl/`; the baseline RTL is not modified.
 
-| Metric | Baseline (forward only) | INTT-capable |
+**Verification**
+
+The implementation was checked using an independent Python reference model and RTL simulation.
+
+| Verification | Result |
+|---|---:|
+| Python mathematical validation | 1,661 checks, 0 failures |
+| RTL verification | 335 checks, 0 failures |
+| Forward test vectors | 31/31 passed |
+| Inverse test vectors | 31/31 passed |
+| Round-trip tests | 16/16 passed |
+| Normalization checks | All 8 memory locations verified |
+
+The tests also cover operation-mode stability, start requests while busy, and reset during normalization.
+
+**Results**
+
+| Metric | Baseline | INTT implementation |
 |---|---:|---:|
-| Forward latency | 37 busy cycles | 37 busy cycles (unchanged) |
-| Inverse latency | N/A | 61 busy cycles (1 `LOAD` + 36 butterfly + 24 normalization) |
-| New FSM states | — | 0 (reuses `READ`/`COMPUTE`/`WRITE`) |
-| New registers | — | `mode_reg` (1 bit), `phase` (1 bit), `nidx` (3 bits) |
-| Synthesized cells (generic, Yosys) | 603 | 673 (+70, +11.6%) |
-| Synthesized flip-flops | 80 | 85 (+5, exactly matching the new register bits above) |
-| `coefficient_memory` cells | 242 | 242 (+0, confirmed unmodified) |
-| LUT / FF / BRAM (target-mapped) | Not measured | Not measured |
-| Critical-path delay / max frequency | Not measured | Not measured |
+| Forward latency | 37 cycles | 37 cycles |
+| Inverse latency | — | 61 cycles |
+| Generic synthesis cells | 603 | 673 |
+| Flip-flops | 80 | 85 |
+| Forward correctness | Passed | Passed |
+| Inverse correctness | — | Passed |
 
-No FPGA place-and-route or static-timing tool is available in this
-environment (checked directly: no `nextpnr-ice40`, `nextpnr-ecp5`, `sta`,
-or `opensta`), so only generic, technology-independent Yosys synthesis
-statistics are reported; see
-[`reports/synthesis_methodology.md`](reports/synthesis_methodology.md) for
-the full methodology, exact commands, and raw reports. These are not FPGA
-resource counts and no timing claim is made.
+The INTT extension adds 70 generic synthesis cells (11.6%) and 5 flip-flops. Forward-transform correctness and latency remain unchanged. The inverse transform reuses the existing butterfly datapath and coefficient memory, avoiding duplicated arithmetic hardware. The main trade-off is the additional 24 cycles required for sequential normalization.
 
-**Reproduction.**
+**Run commands**
 
 ```bash
-cd ntt_accelerator
-
-# Independent Python validation
+# Python mathematical validation
 cd experiments/intt/reference
-python3 intt_reference_model.py        # (re)generates test_vectors/
+python3 intt_reference_model.py
 python3 intt_math_validation.py
 
-# RTL verification (just this experiment)
+# RTL verification
 cd ../../..
-bash experiments/intt/scripts/run_intt_tests.sh
+bash scripts/run_intt.sh
 
-# Baseline + this experiment together
+# Full regression
 bash scripts/run_all_experiments.sh
 
-# Waveform capture and screenshots
-iverilog -g2001 -Wall -o /tmp/intt_dump.vvp \
-    rtl/modular_arithmetic.v rtl/butterfly_datapath.v rtl/coefficient_memory.v \
-    experiments/intt/rtl/twiddle_rom.v experiments/intt/rtl/ntt_controller.v experiments/intt/rtl/ntt_top.v \
-    experiments/intt/waves/dump_intt_waveforms.v
-vvp /tmp/intt_dump.vvp
-python3 experiments/intt/waves/render_intt_waveforms.py
-
-# Synthesis (generic Yosys statistics; see reports/synthesis_methodology.md)
-cd reports/baseline && yosys -s synth.ys
-cd ../intt && yosys -s synth.ys
+# Synthesis comparison
+bash scripts/run_synthesis.sh
 ```
-
-**Waveform evidence.** Captured the same way as the baseline waveforms
-(real simulation, VCD parsed and rendered to SVG/PNG, no hand-drawn
-diagrams): a round trip through the worked-example vector
-(`x=[1,2,3,4,5,6,7,8]`, forward then inverse), and a zoom into the
-normalization phase.
-
-![INTT round-trip execution](experiments/intt/docs/images/intt-complete-execution.png)
-
-This shows `inv` asserted for the second (inverse) leg, `busy` staying high
-for the longer 61-cycle duration, and `phase` rising partway through to
-mark the start of normalization; `nidx` then counts 0 through 7.
-
-![INTT normalization phase](experiments/intt/docs/images/intt-normalization-phase.png)
-
-This shows the 8-location normalization pass: `state` cycling through
-`READ`/`COMPUTE`/`WRITE` once per location (reusing the same states the
-butterflies use), `tw_reg` fixed at 15 (`N⁻¹`) with `b_reg` fixed at 0, and
-`write_enable` pulsing once per location.
-
-**Results and comparison with baseline.** The baseline's forward-only
-behavior is unchanged: the same 31 test vectors, the same 37-cycle latency,
-the same 5363+3579 verification checks, all still passing (confirmed by
-rerunning `scripts/run_all_tests.sh` after this experiment, with `rtl/`
-untouched). The INTT extension adds a real, independently-verified inverse
-transform at the cost of +70 generic synthesis cells (+11.6%) and exactly
-5 new flip-flops, with zero new FSM states and zero duplicated arithmetic
-hardware — the entire inverse capability is implemented as a different
-twiddle-ROM table and 8 extra passes through the existing shared
-butterfly datapath.
