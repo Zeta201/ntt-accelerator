@@ -1247,9 +1247,7 @@ The module-level cell counts show how this overhead is distributed:
 | Modular arithmetic (combined) | 237 | 237 |
 | Total | 603 | 952 |
 
-Unlike Experiment 1, these module counts add up exactly to the reported design totals in both cases. They do not drift depending on the synthesis context.
-
-The largest increase occurs in the coefficient memory module. Its storage doubles from 40 to 80 bits, while its read ports (`mem[lo]` and `mem[hi]`) require larger 16-to-1 multiplexers instead of the baseline's 8-to-1 multiplexers.
+The largest increase occurs in the coefficient memory module. Its storage doubles from 40 to 80 bits, and its read ports (`mem[lo]` and `mem[hi]`) must select among 16 entries instead of 8, increasing read-selection logic accordingly. (Yosys is free to implement this selection however it maps most efficiently, so this does not necessarily correspond to a literal 16-to-1 multiplexer primitive in the synthesized netlist.)
 
 The 43 additional flip-flops are accounted for by two sources, confirmed directly in the synthesized netlist. The coefficient memory's flip-flop count increases from 40 to 80, accounting for 40 additional flip-flops. The controller's flip-flop count increases from 40 to 43 because `bidx`, `lo_reg`, and `hi_reg` each require one additional address bit.
 
