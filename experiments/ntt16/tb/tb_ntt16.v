@@ -49,6 +49,7 @@ module tb_ntt16;
 
     integer butterflies_this_transform;
     integer butterflies_total;
+    integer butterflies_main_sweep;
 
     integer first_elapsed_recorded;
     integer first_elapsed_cycles;
@@ -300,6 +301,7 @@ module tb_ntt16;
                         error_count = error_count + 1;
                         $display("FAIL: vector '%0s': expected exactly %0d butterflies, observed %0d", name, TOTAL_BUTTERFLIES, butterflies_this_transform);
                     end
+                    butterflies_main_sweep = butterflies_main_sweep + butterflies_this_transform;
 
                     check_count = check_count + 1;
                     if (first_elapsed_recorded == 0) begin
@@ -486,6 +488,7 @@ module tb_ntt16;
         setup_error_count = 0;
         vectors_checked = 0;
         butterflies_total = 0;
+        butterflies_main_sweep = 0;
         first_elapsed_recorded = 0;
         busy_cycle_accum = 0;
         first_busy_cycles_recorded = 0;
@@ -510,7 +513,8 @@ module tb_ntt16;
         $display("  vectors in manifest        : %0d", n_vectors);
         $display("  vectors actually DUT-tested: %0d", vectors_checked);
         $display("  setup errors               : %0d", setup_error_count);
-        $display("  total butterflies observed : %0d (expected %0d)", butterflies_total, vectors_checked * TOTAL_BUTTERFLIES);
+        $display("  butterflies observed (main vector sweep)  : %0d (expected %0d)", butterflies_main_sweep, vectors_checked * TOTAL_BUTTERFLIES);
+        $display("  butterflies observed (full simulation)    : %0d (includes directed start/reset tests)", butterflies_total);
         $display("  total individual checks    : %0d", check_count);
         $display("  failures                   : %0d", error_count);
 
