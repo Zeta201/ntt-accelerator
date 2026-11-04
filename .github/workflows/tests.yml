@@ -1,4 +1,4 @@
-name: Tests
+name: Verification Suite
 
 on:
   push:
