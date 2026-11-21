@@ -280,10 +280,7 @@ flowchart TB
     input(["coef_in"]) --> mem
     outmap --> output(["coef_out"])
     start(["start"]) -.-> sdet
-    rst(["rst"]) -.->|resets state| fsm
-    rst -.->|resets stage, bidx| cnt
-    rst -.->|resets start_d| sdet
-    rst -.->|resets done; gates load_enable, write_enable| ctrlsig
+    rst(["rst"]) -.->|synchronous, active-high reset| ctrl
     ctrlsig -.-> handshake(["busy, done"])
 ```
 
@@ -301,7 +298,7 @@ The main responsibilities are:
 
 The butterfly datapath has no internal registers. Its inputs and outputs are captured by registers in the controller.
 
-**Reset.** `rst` is a synchronous, active-high input to `ntt_controller` only — `coefficient_memory` has no reset port. On the clock edge after `rst` is asserted, the controller's single always block clears `state` to `S_IDLE`, `stage` to 0, `bidx` to 0, `done` to 0, and `start_d` to 0; these are the only five registers it resets. `a_reg`, `b_reg`, `tw_reg`, `lo_reg`, `hi_reg`, `u_reg`, and `v_reg` are not reset — they simply retain whatever value they last held until a subsequent `READ`/`COMPUTE` overwrites them. `rst` also appears directly in the combinational `load_enable`/`write_enable` expressions, so both are forced low the instant `rst` is asserted rather than only once `state` transitions to `IDLE` on the next edge. See [Reset and handshake behavior](#reset-and-handshake-behavior) for the full handshake table.
+**Reset.** `rst` is a synchronous, active-high input to `ntt_controller` only — `coefficient_memory` has no reset port. The diagram shows it as a single arrow into the `ntt_controller` block rather than wiring it to every internal register individually, since only a subset of the controller's registers are actually reset. On the clock edge after `rst` is asserted, the controller's single always block clears `state` to `S_IDLE`, `stage` to 0, `bidx` to 0, `done` to 0, and `start_d` to 0; these are the only five registers it resets. `a_reg`, `b_reg`, `tw_reg`, `lo_reg`, `hi_reg`, `u_reg`, and `v_reg` are not reset — they simply retain whatever value they last held until a subsequent `READ`/`COMPUTE` overwrites them. `rst` also appears directly in the combinational `load_enable`/`write_enable` expressions, so both are forced low the instant `rst` is asserted rather than only once `state` transitions to `IDLE` on the next edge. See [Reset and handshake behavior](#reset-and-handshake-behavior) for the full handshake table.
 
 ## Transform execution
 
