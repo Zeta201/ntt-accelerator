@@ -226,61 +226,76 @@ Address-generation and twiddle-index generation are shown as separate entries be
 The following diagram shows the main data and control connections.
 
 ```mermaid
-flowchart TB
+flowchart LR
+    start(["start"])
+    rst(["rst"])
+    coefin(["coef_in"])
+
     subgraph top["ntt_top"]
-        direction TB
+        direction LR
 
         subgraph ctrl["ntt_controller"]
-            direction TB
-            sdet["start edge detector<br/>start_d, start_pulse"]
-            fsm["FSM state register<br/>state"]
-            cnt["stage, bidx counters"]
-            addrgen["address generation<br/>half, shift_amt, group, j"]
-            twidgen["twiddle-index generation<br/>twiddle_exp"]
-            rom["twiddle_rom"]
-            aregs["operand registers<br/>a_reg, b_reg, tw_reg"]
-            awregs["address registers<br/>lo_reg, hi_reg"]
-            subgraph datapath["butterfly_datapath"]
-                direction LR
-                add["mod_add"]
-                sub["mod_sub"]
-                mul["mod_mul"]
-                sub -->|diff| mul
-            end
-            rregs["result registers<br/>u_reg, v_reg"]
-            ctrlsig["control-signal generation<br/>busy, load_enable, write_enable (comb.)<br/>done (registered)"]
+            direction LR
 
-            sdet -.->|start_pulse| fsm
-            fsm -.->|advances stage/bidx on WRITE exit| cnt
-            fsm -.-> ctrlsig
+            subgraph ctllogic["Control logic"]
+                direction TB
+                sdet["start edge detector<br/>start_d, start_pulse"]
+                fsm["FSM state register<br/>state"]
+                cnt["stage, bidx counters"]
+                ctrlsig["control-signal generation<br/>busy, load_enable, write_enable (comb.)<br/>done (registered)"]
+                sdet -.->|start_pulse| fsm
+                fsm -.->|WRITE exit| cnt
+                fsm -.-> ctrlsig
+            end
+
+            subgraph addrtwid["Address &amp; twiddle generation"]
+                direction TB
+                addrgen["address generation<br/>half, shift_amt, group, j"]
+                twidgen["twiddle-index generation<br/>twiddle_exp"]
+                rom["twiddle_rom"]
+                twidgen -.->|twiddle_exp| rom
+            end
+
+            subgraph dpregs["Datapath &amp; registers"]
+                direction TB
+                aregs["operand registers<br/>a_reg, b_reg, tw_reg"]
+                awregs["address registers<br/>lo_reg, hi_reg"]
+                subgraph datapath["butterfly_datapath"]
+                    direction LR
+                    add["mod_add"]
+                    sub["mod_sub"]
+                    mul["mod_mul"]
+                    sub -->|diff| mul
+                end
+                rregs["result registers<br/>u_reg, v_reg"]
+                aregs -->|a_reg, b_reg| add
+                aregs -->|a_reg, b_reg| sub
+                aregs -->|tw_reg| mul
+                add -->|u_c| rregs
+                mul -->|v_c| rregs
+            end
+
             cnt -.-> addrgen
             cnt -.-> twidgen
-            twidgen -.->|twiddle_exp| rom
-            rom -->|tw: comb. ROM output| aregs
-            aregs -->|a_reg, b_reg| add
-            aregs -->|a_reg, b_reg| sub
-            aregs -->|tw_reg: captured in READ| mul
-            add -->|u_c| rregs
-            mul -->|v_c| rregs
+            rom -->|tw| aregs
         end
 
         mem["coefficient_memory<br/>mem[0:7]"]
-        outmap["natural-order output mapping<br/>(bit reversal, in ntt_top)"]
+        outmap["natural-order output mapping<br/>(bit reversal)"]
 
-        addrgen -.->|lo, hi: read-port address| mem
-        addrgen -.->|lo, hi: captured in READ| awregs
-        mem -->|a_out, b_out: read data| aregs
-        rregs -->|u_reg, v_reg: write data| mem
-        awregs -.->|lo_reg, hi_reg: write-port address| mem
-        ctrlsig -.->|load_enable| mem
-        ctrlsig -.->|write_enable| mem
+        addrgen -.->|lo, hi| mem
+        addrgen -.->|lo, hi| awregs
+        mem -->|a_out, b_out| aregs
+        rregs -->|u_reg, v_reg| mem
+        awregs -.->|lo_reg, hi_reg| mem
+        ctrlsig -.->|load_enable, write_enable| mem
         mem -->|mem_flat| outmap
     end
 
-    input(["coef_in"]) --> mem
-    outmap --> output(["coef_out"])
-    start(["start"]) -.-> sdet
-    rst(["rst"]) -.->|synchronous, active-high reset| ctrl
+    coefin --> mem
+    start -.-> sdet
+    rst -.-> ctrl
+    outmap --> coefout(["coef_out"])
     ctrlsig -.-> handshake(["busy, done"])
 ```
 
