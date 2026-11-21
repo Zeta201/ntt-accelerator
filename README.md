@@ -226,13 +226,13 @@ Address-generation and twiddle-index generation are shown as separate entries be
 The following diagram shows the main data and control connections.
 
 ```mermaid
-flowchart LR
+flowchart TB
     start(["start"])
     rst(["rst"])
     coefin(["coef_in"])
 
     subgraph top["ntt_top"]
-        direction LR
+        direction TB
 
         subgraph ctrl["ntt_controller"]
             direction LR
