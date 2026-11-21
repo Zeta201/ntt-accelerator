@@ -192,25 +192,36 @@ The `ntt_top` module accepts eight 5-bit input coefficients packed into a 40-bit
 
 The design uses an iterative architecture with a single shared butterfly datapath and one in-place coefficient memory. Rather than instantiating separate arithmetic units for every butterfly, the same datapath is reused for all 12 butterflies across the three NTT stages.
 
-The design consists of two main blocks:
+`ntt_top` instantiates two sub-blocks, `ntt_controller` and `coefficient_memory`, and additionally implements the natural-order output mapping itself:
 
-- **`ntt_controller`**: Controls the transform, generates coefficient addresses and twiddle indices, and schedules the butterfly operations.
-- **`coefficient_memory`**: Stores the input coefficients, intermediate stage results, and final output.
-
-The controller contains the twiddle ROM and the shared butterfly datapath.
+- **`ntt_controller`**: Controls the transform, generates coefficient addresses and twiddle indices, and schedules the butterfly operations. It contains the twiddle ROM and the shared butterfly datapath.
+- **`coefficient_memory`**: Stores the input coefficients, intermediate stage results, and final (bit-reversed) output in one in-place bank.
+- **Natural-order output mapping**: A combinational bit-reversal permutation inside `ntt_top` itself (not inside `coefficient_memory`) that reorders the memory contents into `coef_out`.
 
 ```text
 ntt_top
 ├── ntt_controller
-│   ├── FSM and control registers
+│   ├── start edge detector        (start_d, start_pulse)
+│   ├── FSM state register         (state: IDLE/LOAD/READ/COMPUTE/WRITE)
+│   ├── stage counter              (stage)
+│   ├── butterfly counter          (bidx)
+│   ├── address-generation logic   (half, shift_amt, group, j -> lo, hi)
+│   ├── twiddle-index generation   (j, stage -> twiddle_exp)
 │   ├── twiddle_rom
-│   └── butterfly_datapath
-│       ├── mod_add
-│       ├── mod_sub
-│       └── mod_mul
-└── coefficient_memory
-    └── mem[0:7]  (8 × 5-bit)
+│   ├── operand registers          (a_reg, b_reg, tw_reg)
+│   ├── address registers          (lo_reg, hi_reg)
+│   ├── butterfly_datapath
+│   │   ├── mod_add
+│   │   ├── mod_sub
+│   │   └── mod_mul
+│   ├── result registers           (u_reg, v_reg)
+│   └── control-signal generation  (busy, done, load_enable, write_enable)
+├── coefficient_memory
+│   └── mem[0:7]  (8 × 5-bit, in-place, single-cycle load + dual read/write ports)
+└── natural-order output mapping    (bit-reversal permutation, in ntt_top)
 ```
+
+Address-generation and twiddle-index generation are shown as separate entries because the controller computes them for different purposes (memory addresses versus a ROM index), but they are not independent combinational blocks: the twiddle-index calculation reuses `j` and `stage`, both already produced while computing `lo`/`hi`.
 
 The following diagram shows the main data and control connections.
 
@@ -221,37 +232,59 @@ flowchart TB
 
         subgraph ctrl["ntt_controller"]
             direction TB
-            fsm["FSM and registers"]
+            sdet["start edge detector<br/>start_d, start_pulse"]
+            fsm["FSM state register<br/>state"]
+            cnt["stage, bidx counters"]
+            addrgen["address generation<br/>half, shift_amt, group, j"]
+            twidgen["twiddle-index generation<br/>twiddle_exp"]
             rom["twiddle_rom"]
+            aregs["operand registers<br/>a_reg, b_reg, tw_reg"]
+            awregs["address registers<br/>lo_reg, hi_reg"]
             subgraph datapath["butterfly_datapath"]
                 direction LR
                 add["mod_add"]
                 sub["mod_sub"]
                 mul["mod_mul"]
-                sub --> mul
+                sub -->|diff| mul
             end
-            fsm -.->|twiddle exponent| rom
-            rom -->|twiddle| fsm
-            fsm -->|operands| add
-            fsm -->|operands| sub
-            fsm -->|twiddle| mul
-            add -->|sum result| fsm
-            mul -->|product result| fsm
+            rregs["result registers<br/>u_reg, v_reg"]
+            ctrlsig["control-signal generation<br/>busy, load_enable, write_enable (comb.)<br/>done (registered)"]
+
+            sdet -.->|start_pulse| fsm
+            fsm -.->|advances stage/bidx on WRITE exit| cnt
+            fsm -.-> ctrlsig
+            cnt -.-> addrgen
+            cnt -.-> twidgen
+            twidgen -.->|twiddle_exp| rom
+            rom -->|tw: comb. ROM output| aregs
+            aregs -->|a_reg, b_reg| add
+            aregs -->|a_reg, b_reg| sub
+            aregs -->|tw_reg: captured in READ| mul
+            add -->|u_c| rregs
+            mul -->|v_c| rregs
         end
 
         mem["coefficient_memory<br/>mem[0:7]"]
-        outmap["natural-order output mapping<br/>(bit reversal)"]
-        fsm -.->|read addresses| mem
-        mem -->|coefficient values| fsm
-        fsm -.->|load and write enables, write addresses| mem
-        fsm -->|butterfly results| mem
-        mem -->|bit-reversed contents| outmap
+        outmap["natural-order output mapping<br/>(bit reversal, in ntt_top)"]
+
+        addrgen -.->|lo, hi: read-port address| mem
+        addrgen -.->|lo, hi: captured in READ| awregs
+        mem -->|a_out, b_out: read data| aregs
+        rregs -->|u_reg, v_reg: write data| mem
+        awregs -.->|lo_reg, hi_reg: write-port address| mem
+        ctrlsig -.->|load_enable| mem
+        ctrlsig -.->|write_enable| mem
+        mem -->|mem_flat| outmap
     end
 
     input(["coef_in"]) --> mem
     outmap --> output(["coef_out"])
-    start(["start"]) -.-> fsm
-    fsm -.-> handshake(["busy, done"])
+    start(["start"]) -.-> sdet
+    rst(["rst"]) -.->|resets state| fsm
+    rst -.->|resets stage, bidx| cnt
+    rst -.->|resets start_d| sdet
+    rst -.->|resets done; gates load_enable, write_enable| ctrlsig
+    ctrlsig -.-> handshake(["busy, done"])
 ```
 
 Solid arrows represent coefficient or arithmetic data. Dashed arrows represent control and address signals.
@@ -260,13 +293,15 @@ This diagram describes the baseline implementation in `rtl/`. The experimental i
 
 The main responsibilities are:
 
-- **`ntt_top`** connects the controller and coefficient memory, exposes the external interface, and applies the bit-reversal permutation to produce natural-order output.
-- **`ntt_controller`** contains the FSM, stage and butterfly counters, address and twiddle-index generation logic, and registers used to capture butterfly inputs and outputs.
-- **`coefficient_memory`** is a single in-place bank containing eight 5-bit coefficients. It supports loading all eight inputs and reading or writing the two coefficients involved in a butterfly.
+- **`ntt_top`** connects the controller and coefficient memory, exposes the external interface, wires `coef_in` directly into `coefficient_memory` (the controller never sees the coefficient values, only `load_enable`), and applies the bit-reversal permutation to `coefficient_memory`'s combinational `mem_flat` output to produce natural-order `coef_out`.
+- **`ntt_controller`** contains the start-edge detector, the FSM state register, the `stage`/`bidx` counters, the address- and twiddle-index-generation logic, the twiddle ROM, the operand/address/result registers, the shared butterfly datapath, and the combinational control-signal generation for `busy`/`load_enable`/`write_enable` (`done` is registered alongside `state`).
+- **`coefficient_memory`** is a single in-place bank containing eight 5-bit coefficients. It loads all eight inputs in one clock cycle directly from `coef_in` (an unrolled loop over all eight words in the same always block, gated by `load_enable`; there is no separate load counter), provides two continuously-addressed combinational read ports (`a_out`/`b_out` at `lo`/`hi`), writes two coefficients per cycle (`mem[lo_reg]`, `mem[hi_reg]`) when `write_enable` is asserted, and continuously exposes its full contents as `mem_flat` for `ntt_top`'s output mapping.
 - **`twiddle_rom`** provides the precomputed values of $\omega^e \bmod 17$.
 - **`butterfly_datapath`** contains one shared combinational adder, subtractor, and multiplier. The adder and subtractor operate on the same input pair; the subtraction result is multiplied by the twiddle factor.
 
 The butterfly datapath has no internal registers. Its inputs and outputs are captured by registers in the controller.
+
+**Reset.** `rst` is a synchronous, active-high input to `ntt_controller` only — `coefficient_memory` has no reset port. On the clock edge after `rst` is asserted, the controller's single always block clears `state` to `S_IDLE`, `stage` to 0, `bidx` to 0, `done` to 0, and `start_d` to 0; these are the only five registers it resets. `a_reg`, `b_reg`, `tw_reg`, `lo_reg`, `hi_reg`, `u_reg`, and `v_reg` are not reset — they simply retain whatever value they last held until a subsequent `READ`/`COMPUTE` overwrites them. `rst` also appears directly in the combinational `load_enable`/`write_enable` expressions, so both are forced low the instant `rst` is asserted rather than only once `state` transitions to `IDLE` on the next edge. See [Reset and handshake behavior](#reset-and-handshake-behavior) for the full handshake table.
 
 ## Transform execution
 
