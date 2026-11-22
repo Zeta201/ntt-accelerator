@@ -202,7 +202,7 @@ The design uses an iterative architecture with a single shared butterfly datapat
 ntt_top
 ├── ntt_controller
 │   ├── start edge detector        (start_d, start_pulse)
-│   ├── FSM state register         (state: IDLE/LOAD/READ/COMPUTE/WRITE)
+│   ├── FSM state register         (state: IDLE/LOAD/READ/WRITE)
 │   ├── stage counter              (stage)
 │   ├── butterfly counter          (bidx)
 │   ├── address-generation logic   (half, shift_amt, group, j -> lo, hi)
@@ -210,11 +210,10 @@ ntt_top
 │   ├── twiddle_rom
 │   ├── operand registers          (a_reg, b_reg, tw_reg)
 │   ├── address registers          (lo_reg, hi_reg)
-│   ├── butterfly_datapath
+│   ├── butterfly_datapath         (combinational outputs u_c, v_c feed coefficient_memory directly)
 │   │   ├── mod_add
 │   │   ├── mod_sub
 │   │   └── mod_mul
-│   ├── result registers           (u_reg, v_reg)
 │   └── control-signal generation  (busy, done, load_enable, write_enable)
 ├── coefficient_memory
 │   └── mem[0:7]  (8 × 5-bit, in-place, single-cycle load + dual read/write ports)
@@ -267,12 +266,9 @@ flowchart TB
                     mul["mod_mul"]
                     sub -->|diff| mul
                 end
-                rregs["result registers<br/>u_reg, v_reg"]
                 aregs -->|a_reg, b_reg| add
                 aregs -->|a_reg, b_reg| sub
                 aregs -->|tw_reg| mul
-                add -->|u_c| rregs
-                mul -->|v_c| rregs
             end
 
             cnt -.-> addrgen
@@ -286,7 +282,8 @@ flowchart TB
         addrgen -.->|lo, hi| mem
         addrgen -.->|lo, hi| awregs
         mem -->|a_out, b_out| aregs
-        rregs -->|u_reg, v_reg| mem
+        add -->|u_c| mem
+        mul -->|v_c| mem
         awregs -.->|lo_reg, hi_reg| mem
         ctrlsig -.->|load_enable, write_enable| mem
         mem -->|mem_flat| outmap
@@ -306,14 +303,14 @@ This diagram describes the baseline implementation in `rtl/`. The experimental i
 The main responsibilities are:
 
 - **`ntt_top`** connects the controller and coefficient memory, exposes the external interface, wires `coef_in` directly into `coefficient_memory` (the controller never sees the coefficient values, only `load_enable`), and applies the bit-reversal permutation to `coefficient_memory`'s combinational `mem_flat` output to produce natural-order `coef_out`.
-- **`ntt_controller`** contains the start-edge detector, the FSM state register, the `stage`/`bidx` counters, the address- and twiddle-index-generation logic, the twiddle ROM, the operand/address/result registers, the shared butterfly datapath, and the combinational control-signal generation for `busy`/`load_enable`/`write_enable` (`done` is registered alongside `state`).
+- **`ntt_controller`** contains the `start_edge` detector, the FSM state register, the `stage`/`bidx` counters, the address and twiddle index generation logic, the twiddle ROM, the operand/address registers, the shared butterfly datapath, and the combinational control signal generation for `busy`/`load_enable`/`write_enable` (`done` is registered alongside `state`). The datapath's combinational `u_c`/`v_c` outputs feed `coefficient_memory`'s write-data ports directly.
 - **`coefficient_memory`** is a single in-place bank containing eight 5-bit coefficients. It loads all eight inputs in one clock cycle directly from `coef_in` (an unrolled loop over all eight words in the same always block, gated by `load_enable`; there is no separate load counter), provides two continuously-addressed combinational read ports (`a_out`/`b_out` at `lo`/`hi`), writes two coefficients per cycle (`mem[lo_reg]`, `mem[hi_reg]`) when `write_enable` is asserted, and continuously exposes its full contents as `mem_flat` for `ntt_top`'s output mapping.
 - **`twiddle_rom`** provides the precomputed values of $\omega^e \bmod 17$.
 - **`butterfly_datapath`** contains one shared combinational adder, subtractor, and multiplier. The adder and subtractor operate on the same input pair; the subtraction result is multiplied by the twiddle factor.
 
-The butterfly datapath has no internal registers. Its inputs and outputs are captured by registers in the controller.
+The butterfly datapath has no internal registers. Its inputs (`a_reg`, `b_reg`, `tw_reg`) are captured by registers in the controller. Its outputs (`u_c`, `v_c`) are combinational: they settle during the `WRITE` cycle and are written directly into `coefficient_memory`.
 
-**Reset.** `rst` is a synchronous, active-high input to `ntt_controller` only — `coefficient_memory` has no reset port. The diagram shows it as a single arrow into the `ntt_controller` block rather than wiring it to every internal register individually, since only a subset of the controller's registers are actually reset. On the clock edge after `rst` is asserted, the controller's single always block clears `state` to `S_IDLE`, `stage` to 0, `bidx` to 0, `done` to 0, and `start_d` to 0; these are the only five registers it resets. `a_reg`, `b_reg`, `tw_reg`, `lo_reg`, `hi_reg`, `u_reg`, and `v_reg` are not reset — they simply retain whatever value they last held until a subsequent `READ`/`COMPUTE` overwrites them. `rst` also appears directly in the combinational `load_enable`/`write_enable` expressions, so both are forced low the instant `rst` is asserted rather than only once `state` transitions to `IDLE` on the next edge. See [Reset and handshake behavior](#reset-and-handshake-behavior) for the full handshake table.
+**Reset.** `rst` is a synchronous, active-high input to `ntt_controller`. The diagram shows it as a single arrow into the `ntt_controller` block rather than wiring it to every internal register individually. On the clock edge after `rst` is asserted, the controller's single always block clears `state` to `S_IDLE`, `stage` to 0, `bidx` to 0, `done` to 0, and `start_d` to 0. See [Reset and handshake behavior](#reset-and-handshake-behavior) for the full handshake table.
 
 ## Transform execution
 
@@ -339,7 +336,7 @@ The shared datapath computes both results combinationally:
 2. `mod_sub` calculates the difference $a-b$ modulo 17.
 3. `mod_mul` multiplies the difference by the selected twiddle factor to produce $v$.
 
-The controller captures the two results and writes them back to their respective memory locations.
+The controller writes both results directly back to their respective memory locations; there is no intermediate register that captures them first.
 
 ### Butterfly schedule
 
@@ -360,15 +357,14 @@ Each stage processes four butterflies. Once all four have completed, the control
 
 ### Controller state machine
 
-Five states control the execution:
+Four states control the execution:
 
 | State | Operation |
 |---|---|
 | `IDLE` | Wait for a start request |
 | `LOAD` | Write all eight input coefficients into memory |
 | `READ` | Read the selected coefficient pair and twiddle factor |
-| `COMPUTE` | Capture the butterfly results |
-| `WRITE` | Write both results back to memory and advance the schedule |
+| `WRITE` | Let the butterfly datapath settle combinationally, write both results back to memory, and advance the schedule |
 
 The execution sequence is:
 
@@ -377,8 +373,7 @@ stateDiagram-v2
     [*] --> IDLE
     IDLE --> LOAD: start_pulse
     LOAD --> READ
-    READ --> COMPUTE
-    COMPUTE --> WRITE
+    READ --> WRITE
     WRITE --> READ: bidx &lt; 3
     WRITE --> READ: bidx == 3 &amp;&amp; stage &lt; 2
     WRITE --> IDLE: bidx == 3 &amp;&amp; stage == 2 / done &lt;= 1
@@ -390,19 +385,16 @@ stateDiagram-v2
     end note
 ```
 
-The `READ`, `COMPUTE`, and `WRITE` states repeat for each butterfly. The controller does not begin the next butterfly until the current butterfly's results have been written to memory.
+The `READ` and `WRITE` states repeat for each butterfly. The controller does not begin the next butterfly until the current butterfly's results have been written to memory.
 
 The `stage` and `bidx` counters are advanced as part of the `WRITE` state's exit logic. This avoids introducing additional FSM states or clock cycles just for schedule bookkeeping.
 
 ### Cycle-by-cycle operation
 
-Each butterfly takes three clock cycles:
+Each butterfly takes two clock cycles:
 
 1. **READ:** The controller reads the two coefficients from memory, selects the twiddle factor from the ROM, and captures these values into `a_reg`, `b_reg`, and `tw_reg`.
-2. **COMPUTE:** The combinational butterfly datapath calculates the sum and twiddle-multiplied difference. The controller captures the results into `u_reg` and `v_reg`.
-3. **WRITE:** The controller writes `u_reg` and `v_reg` back to the two selected memory locations.
-
-This sequence ensures that each butterfly completes before the next one begins. There are no overlapping butterfly operations or pending writes when a subsequent butterfly starts.
+2. **WRITE:** The combinational butterfly datapath, driven by the operands just captured, settles over this cycle and produces `u_c`/`v_c`. The controller writes them directly into the two selected memory locations at the end of the cycle, and advances the schedule.
 
 ## Implementation details
 
@@ -494,7 +486,7 @@ $$
 [1,9,13,15,16,8,4,2]
 $$
 
-A 3-bit exponent selects the corresponding value of $\omega^e\bmod17$. The selected value is captured by the controller during `READ` and used by the multiplier during `COMPUTE`.
+A 3-bit exponent selects the corresponding value of $\omega^e\bmod17$. The selected value is captured by the controller during `READ` and used by the multiplier during `WRITE`.
 
 ### Bit widths
 
@@ -543,15 +535,15 @@ The transform requires:
 
 - 1 cycle to load the eight input coefficients.
 - 12 butterflies.
-- 3 cycles per butterfly.
+- 2 cycles per butterfly.
 
 Therefore:
 
 $$
-1+(12\times3)=37\text{ cycles}
+1+(12\times2)=25\text{ cycles}
 $$
 
-The measured latency is 37 busy cycles, from the accepted-start edge to the final `WRITE` edge. This was independently checked using a busy-cycle counter and the distance between the accepted-start and completion edges. See [Verification results](#verification-results).
+The measured latency is 25 busy cycles, from the `start` edge to the final `WRITE` edge. See [Verification results](#verification-results).
 
 ## Design decisions and trade-offs
 
@@ -563,25 +555,23 @@ The design uses one shared butterfly datapath consisting of a modular adder, mod
 
 The main advantage is reduced arithmetic hardware. Instead of implementing four butterfly units to process the four disjoint pairs in a stage simultaneously, the controller reuses the same arithmetic resources sequentially. This keeps the datapath small and avoids the need for multiple simultaneous memory accesses.
 
-The trade-off is execution latency. Each butterfly requires three controller cycles (`READ`, `COMPUTE`, and `WRITE`), resulting in 37 busy cycles per transform, including the initial `LOAD` cycle.
+The trade-off is execution latency. Each butterfly requires two controller cycles (`READ` and `WRITE`), resulting in 25 busy cycles per transform, including the initial `LOAD` cycle.
 
 Four parallel butterfly units could reduce execution time by processing an entire stage concurrently. However, this would require four sets of arithmetic resources and a memory organization capable of supplying and storing multiple coefficient pairs simultaneously. This alternative is not implemented or evaluated in this design.
 
 ### Sequential execution
 
-The controller executes each butterfly through a strict `READ → COMPUTE → WRITE` sequence. Each operation completes its memory updates before the next butterfly begins.
+The controller executes each butterfly through a strict `READ → WRITE` sequence. Each operation completes its memory updates before the next butterfly begins.
 
 This approach simplifies operand capture, result storage, and memory access scheduling. It also avoids managing overlapping operations that may depend on the same shared datapath or memory resources.
 
 The trade-off is that the datapath remains idle during some controller phases, and successive butterfly operations cannot overlap. This limits throughput but keeps the control logic and resource requirements relatively simple.
 
-### Five-state FSM versus additional bookkeeping states
+### Four-state FSM versus additional bookkeeping states
 
-The controller uses five states: `IDLE`, `LOAD`, `READ`, `COMPUTE`, and `WRITE`. Stage and butterfly progression are handled by the `stage` and `bidx` counters within the existing state transitions, rather than introducing separate FSM states for counter updates.
+The controller uses four states: `IDLE`, `LOAD`, `READ`, and `WRITE`. Stage and butterfly progression are handled by the `stage` and `bidx` counters within the existing state transitions, rather than introducing separate FSM states for counter updates.
 
 The `bidx` counter advances after each completed butterfly. When the final butterfly of a stage is written, `bidx` is reset and `stage` advances. After the final butterfly of the final stage, the controller returns to `IDLE` and asserts `done`.
-
-Keeping this bookkeeping within the `WRITE` exit logic avoids additional state transitions and keeps the FSM focused on the actual datapath operations. Each active operation state (`LOAD`, `READ`, `COMPUTE`, and `WRITE`) occupies one clock cycle, while `IDLE` persists until a start request is accepted. A dedicated counter-update state would introduce an additional clock cycle each time it is visited. Separate counter-update states could make individual control actions more explicit, but would increase execution latency without providing a functional benefit for this design.
 
 ### Single in-place bank versus double buffering
 
@@ -752,12 +742,15 @@ ntt_accelerator/
 │   ├── run_ntt16.sh                # Runs the N=16 experiment's RTL and Python checks
 │   ├── run_pipelined.sh            # Runs the pipelined experiment's RTL and Python checks
 │   ├── run_all_experiments.sh      # Runs the baseline suite plus all three experiments
-│   └── run_synthesis.sh            # Runs generic Yosys synthesis for the baseline and every experiment
-├── reports/                        # Raw Yosys synthesis scripts and output
-│   ├── baseline/synth.ys, synth_report.txt
-│   ├── intt/synth.ys, synth_report.txt
-│   ├── ntt16/synth.ys, synth_report.txt
-│   └── pipelined/synth.ys, synth_report.txt
+│   ├── setup_toolchain.sh          # Locates and sources OSS CAD Suite (yosys, nextpnr-ecp5)
+│   └── run_synthesis.sh            # Runs ECP5 synth_ecp5 -nodsp + nextpnr-ecp5 place-and-route for the baseline and every experiment
+├── toolchain/
+│   └── versions.txt                # Exact tool versions the committed reports/ results were generated with
+├── reports/                        # Raw Yosys/nextpnr-ecp5 scripts and output
+│   ├── baseline/synth.ys, synth_report.txt, nextpnr_report.txt
+│   ├── intt/synth.ys, synth_report.txt, nextpnr_report.txt
+│   ├── ntt16/synth.ys, synth_report.txt, nextpnr_report.txt
+│   └── pipelined/synth.ys, synth_report.txt, nextpnr_report.txt
 ├── waves/                          # Waveform capture and inspection artifacts
 │   ├── dump_waveforms.v            # Standalone VCD capture harness
 │   ├── render_waveforms.py         # Generates waveform screenshots from VCD
@@ -773,8 +766,9 @@ The main directories have distinct responsibilities:
 - `tb/` contains the baseline testbenches that exercise `rtl/`, along with fixtures used by negative tests.
 - `reference/` contains the baseline's Python reference implementations, mathematical checks, and expected test data.
 - `experiments/` contains the three independent extensions (INTT, N=16, pipelined), each with its own `rtl/`, `tb/`, and `reference/` subdirectories, mirroring the baseline's layout. None of these modify `rtl/`.
-- `scripts/` contains the scripts used to run the baseline suite, each experiment's suite, the combined regression, and the synthesis comparison.
-- `reports/` contains the raw Yosys synthesis script and output for the baseline and each experiment.
+- `scripts/` contains the scripts used to run the baseline suite, each experiment's suite, the combined regression, the toolchain setup, and the synthesis flow.
+- `toolchain/` records the exact tool versions the committed `reports/` results were generated with (see [Reproducing the FPGA synthesis results](#reproducing-the-fpga-synthesis-results)).
+- `reports/` contains the ECP5 synthesis/place-and-route scripts and output for the baseline and each experiment.
 - `waves/` contains the standalone waveform-capture harness, recorded VCD, and trace-generation utilities.
 - `docs/images/` contains the rendered waveform screenshots included in this documentation.
 
@@ -949,7 +943,7 @@ This waveform shows `clk`, `rst`, `start`, `busy`, `done`, and the controller's 
 
 It shows that:
 
-- `busy` rises after the accepted start request and remains asserted throughout the 37-cycle execution.
+- `busy` rises after the accepted start request and remains asserted throughout the 25-cycle execution.
 - `done` is asserted on the final `WRITE` edge, when `busy` returns low.
 - `stage` progresses through 0, 1, and 2.
 - `bidx` progresses from 0 to 3 within each stage.
@@ -958,15 +952,14 @@ It shows that:
 
 ![Single butterfly waveform](docs/images/butterfly-operation.png)
 
-This waveform focuses on stage 0, `bidx = 1`, and shows the controller's `READ → COMPUTE → WRITE` sequence.
+This waveform focuses on stage 0, `bidx = 1`, and shows the controller's `READ → WRITE` sequence.
 
-The signals include `state`, `stage`, `bidx`, `lo`, `hi`, `twiddle_exp`, `a_reg`, `b_reg`, `tw_reg`, `u_reg`, `v_reg`, and `write_enable`.
+The signals include `state`, `stage`, `bidx`, `lo`, `hi`, `twiddle_exp`, `a_reg`, `b_reg`, `tw_reg`, `u_c`, `v_c`, and `write_enable`. Note that `a_reg`/`b_reg`/`tw_reg` still show the *previous* butterfly's (`bidx = 0`) operands throughout `READ`. They are only captured with the new, correct operands at the `READ`→`WRITE` edge which is why `u_c`/`v_c` read the previous butterfly's stale result during `READ` and the correct new result only once `WRITE` begins.
 
 The sequence shows how the controller:
 
 1. Captures the selected operands and twiddle factor during `READ`.
-2. Captures the butterfly results during `COMPUTE`.
-3. Asserts `write_enable` during `WRITE` to commit both results to memory.
+2. Lets the combinational butterfly datapath settle on the newly captured operands during `WRITE`, and asserts `write_enable` to commit both results (`u_c`, `v_c`) directly to memory at the end of that same cycle.
 
 The same registers and combinational butterfly datapath are reused for all 12 operations, illustrating the iterative reuse of the hardware rather than separate per-butterfly units.
 
@@ -1012,7 +1005,7 @@ iverilog -g2001 -Wall -o /tmp/dump.vvp \
 vvp /tmp/dump.vvp
 ```
 
-The accompanying `waves/trace.log` provides a textual view of the same execution. It contains 37 busy-cycle entries before the final output comparison, consistent with the measured transform latency. Its final `coef_out` also matches the worked example's natural-order NTT output.
+The accompanying `waves/trace.log` provides a textual view of the same execution. It contains 25 busy-cycle entries before the final output comparison, consistent with the measured transform latency. Its final `coef_out` also matches the worked example's natural-order NTT output.
 
 ## Verification results
 
@@ -1058,7 +1051,7 @@ Across the 31 transforms, the controller executes 12 butterflies per transform, 
 
 Directed scenarios exercise the controller's reset and handshake behavior. These checks cover start acceptance, busy-state behavior, completion signaling, and the controller's response to reset.
 
-They verify that the control logic follows the expected state transitions and that `busy` and `done` behave correctly throughout a transform.
+They verify that the control logic follows the expected state transitions and that `busy` and `done` behave correctly throughout a transform. One scenario (`T8`) measures the transform's busy-cycle latency directly, counting clock edges with `busy == 1` from the accepted start edge through the final `WRITE` edge and asserts it equals the documented 25 cycles.
 
 **4. Negative and setup-error tests (`tb_negative.v`)**
 
@@ -1076,21 +1069,60 @@ The stage checkpoint files in `reference/stage_checkpoints/` are generated separ
 
 The mathematical validation and RTL simulation therefore provide complementary evidence: the Python checks validate the mathematical reference, while the RTL testbenches verify that the hardware implementation follows the intended operations and produces the expected results.
 
-### Measured transform latency
+### Measured Performance and Synthesis Results
 
-The implementation completes each transform in **37 busy cycles**, consistently across all 31 test vectors.
+The N=8 baseline is evaluated in terms of computational performance, FPGA resource utilization, and functional correctness. The evaluation examines the number of clock cycles required to complete an NTT, the resulting execution time and transform throughput, the maximum operating frequency and critical-path characteristics, and the hardware resources required to implement the design. Functional verification results are also included to establish the correctness of the measured implementation.
 
-The latency follows directly from the controller's execution sequence:
+Transform latency and functional verification results are obtained through RTL simulation. Hardware resource utilization and timing characteristics are evaluated using an ECP5-targeted synthesis and place-and-route flow. The design is synthesized with Yosys using `synth_ecp5 -nodsp`, targeting the **LFE5U-85F FPGA, CABGA381 package, speed grade 6**, and subsequently placed and routed using `nextpnr-ecp5`. Execution time and transform throughput are calculated using the simulated cycle count and the post-route maximum operating frequency. These timing and resource results are tool-based implementation estimates rather than measurements from physical FPGA hardware.
 
-| Operation | Cycles |
-|---|---:|
-| Initial input loading (`LOAD`) | 1 |
-| Butterfly operations (`12 × 3 cycles`) | 36 |
-| **Total busy cycles** | **37** |
+The synthesis flow is defined in `reports/baseline/synth.ys` and executed through `scripts/run_synthesis.sh`; see [Reproducing the FPGA synthesis results](#reproducing-the-fpga-synthesis-results) for the toolchain setup and version-reproducibility details.
 
-Each butterfly uses three controller cycles: `READ`, `COMPUTE`, and `WRITE`. The same datapath is reused for all 12 operations rather than executing them in parallel.
+| Category | Metric | Result |
+|---|---|---:|
+| Performance | Transform latency | 25 cycles |
+| Performance | Execution time | 364.8 ns |
+| Performance | Fmax | 68.53 MHz |
+| Timing | Critical path delay | 14.59 ns |
+| Timing | Logic delay | 5.06 ns |
+| Timing | Routing delay | 9.53 ns |
+| Resources | LUTs | 309 |
+| Resources | FFs | 69 |
+| Resources | DSP blocks | 0 |
+| Resources | EBR / Block RAM | 0 |
+| Throughput | Transforms per second | ≈2.74 million |
+| Verification | Test vectors | 31 |
+| Verification | Butterfly operations | 372 |
+| Verification | Failed checks | 0 |
 
-The 37-cycle measurement is taken from the accepted start edge through the completion edge of the final `WRITE` operation. It represents the simulated controller latency for one transform, not a measured maximum operating frequency or physical hardware performance.
+The 14.59 ns critical path starts at `a_reg`, passes through the combinational logic of `mod_sub` and `mod_mul`, and terminates at a write-data flip-flop in `coefficient_memory`. This path reflects the direct connection between the butterfly datapath and coefficient memory: the result is computed and written in the same cycle, without an intermediate result register. The multiplier is implemented entirely in FPGA fabric, with no DSP hard-macro boundary.
+
+### Reproducing the FPGA synthesis results
+
+The FPGA synthesis and place-and-route results were obtained using OSS CAD Suite, targeting the Lattice ECP5 LFE5U-85F FPGA.
+
+Install [OSS CAD Suite](https://github.com/YosysHQ/oss-cad-suite-build), then initialize the toolchain:
+
+```bash
+source scripts/setup_toolchain.sh
+```
+
+By default, the script searches for OSS CAD Suite in `~/tools/oss-cad-suite`, `~/oss-cad-suite`, `/opt/oss-cad-suite`, and `/usr/local/oss-cad-suite`. If installed elsewhere, specify its location:
+
+```bash
+OSS_CAD_SUITE=/path/to/oss-cad-suite source scripts/setup_toolchain.sh
+```
+
+Run the synthesis flow for the baseline and all experiments:
+
+```bash
+bash scripts/run_synthesis.sh
+```
+
+The script regenerates the synthesis and place-and-route reports under `reports/`, checks that the required tools are available, and warns if the detected Yosys version differs from the version recorded in `toolchain/versions.txt`.
+
+The exact synthesis and timing results may vary between toolchain versions. `toolchain/versions.txt` records the versions used to generate the committed results. Reproducing them exactly requires matching these versions, the target device, and the implementation settings.
+
+**Note:** Sourcing OSS CAD Suite also puts its bundled Icarus Verilog and Python ahead of system-installed versions on `PATH`. Run RTL simulation scripts (`scripts/run_all_tests.sh` and related scripts) in a separate shell where OSS CAD Suite has not been sourced, to use the separately installed versions recorded in `toolchain/versions.txt`.
 
 ## Limitations and Future Work
 
@@ -1100,111 +1132,86 @@ There are still several areas that could be explored further:
 
 - **Configurable transform sizes:** The larger-transform experiment extends the implementation to N=16. Supporting arbitrary transform sizes would require further generalization of the address generation, twiddle-factor storage, and controller.
 - **Combined architectural extensions:** The inverse NTT, N=16, and pipelined implementations are separate experimental variants. Combining these capabilities into a unified, configurable accelerator remains future work.
-- **Target-specific hardware evaluation:** The synthesis experiments use generic Yosys statistics to compare the relative hardware complexity of the implementations. FPGA- or ASIC-specific resource utilization, critical-path delay, maximum operating frequency, and power consumption have not been evaluated. These would require a target device or technology library and an appropriate implementation flow.
 - **Further architectural optimization:** Additional work could investigate alternative butterfly architectures, memory organizations, and pipeline configurations to improve throughput and resource efficiency, particularly for larger transform sizes.
 
 These extensions provide opportunities to develop the accelerator beyond the initial task requirements while retaining the original implementation as a reference for evaluating subsequent designs.
 
 ## Experiments and evaluation
 
-After completing the initial 8-point forward NTT implementation, three experiments were conducted to investigate possible extensions and architectural improvements. These explore inverse transform support, a larger transform size, and pipelined execution.
+Three experiments extend the N=8 baseline: inverse transform support, a larger transform size (N=16), and pipelined execution. Each experiment is maintained independently under `experiments/`, with its own controller and top-level module.
 
-Each experiment builds on the original implementation's design approach while evaluating a separate architectural variant. The original RTL under `rtl/` remains unchanged, and each experimental implementation is maintained independently under `experiments/`.
+All three experiments follow the baseline's synthesis and evaluation methodology. Each is independently evaluated for functional correctness, transform latency, FPGA resource utilization, and timing performance.
 
-The experiments evaluate functional correctness, execution latency, and generic synthesis resource counts. Their results are compared against the initial implementation to assess the impact of each extension.
+### Synthesis scripts
 
-Each experiment is implemented, verified, evaluated, and committed separately.
-
-### Synthesis methodology
-
-All designs use the same generic Yosys synthesis flow: load the design's source files with `read_verilog -sv`, then run `hierarchy -top <top>; synth -top <top>; stat`. For example, the baseline (`reports/baseline/synth.ys`):
+Each design has a corresponding synthesis script under `reports/`, which specifies the RTL files to include and the appropriate top-level module. For example, the INTT synthesis script is `reports/intt/synth.ys`:
 
 ```text
-read_verilog -sv rtl/modular_arithmetic.v
-read_verilog -sv rtl/twiddle_rom.v
-read_verilog -sv rtl/butterfly_datapath.v
-read_verilog -sv rtl/coefficient_memory.v
-read_verilog -sv rtl/ntt_controller.v
-read_verilog -sv rtl/ntt_top.v
+read_verilog -sv ../../rtl/modular_arithmetic.v
+read_verilog -sv ../../rtl/butterfly_datapath.v
+read_verilog -sv ../../rtl/coefficient_memory.v
+read_verilog -sv ../../experiments/intt/rtl/twiddle_rom.v
+read_verilog -sv ../../experiments/intt/rtl/ntt_controller.v
+read_verilog -sv ../../experiments/intt/rtl/ntt_top.v
 hierarchy -top ntt_top
-synth -top ntt_top
+synth_ecp5 -top ntt_top -nodsp -json ntt_top.json
 stat
 ```
 
-Each experiment's `reports/<name>/synth.ys` follows the same flow, loading that experiment's own RTL files (plus the unmodified baseline files it reuses) and selecting its own top module (`ntt_top`, `ntt_top16`, or `ntt_top_pipelined`). Running `bash scripts/run_synthesis.sh` executes all four `synth.ys` scripts and regenerates their `synth_report.txt` files.
-
-No FPGA or ASIC target, timing constraints, or technology library is specified. The reported results are therefore generic synthesis cell counts, not device-specific LUT, BRAM, or DSP utilization, ASIC physical area, critical-path delay, maximum operating frequency, or power consumption. None of these were measured.
-
-Raw reports are stored under `reports/`. The same synthesis settings are used for baseline and experimental comparisons.
+The other scripts follow the same structure, loading each design's own RTL files and selecting its corresponding top-level module (`ntt_top`, `ntt_top16`, or `ntt_top_pipelined`). Running `bash scripts/run_synthesis.sh` executes the evaluation flow for all four designs and regenerates their corresponding reports under `reports/`.
 
 ### Experiment 1: Inverse NTT (INTT)
 
 **Objective**
 
-Extend the accelerator to support inverse NTT while preserving forward-transform behavior and minimizing additional hardware through reuse of the existing butterfly datapath and coefficient memory.
+Extend the accelerator to support inverse NTT while preserving forward-transform behavior and reusing the existing butterfly datapath and coefficient memory.
 
 **Design changes**
 
-The inverse transform uses the same DIF butterfly schedule and address generation as the forward transform, with inverse twiddle factors and a final normalization pass.
+The inverse transform retains the forward transform's DIF butterfly schedule and address generation, but uses inverse twiddle factors followed by a normalization pass.
 
-For $q=17$ and $N=8$:
+For \(q=17\) and \(N=8\):
 
-- Inverse primitive root: $\omega^{-1}=2$.
-- Normalization factor: $N^{-1}=15 \pmod{17}$.
+- Inverse primitive root: \(\omega^{-1}=2\).
+- Normalization factor: \(N^{-1}=15 \pmod{17}\).
 - Inverse twiddle table: `[1, 2, 4, 8, 16, 15, 13, 9]`.
 
-The implementation adds:
-
-- An inverse-mode input captured when a transform starts.
-- An inverse twiddle table in the twiddle ROM.
-- A normalization phase that scales all eight output coefficients by 15.
-
-During normalization, the controller selects the butterfly's `v` output for both memory write ports. This is necessary because the ordinary `u` output is unscaled, whereas `v` contains the required multiplication by 15 modulo 17.
-
-The existing butterfly datapath, modular arithmetic, and coefficient memory are reused. The changes are isolated in `experiments/intt/rtl/`; the baseline RTL is not modified.
+The implementation adds an inverse-mode input, inverse twiddle support, and a normalization phase that multiplies each output coefficient by 15 modulo 17. Normalization reuses the existing butterfly datapath and coefficient memory, without introducing a separate arithmetic unit or additional memory.
 
 **Verification**
 
-The implementation was checked using an independent Python reference model and RTL simulation.
+An independent Python reference model and RTL simulation were used to verify mathematical correctness and controller behavior.
 
 | Verification | Result |
 |---|---:|
-| Python mathematical validation | 1,661 checks, 0 failures |
-| RTL verification | 335 checks, 0 failures |
+| Python mathematical checks | 1,661 passed |
+| RTL checks | 335 passed |
 | Forward test vectors | 31/31 passed |
 | Inverse test vectors | 31/31 passed |
 | Round-trip tests | 16/16 passed |
-| Normalization checks | All 8 memory locations verified |
+| Normalization locations | 8/8 verified |
 
-The tests also cover operation-mode stability, start requests while busy, and reset during normalization.
+Additional tests cover mode stability, start requests while busy, and reset during normalization.
 
 **Results**
 
-Both implementations were synthesized using the same generic Yosys flow (`synth -top ntt_top; stat`). The results are compared below.
-
-| Metric | Baseline | INTT implementation |
+| Metric | Baseline | INTT |
 |---|---:|---:|
-| Forward latency | 37 cycles | 37 cycles |
-| Inverse latency | — | 61 cycles |
-| Generic synthesis cells | 603 | 673 |
-| — combinational cells | 364 | 417 |
-| — multiplexers | 159 | 171 |
-| — flip-flops | 80 | 85 |
+| Forward latency | 25 cycles | 25 cycles |
+| Inverse latency | — | 41 cycles |
+| Maximum frequency | 68.53 MHz | 62.83 MHz |
+| Critical-path delay | 14.59 ns | 15.92 ns |
+| LUTs | 309 | 334 |
+| Flip-flops | 69 | 74 |
+| DSP blocks | 0 | 0 |
+| EBR blocks | 0 | 0 |
+| Forward execution time | 364.8 ns | 397.9 ns |
+| Inverse execution time | — | 652.6 ns |
+| Forward throughput | ≈2.74M transforms/s | ≈2.51M transforms/s |
 
-The INTT implementation uses 70 more generic synthesis cells than the baseline, an increase of 11.6%. This comprises 53 additional combinational cells, 12 additional multiplexers, and 5 additional flip-flops. Forward-transform correctness and latency remain unchanged. The existing butterfly datapath and coefficient memory are reused, so no separate arithmetic datapath is required. Inverse-transform latency increases by 24 cycles because normalization is performed sequentially.
+The forward transform retains its 25-cycle schedule, confirming that inverse support does not add cycles to existing forward operations. The inverse transform requires 41 cycles because the eight-coefficient normalization pass executes sequentially after the 12 butterflies.
 
-These five additional flip-flops are associated with the inverse-mode register (`mode_reg`), normalization control (`phase`), and the 3-bit normalization index (`nidx`), the only new registers declared in the controller. No additional sequential datapath registers are required.
-
-The module-level synthesis results show where the additional cells are used:
-
-| Module | Baseline cells | INTT cells |
-|---|---:|---:|
-| Controller | 117 | 172 |
-| Twiddle ROM | 7 | 20 |
-| Coefficient memory | 242 | 242 |
-| Modular arithmetic (combined) | 237 | 239 |
-
-Nearly all of the overhead is in the controller (+55 cells, for the normalization-phase state machine and `phase`/`nidx` logic) and the twiddle ROM (+13 cells, for the added inverse-twiddle table and the `inv` select). The coefficient memory implementation remains unchanged, with the same synthesized cell count in both designs. The combined modular-arithmetic count increases by two cells even though none of `mod_add.v`, `mod_sub.v`, or `mod_mul.v` were modified. This illustrates that unchanged RTL does not necessarily produce identical generic cell counts when synthesis is performed in different design contexts.
+Compared with the baseline, INTT adds 25 LUTs (+8.1%) and 5 flip-flops (+7.2%), primarily for inverse-mode control, twiddle selection, and normalization. It reuses the existing arithmetic datapath and coefficient memory. The maximum frequency decreases by approximately 8.3%, with critical-path delay increasing from 14.59 ns to 15.92 ns. The additional selection logic contributes to this increase.
 
 **Run commands**
 
@@ -1229,78 +1236,63 @@ bash scripts/run_synthesis.sh
 
 **Objective**
 
-Evaluate how doubling the transform size from $N=8$ to $N=16$ affects the architecture, execution latency, and hardware resource requirements while retaining the existing design approach.
+Evaluate how increasing the transform size from N=8 to N=16 affects execution latency, hardware resource utilization, and timing performance while retaining the baseline architecture.
 
 **Design changes**
 
-The N=16 implementation extends the baseline's radix-2 DIF scheduling and shared-datapath approach to a specific 16-point configuration, using four stages of eight butterflies each.
+The N=16 implementation extends the radix-2 DIF schedule to four stages, with eight butterflies per stage.
 
-For $q=17$ and $N=16$:
+For \(q=17\) and \(N=16\):
 
-- Primitive root: $\omega=3$, since $3^{16}\equiv1\pmod{17}$ and $3^8\not\equiv1\pmod{17}$, confirming that its order is exactly 16.
+- Primitive root: \(\omega=3\), with \(3^{16}\equiv1\pmod{17}\) and \(3^8\not\equiv1\pmod{17}\).
 - Twiddle table: `[1, 3, 9, 10, 13, 5, 15, 11, 16, 14, 8, 7, 4, 12, 2, 6]`.
 
-The implementation, kept entirely under `experiments/ntt16/` with the baseline and INTT experiment untouched, adds:
+The implementation, isolated under `experiments/ntt16/`, introduces:
 
-- `coefficient_memory16.v`: a 16-entry coefficient memory, doubling the storage and widening the read/write addresses from 3 to 4 bits.
-- `twiddle_rom16.v`: a 16-entry twiddle ROM addressed by a 4-bit exponent, compared with the baseline's 8-entry ROM and 3-bit address.
-- `ntt_controller16.v`: generalizes the baseline's shift-and-mask address generation to four stages and eight butterflies per stage, using a 3-bit butterfly index.
-- `ntt_top16.v`: follows the same assembly pattern as `ntt_top.v`, with an 80-bit coefficient bus and 4-bit output bit reversal, compared with 40 bits and 3-bit reversal in the baseline.
+- `coefficient_memory16.v`: expands coefficient storage from 8 to 16 entries, with 4-bit addresses.
+- `twiddle_rom16.v`: provides 16 twiddle factors using a 4-bit address.
+- `ntt_controller16.v`: extends address generation and scheduling to four stages and eight butterflies per stage.
+- `ntt_top16.v`: integrates the N=16 components, using an 80-bit coefficient interface and 4-bit output bit reversal.
 
-`butterfly_datapath.v` and `modular_arithmetic.v` are reused unchanged directly from `rtl/`. Both operate on operands in the canonical range 0–16, regardless of transform size, so increasing $N$ does not require changes to the arithmetic datapath.
+The existing `butterfly_datapath.v` and `modular_arithmetic.v` are reused unchanged. Since the modular arithmetic operates on coefficients in the range 0–16, it does not need to change when the transform size increases.
 
 **Verification**
 
-The implementation was checked using an independent Python reference model and RTL simulation, following the same verification structure as the baseline and Experiment 1.
+An independent Python reference model and RTL simulation were used to verify the implementation.
 
 | Verification | Result |
 |---|---:|
-| Python mathematical validation | 5,014 checks, 0 failures |
-| RTL verification | 11,135 checks, 0 failures |
+| Python mathematical checks | 5,014 passed |
+| RTL checks | 8,399 passed |
 | Test vectors | 39/39 passed |
-| Intermediate-stage checkpoints | All 4 stages verified per vector |
-| Butterfly schedule | All 32 butterflies per transform verified per vector |
+| Intermediate-stage checkpoints | All four stages verified |
+| Butterfly operations | All 32 per transform verified |
 
-Test vectors cover all-zero, all-one, an impulse at each of the 16 positions, all-maximum, alternating, increasing, decreasing, and boundary inputs, plus 16 seeded-random vectors. The RTL testbench also covers start requests while busy and reset mid-transform, following the baseline's `tb_ntt_top.v` conventions.
+Test vectors include zero, boundary, impulse, alternating, increasing, decreasing, and seeded-random inputs. The testbench also checks start requests while busy and reset during a transform.
 
 **Results**
 
-Both implementations were synthesized using the same generic Yosys flow (`synth -top <top>; stat`).
-
-| Metric | N=8 baseline | N=16 implementation |
+| Metric | N=8 baseline | N=16 |
 |---|---:|---:|
 | Transform size | 8 | 16 |
-| Number of stages | 3 | 4 |
+| Stages | 3 | 4 |
 | Butterfly operations | 12 | 32 |
-| Transform latency | 37 cycles | 97 cycles |
-| Coefficient memory entries | 8 | 16 |
-| Coefficient memory bits | 40 | 80 |
-| Generic synthesis cells | 603 | 952 |
-| Combinational logic cells (excluding multiplexers) | 364 | 536 |
-| Multiplexers | 159 | 293 |
-| Flip-flops | 80 | 123 |
+| Transform latency | 25 cycles | 65 cycles |
+| Coefficient memory | 40 bits | 80 bits |
+| Maximum frequency | 68.53 MHz | 66.98 MHz |
+| Critical-path delay | 14.59 ns | 14.92 ns |
+| LUTs | 309 | 514 |
+| Flip-flops | 69 | 112 |
+| DSP blocks | 0 | 0 |
+| EBR blocks | 0 | 0 |
+| Execution time | 364.8 ns | 970.4 ns |
+| Transform throughput | ≈2.74M/s | ≈1.03M/s |
 
-Latency is measured in busy cycles, from the accepted-start edge through the final `WRITE` cycle. A dedicated counter in `tb_ntt16.v` confirms exactly 97 cycles for each of the 39 test vectors. Both designs follow the same execution pattern: one `LOAD` cycle and three cycles (`READ`, `COMPUTE`, `WRITE`) per butterfly. Therefore, latency is $1+3B$, where $B$ is the number of butterfly operations: 37 cycles for $N=8$ and 97 cycles for $N=16$.
+Both implementations use the same two-cycle-per-butterfly schedule. Consequently, latency follows \(1+2B\), where \(B\) is the number of butterfly operations: 25 cycles for N=8 and 65 cycles for N=16. The N=16 testbench independently confirms the 65-cycle latency across all 39 test vectors.
 
-Doubling the transform size increases the butterfly count by 2.67× and latency by 2.62×, while generic synthesis cells increase by 57.9% and flip-flops by 53.8%. The hardware increase is smaller than the increase in butterfly operations because the implementation reuses a single butterfly datapath sequentially. Most of the additional hardware is associated with coefficient storage, read-port logic, addressing, and control.
+Doubling the transform size increases the butterfly count by 2.67× and latency by 2.6×. LUT usage increases by 66.3%, while flip-flop usage increases by 62.3%. These increases are smaller than the growth in butterfly operations because the arithmetic datapath is shared and reused sequentially. Most additional hardware is associated with the larger coefficient memory, wider addressing, and expanded control logic.
 
-The module-level cell counts show how this overhead is distributed:
-
-| Module | N=8 baseline | N=16 implementation |
-|---|---:|---:|
-| Controller | 117 | 151 |
-| Twiddle ROM | 7 | 16 |
-| Coefficient memory | 242 | 548 |
-| Modular arithmetic (combined) | 237 | 237 |
-| Total | 603 | 952 |
-
-The largest increase occurs in the coefficient memory module. Its storage doubles from 40 to 80 bits, and its read ports (`mem[lo]` and `mem[hi]`) must select among 16 entries instead of 8, increasing read-selection logic accordingly. (Yosys is free to implement this selection however it maps most efficiently, so this does not necessarily correspond to a literal 16-to-1 multiplexer primitive in the synthesized netlist.)
-
-The 43 additional flip-flops are accounted for by two sources, confirmed directly in the synthesized netlist. The coefficient memory's flip-flop count increases from 40 to 80, accounting for 40 additional flip-flops. The controller's flip-flop count increases from 40 to 43 because `bidx`, `lo_reg`, and `hi_reg` each require one additional address bit.
-
-The controller and twiddle ROM also grow modestly due to wider addresses and twiddle exponents. The shared butterfly datapath and modular arithmetic are reused unchanged, as reflected in their identical combined synthesis cell counts.
-
-The N=16 implementation retains the baseline's sequential butterfly execution model. Consequently, the larger transform increases execution time, while the shared datapath avoids the hardware cost of instantiating additional butterfly units.
+Maximum frequency decreases by approximately 2.3%, with critical-path delay increasing from 14.59 ns to 14.92 ns. Despite the relatively small timing difference, the larger transform takes longer to execute because it requires substantially more butterfly operations.
 
 **Run commands**
 
@@ -1325,100 +1317,91 @@ bash scripts/run_synthesis.sh
 
 **Objective**
 
-Investigate whether pipelining the $N=8$ forward butterfly datapath reduces execution latency by overlapping independent butterflies within a DIF stage, while preserving the exact baseline mathematics. The experiment also determines the initiation interval permitted by the existing memory architecture rather than assuming that a new butterfly can be issued every cycle throughout the entire transform.
+Investigate whether overlapping independent butterfly operations can reduce N=8 NTT execution latency while preserving the baseline's mathematical behavior. The experiment also examines the memory dependencies that limit pipeline scheduling between DIF stages.
 
 **Pipeline architecture**
 
-Within each DIF stage, the four butterflies access disjoint coefficient-address pairs. This allows a new butterfly to be issued every cycle while earlier butterflies are still in flight. The pipeline has three stages, corresponding to the baseline's `READ`, `COMPUTE`, and `WRITE` phases, but overlaps their execution:
+Within each DIF stage, the four butterflies access disjoint coefficient-address pairs, allowing a new butterfly to be issued every cycle while previous operations are still in flight.
 
-1. **Issue**: generates the address and twiddle exponent for the next butterfly using the same combinational formulas as the baseline's `ntt_controller.v`. The operands, twiddle factor, and destination addresses are registered.
-2. **Compute**: the reused `butterfly_datapath.v` combinationally computes `u` and `v` from the registered operands and twiddle factor.
-3. **Write**: writes `u` and `v` to their destination addresses, with writes enabled only for valid pipeline entries.
+The implementation uses three pipeline stages:
 
-A valid bit is carried at each register boundary (`valid1` after issue and `valid2` after compute) and advances with the corresponding data. `write_enable` is driven directly by `valid2`, preventing invalid pipeline entries from modifying coefficient memory.
+1. **Issue:** Generates the butterfly addresses and twiddle exponent, then registers the operands, twiddle factor, and destination addresses.
+2. **Compute:** Uses the shared `butterfly_datapath.v` to calculate the butterfly outputs.
+3. **Write:** Commits the results to coefficient memory.
 
-The existing `coefficient_memory.v` is reused without modification. It provides independent combinational read ports (`lo`/`hi`) and registered write ports (`lo_reg`/`hi_reg`), allowing an issue operation to overlap with an older write. Within each DIF stage, the four butterflies access disjoint address pairs. At stage boundaries, however, a new issue may conflict with a write from the preceding stage, so the controller performs explicit hazard checks before issuing the next butterfly.
+Valid bits (`valid1` and `valid2`) accompany the pipeline data to ensure that only valid operations can write to memory.
 
-**Stage-boundary overlap**
+The existing `coefficient_memory.v` is reused without modification. Its independent combinational read ports and registered write ports allow a new butterfly to be issued while an earlier result is being written.
 
-A fully conservative approach would drain the pipeline completely before advancing to the next stage. However, the dependency only requires delaying a new issue when its read addresses conflict with destinations that have not yet been written. A full pipeline drain is therefore unnecessary.
+**Stage-boundary hazard handling**
 
-The controller checks the candidate butterfly's two read addresses (`lo` and `hi`) against the destination addresses of both in-flight entries (`lo1`/`hi1` for the compute-stage entry and `lo_reg`/`hi_reg` for the writing-stage entry). Issuing is stalled only when one of these addresses matches an outstanding write destination.
+Although butterflies within a stage access disjoint addresses, dependencies can occur when moving between stages. Issuing a new butterfly before an earlier write has completed could cause it to read stale coefficient values.
 
-Tracing the N=8 schedule reveals that only one of the two stage boundaries contains an actual address conflict. Consequently, the controller introduces exactly one stall cycle per transform. The other stage boundary permits the next stage to begin issuing without a stall.
+To prevent this, the controller compares the candidate butterfly's read addresses against the outstanding write destinations of both in-flight pipeline entries. Issuing is stalled only when an address conflict is detected, avoiding an unnecessary full pipeline drain at every stage boundary.
 
-This behavior is verified independently by `pipelined_schedule_model.py` and directly by `tb_pipelined.v`. The Python model reproduces the issue policy and checks the resulting issue/write schedule. The RTL testbench verifies that concurrent issue and write operations never target the same address and that exactly one stall occurs for every tested vector.
+For the N=8 schedule, only the transition from stage 0 to stage 1 produces an actual conflict. Consequently, exactly one stall cycle is required per transform; the stage 1-to-stage 2 transition requires no stall.
 
-Completion is tracked using a second tag (`last1`/`last2`) that advances through the same pipeline stages as the data and identifies the final butterfly. `done` is asserted on the same clock edge as the final memory write, ensuring that completion is aligned with the final writeback rather than requiring an additional confirmation cycle.
+A separate completion tag (`last1`/`last2`) tracks the final butterfly through the pipeline. The `done` signal is asserted on the same clock edge as the final memory write.
 
 **Verification**
 
+The implementation was verified using an independent Python schedule model and RTL simulation.
+
 | Verification | Result |
 |---|---:|
-| Python schedule-model validation | 192 checks, 0 failures |
-| RTL verification | 2,747 checks, 0 failures |
+| Python schedule-model checks | 192 passed |
+| RTL checks | 2,747 passed |
 | Test vectors | 31/31 passed |
-| Intermediate-stage checkpoints | All 3 stages verified per vector |
-| Issue/write destination tracking | Every write matched to its issuing butterfly using an issue-order FIFO |
-| Concurrent access safety | All simultaneous issue/write operations verified to use disjoint addresses |
-| Stall count | Exactly 1 stall cycle per transform |
+| Intermediate-stage checkpoints | All 3 stages verified |
+| Issue-to-write tracking | All operations matched in order |
+| Concurrent access checks | All address conflicts prevented |
+| Stall count | Exactly 1 per transform |
 
-`experiments/pipelined/reference/pipelined_schedule_model.py` independently models the controller's issue policy. It issues the next butterfly in fixed schedule order as soon as neither of its read addresses conflicts with an outstanding write in either pipeline slot. It computes the issue and write cycle for all 12 butterflies and verifies that no butterfly is lost, duplicated, or written out of order.
+The Python model independently reproduces the issue policy and verifies that all 12 butterflies are issued and written in the correct order. It also checks the resulting NTT values against the direct-NTT reference and intermediate-stage checkpoints.
 
-The model also checks that the resulting NTT values match the direct-NTT reference and the on-disk stage checkpoints for all 31 test vectors.
+The RTL testbench additionally verifies valid-bit propagation, concurrent issue/write safety, stage-boundary stalls, and completion timing. Directed tests cover start requests while busy, reset during pipeline execution, and restarting after reset.
 
-The RTL testbench (`tb_pipelined.v`) reuses the baseline's schedule-expectation tables and stage-checkpoint files because the mathematical operation is unchanged. It adds pipeline-specific checks, including an issue-order FIFO that matches every write to its originating butterfly, verification that `write_enable` only asserts for valid entries, concurrent-access checks, and stall-count verification. Directed tests also cover start requests while busy, reset during pipeline execution, and starting a new transform after reset.
+**Performance and hardware results**
 
-Stage-checkpoint verification uses the number of committed writes to determine when each stage has completed. This ensures that a stage is checked only after all its writes have reached coefficient memory, even when the controller has already advanced to the next stage.
-
-**Performance**
-
-Latency is measured in busy cycles using the same convention as the baseline and Experiment 2. A dedicated counter confirms that the execution latency is data-independent across all 31 test vectors.
+Latency is measured in busy cycles using the same convention as the baseline and the previous experiments. The measured latency is identical across all 31 test vectors.
 
 | Metric | Baseline N=8 | Pipelined N=8 |
 |---|---:|---:|
 | Transform size | 8 | 8 |
 | Butterfly operations | 12 | 12 |
-| Pipeline stages | N/A | 3 (issue, compute, write) |
-| Per-butterfly pipeline latency | N/A | 3 cycles |
-| Initiation interval (within a DIF stage) | N/A | 1 cycle |
-| Stall cycles | N/A | 1 |
-| Execution latency (busy cycles) | 37 | 16 |
-| Average cycles per butterfly (whole transform) | 3.08 (37/12) | 1.33 (16/12) |
-| Average throughput | 0.324 butterflies/cycle | 0.750 butterflies/cycle |
+| Pipeline stages | — | 3 |
+| Per-butterfly pipeline latency | — | 3 cycles |
+| Initiation interval (within a stage) | — | 1 cycle |
+| Stall cycles | — | 1 |
+| Transform latency | 25 cycles | 16 cycles |
+| Maximum frequency | 68.53 MHz | 74.02 MHz |
+| Critical-path delay | 14.59 ns | 13.51 ns |
+| Logic delay | 5.06 ns | 5.78 ns |
+| Routing delay | 9.53 ns | 7.73 ns |
+| LUTs | 309 | 332 |
+| Flip-flops | 69 | 90 |
+| DSP blocks | 0 | 0 |
+| EBR blocks | 0 | 0 |
+| Execution time | 364.8 ns | 216.2 ns |
+| Transform throughput | ≈2.74M/s | ≈4.63M/s |
 
-Per-butterfly pipeline latency is the time taken for one butterfly to pass through issue, compute, and writeback. The initiation interval (II) describes how frequently a new butterfly can be accepted. These are different measurements: the pipeline latency is three cycles, while the initiation interval is one cycle within a DIF stage.
+The three-cycle pipeline latency describes the time taken by an individual butterfly to pass through issue, compute, and writeback. The one-cycle initiation interval describes how frequently new butterflies can be accepted within a DIF stage. These are different properties: the pipeline overlaps successive operations rather than reducing the latency of an individual butterfly.
 
-The initiation interval of one cycle is maintained throughout the issue window of each stage, except where an actual memory dependency requires a stall. For this schedule, exactly one stall occurs at the boundary between stage 0 and stage 1. The stage 1-to-stage 2 boundary has no address conflict and requires no stall.
+The total transform latency is:
 
-The total execution latency is:
+\[
+1\;(\text{LOAD})+12\;(\text{issues})+
+1\;(\text{stall})+2\;(\text{final drain})
+=16\text{ cycles}
+\]
 
-$$
-1\;(\text{LOAD})+12\;(\text{issues})+1\;(\text{stall})+2\;(\text{final pipeline drain})=16\text{ cycles}
-$$
+Compared with the current baseline, pipelining reduces transform latency from 25 to 16 cycles, giving a **1.56× improvement in cycle count**. It also increases the maximum operating frequency from 68.53 MHz to 74.02 MHz, approximately 8.0%.
 
-The measured improvement reduces execution latency from 37 to 16 cycles, giving a **2.31× speedup**. This approaches the 3× asymptotic throughput improvement expected from overlapping the three baseline operations, although pipeline fill and drain overhead and the single required stall limit the improvement for this 12-butterfly transform.
+The frequency improvement comes from keeping computation and writeback in separate pipeline stages, rather than combining the combinational butterfly calculation and memory write in the same cycle as the optimized baseline. This results in a shorter critical path.
 
-**Synthesis and hardware resource evaluation**
+Together, the reduced cycle count and higher operating frequency decrease execution time from 364.8 ns to 216.2 ns, giving a **1.69× speedup** and increasing estimated transform throughput from approximately 2.74 million to 4.63 million transforms per second.
 
-Both implementations were synthesized using the same generic Yosys flow (`synth -top <top>; stat`).
-
-| Metric | Baseline N=8 | Pipelined N=8 |
-|---|---:|---:|
-| Generic synthesis cells | 603 | 661 |
-| Combinational logic cells (excluding multiplexers) | 364 | 413 |
-| Multiplexers | 159 | 158 |
-| Flip-flops | 80 | 90 |
-
-Pipelining increases the generic synthesis cell count by 58 (9.6%) and the flip-flop count by 10 (12.5%). The multiplexer count remains essentially unchanged, decreasing by one cell.
-
-The coefficient memory and twiddle ROM are reused unchanged, with identical per-module cell counts of 242 and 7, respectively. The change occurs in the controller, whose total cell count increases from 117 to 175 and whose flip-flop count increases from 40 to 50.
-
-The net increase of 10 flip-flops is accounted for by the controller's register changes. Five additional valid and control bits are introduced (`valid1`, `valid2`, `all_issued`, `last1`, and `last2`), while six additional destination-address bits are required for the second in-flight entry (`lo1` and `hi1`). The state register becomes one bit narrower because the pipelined controller uses three states instead of the baseline's five. Together, these changes account for the net increase of 10 flip-flops.
-
-The hazard-detection logic is also evaluated separately. It performs eight 3-bit equality comparisons, checking the next butterfly's two read addresses against the four destination addresses held by the two in-flight entries. To isolate its synthesis cost, `hazard_v1` and `hazard_v2` are tied to constant zero and the design is synthesized again. The generic cell count decreases from 661 to 609, with the entire difference of 52 cells occurring in combinational logic; the flip-flop and multiplexer counts remain unchanged at 90 and 158, respectively.
-
-Therefore, the isolated hazard-detection logic accounts for 52 generic combinational cells under this synthesis flow. These cells implement the address-conflict checks required to safely overlap issue and write operations across stage boundaries.
+This improvement comes at a resource cost: LUT usage increases by 7.4% and flip-flop usage by 30.4%. The additional registers store in-flight operands, results, addresses, and pipeline-control information. The experiment therefore demonstrates a trade-off between hardware resources and execution performance.
 
 **Run commands**
 
@@ -1446,17 +1429,19 @@ bash scripts/run_synthesis.sh
 | Transform direction | Forward only | Forward + inverse | Forward only | Forward only |
 | Butterfly operations | 12 | 12 | 32 | 12 |
 | Normalization operations | N/A | 8 | N/A | N/A |
-| Forward execution latency (busy cycles) | 37 | 37 | 97 | 16 |
-| Inverse execution latency (busy cycles) | N/A | 61 | N/A | N/A |
+| Forward execution latency (busy cycles) | 25 | 25 | 65 | 16 |
+| Inverse execution latency (busy cycles) | N/A | 41 | N/A | N/A |
 | Hardware pipeline stages | N/A | N/A | N/A | 3 |
 | Initiation interval (within a DIF stage) | N/A | N/A | N/A | 1 cycle |
 | Stall cycles | N/A | N/A | N/A | 1 |
-| Generic synthesis cells | 603 | 673 | 952 | 661 |
-| Combinational logic cells (excluding multiplexers) | 364 | 417 | 536 | 413 |
-| Multiplexers | 159 | 171 | 293 | 158 |
-| Flip-flops | 80 | 85 | 123 | 90 |
-
-All synthesis-cell figures are generic Yosys statistics obtained using the same synthesis flow and settings. They are not FPGA- or ASIC-specific resource estimates. Critical-path delay, maximum operating frequency, and power consumption were not measured. The N=16 implementation uses a different transform size, so its resource counts are included for completeness and are analyzed separately in Experiment 2.
+| Maximum frequency | 68.53 MHz | 62.83 MHz | 66.98 MHz | 74.02 MHz |
+| Critical-path delay | 14.59 ns | 15.92 ns | 14.92 ns | 13.51 ns |
+| LUTs | 309 | 334 | 514 | 332 |
+| Flip-flops | 69 | 74 | 112 | 90 |
+| DSP blocks | 0 | 0 | 0 | 0 |
+| BRAM blocks | 0 | 0 | 0 | 0 |
+| Forward latency (ns) | 364.8 ns | 397.9 ns | 970.4 ns | 216.2 ns |
+| Forward throughput | ≈2.74M NTTs/s | ≈2.51M NTTs/s | ≈1.03M NTTs/s | ≈4.63M NTTs/s |
 
 ## Assignment coverage
 
