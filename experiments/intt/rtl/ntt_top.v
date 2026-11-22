@@ -12,7 +12,7 @@ module ntt_top (
     output wire [39:0] coef_out
 );
     wire [2:0] lo, hi, lo_reg, hi_reg;
-    wire [4:0] a_in, b_in, u_reg, v_reg;
+    wire [4:0] a_in, b_in, u_c, v_c;
     wire load_enable, write_enable;
     wire [39:0] mem_flat;
 
@@ -20,7 +20,7 @@ module ntt_top (
         .clk(clk), .rst(rst), .start(start), .inv(inv), .busy(busy), .done(done),
         .lo(lo), .hi(hi), .a_in(a_in), .b_in(b_in),
         .load_enable(load_enable), .write_enable(write_enable),
-        .lo_reg(lo_reg), .hi_reg(hi_reg), .u_reg(u_reg), .v_reg(v_reg)
+        .lo_reg(lo_reg), .hi_reg(hi_reg), .u_c(u_c), .v_c(v_c)
     );
 
     coefficient_memory u_mem (
@@ -28,7 +28,7 @@ module ntt_top (
         .load_enable(load_enable), .write_enable(write_enable),
         .coef_in(coef_in),
         .lo(lo), .hi(hi), .a_out(a_in), .b_out(b_in),
-        .lo_reg(lo_reg), .hi_reg(hi_reg), .u_in(u_reg), .v_in(v_reg),
+        .lo_reg(lo_reg), .hi_reg(hi_reg), .u_in(u_c), .v_in(v_c),
         .mem_flat(mem_flat)
     );
 
