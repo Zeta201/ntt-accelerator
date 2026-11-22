@@ -15,7 +15,7 @@ VCD_PATH = os.path.join(HERE, "ntt_top.vcd")
 OUT_DIR = os.path.join(os.path.dirname(HERE), "docs", "images")
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
-STATE_NAMES = {0: "IDLE", 1: "LOAD", 2: "READ", 3: "COMPUTE", 4: "WRITE"}
+STATE_NAMES = {0: "IDLE", 1: "LOAD", 2: "READ", 3: "WRITE"}
 
 
 def parse_vcd(path):
@@ -200,9 +200,11 @@ def render_view(name_to_id, id_to_width, id_to_timeline,
                             f'stroke="{stroke}" stroke-width="1"/>')
                 if w > 18:
                     txt = label_for(label, val)
-                    svg.append(f'<text x="{(x1+x2)/2:.1f}" y="{y_mid + 4:.1f}" '
-                                f'fill="#e8e8e8" font-size="11" '
-                                f'text-anchor="middle">{txt}</text>')
+                    text_w = len(txt) * 6.6
+                    if text_w <= w - 6:
+                        svg.append(f'<text x="{(x1+x2)/2:.1f}" y="{y_mid + 4:.1f}" '
+                                    f'fill="#e8e8e8" font-size="11" '
+                                    f'text-anchor="middle">{txt}</text>')
 
     svg.append("</svg>")
 
@@ -232,7 +234,7 @@ def main():
     # Complete transform, including control signals and stage progression.
     views.append((
         "ntt_top: complete transform (x = [1,2,3,4,5,6,7,8])",
-        0, 440, 1.6,
+        0, 320, 4.5,
         [
             ("clk", "dump_waveforms.clk", "bit"),
             ("rst", "dump_waveforms.rst", "bit"),
@@ -246,10 +248,10 @@ def main():
         "ntt-complete-execution",
     ))
 
-    # One butterfly operation, showing its READ, COMPUTE, and WRITE phases.
+    # One butterfly operation, showing its READ and WRITE phases.
     views.append((
-        "ntt_controller: one butterfly, READ / COMPUTE / WRITE (stage 0, bidx 1)",
-        86, 116, 9.0,
+        "ntt_controller: one butterfly, READ / WRITE (stage 0, bidx 1)",
+        76, 96, 13.0,
         [
             ("state", "dump_waveforms.dut.u_ctrl.state", "bus"),
             ("stage", "dump_waveforms.dut.u_ctrl.stage", "bus"),
@@ -260,8 +262,8 @@ def main():
             ("a_reg", "dump_waveforms.dut.u_ctrl.a_reg", "bus"),
             ("b_reg", "dump_waveforms.dut.u_ctrl.b_reg", "bus"),
             ("tw_reg", "dump_waveforms.dut.u_ctrl.tw_reg", "bus"),
-            ("u_reg", "dump_waveforms.dut.u_ctrl.u_reg", "bus"),
-            ("v_reg", "dump_waveforms.dut.u_ctrl.v_reg", "bus"),
+            ("u_c", "dump_waveforms.dut.u_ctrl.u_c", "bus"),
+            ("v_c", "dump_waveforms.dut.u_ctrl.v_c", "bus"),
             ("write_enable", "dump_waveforms.dut.write_enable", "bit"),
         ],
         "butterfly-operation",
@@ -270,7 +272,7 @@ def main():
     # Modular arithmetic signals for the butterfly shown above.
     views.append((
         "butterfly_datapath: modular arithmetic (mod_add, mod_sub, mod_mul)",
-        86, 116, 9.0,
+        76, 96, 13.0,
         [
             ("a", "dump_waveforms.dut.u_ctrl.u_bfly.u_mod_add.a", "bus"),
             ("b", "dump_waveforms.dut.u_ctrl.u_bfly.u_mod_add.b", "bus"),

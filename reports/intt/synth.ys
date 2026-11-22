@@ -1,8 +1,11 @@
-# Generic (technology-independent) synthesis of the INTT-capable ntt_top for
-# a gate/cell-count comparison against the baseline, under the same flow and
-# settings. No FPGA target or timing library is used, so this produces
-# generic synthesis statistics only -- no LUT/FF/BRAM counts and no timing
-# (Fmax / critical path) are available from this flow.
+# Official synthesis flow for the INTT-capable ntt_top: target-specific
+# synthesis for a Lattice ECP5 (LFE5U-85F, CABGA381, speed grade 6), used
+# together with nextpnr-ecp5 (see scripts/run_synthesis.sh) to obtain real
+# post-route LUT/FF/DSP/BRAM counts and a real critical-path/Fmax
+# measurement, on the same target and settings as the baseline.
+#
+# -nodsp keeps mod_mul's single 5x5 multiply (diff * tw) on LUT/carry-chain
+# logic instead of a MULT18X18D hard macro.
 read_verilog -sv ../../rtl/modular_arithmetic.v
 read_verilog -sv ../../rtl/butterfly_datapath.v
 read_verilog -sv ../../rtl/coefficient_memory.v
@@ -10,5 +13,5 @@ read_verilog -sv ../../experiments/intt/rtl/twiddle_rom.v
 read_verilog -sv ../../experiments/intt/rtl/ntt_controller.v
 read_verilog -sv ../../experiments/intt/rtl/ntt_top.v
 hierarchy -top ntt_top
-synth -top ntt_top
+synth_ecp5 -top ntt_top -nodsp -json ntt_top.json
 stat

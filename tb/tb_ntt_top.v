@@ -19,10 +19,6 @@ module tb_ntt_top;
 
     always #5 clk = ~clk;
 
-    integer cycle_count;
-    // Track clock cycles using a nonblocking assignment to avoid testbench races.
-    always @(posedge clk) cycle_count <= cycle_count + 1;
-
     integer error_count;
     integer check_count;
     integer setup_error_count;
@@ -82,7 +78,7 @@ module tb_ntt_top;
         end
 
         check_count = check_count + 1;
-        if (dut.u_ctrl.write_enable && dut.u_ctrl.state !== 3'd4) begin
+        if (dut.u_ctrl.write_enable && dut.u_ctrl.state !== 3'd3) begin
             error_count = error_count + 1;
             $display("FAIL: write_enable asserted outside WRITE state (state=%0d)", dut.u_ctrl.state);
         end
@@ -156,7 +152,7 @@ module tb_ntt_top;
         reg [4:0] s2_exp [0:7];
         reg [4:0] s3_exp [0:7];
         reg [4:0] actual_out;
-        integer k, cyc_start, cyc_done, elapsed, timeout_limit, mismatch;
+        integer k, elapsed, busy_cycles, mismatch;
         reg checkpoint1_done, checkpoint2_done;
         begin
             $sformat(input_path, "reference/test_vectors/input_%0s.txt", name);
@@ -189,25 +185,20 @@ module tb_ntt_top;
                 checkpoint1_done = 0;
                 checkpoint2_done = 0;
 
-                @(posedge clk);
                 start <= 1'b1;
-                cyc_start = cycle_count;
-                @(posedge clk);
-                start <= 1'b0;
-
-                // Allow the start-edge updates to settle before checking completion.
                 @(posedge clk);
                 #1;
-                if (!checkpoint1_done && dut.u_ctrl.state === 3'd2 && dut.u_ctrl.stage === 2'd1) begin
-                    checkpoint1_done = 1;
-                    for (k = 0; k < 8; k = k + 1) stage_check_expected[k] = s1_exp[k];
-                    check_stage_mem(name, 1);
-                end
+                start <= 1'b0;
 
-                timeout_limit = cyc_start + 200;
-                while (!done && cycle_count < timeout_limit) begin
-                    @(posedge clk);
-                    #1;
+                // Count clock cycles directly from `busy`, rather than inferring the
+                // window from `start`/`done` edge timing: the first iteration below
+                // samples `busy` on the same settled edge where the accepted start
+                // request first takes effect (the LOAD cycle), and the loop exits
+                // the instant `busy` is observed low, so the count includes the
+                // first busy cycle and excludes the cycle after `busy` drops.
+                busy_cycles = 0;
+                while (busy && busy_cycles < 200) begin
+                    busy_cycles = busy_cycles + 1;
                     if (!checkpoint1_done && dut.u_ctrl.state === 3'd2 && dut.u_ctrl.stage === 2'd1) begin
                         checkpoint1_done = 1;
                         for (k = 0; k < 8; k = k + 1) stage_check_expected[k] = s1_exp[k];
@@ -218,6 +209,8 @@ module tb_ntt_top;
                         for (k = 0; k < 8; k = k + 1) stage_check_expected[k] = s2_exp[k];
                         check_stage_mem(name, 2);
                     end
+                    @(posedge clk);
+                    #1;
                 end
 
                 check_count = check_count + 1;
@@ -225,8 +218,7 @@ module tb_ntt_top;
                     error_count = error_count + 1;
                     $display("FAIL: vector '%0s': TIMEOUT waiting for done (no done within 200 cycles of start)", name);
                 end else begin
-                    cyc_done = cycle_count;
-                    elapsed = cyc_done - cyc_start;
+                    elapsed = busy_cycles;
 
                     for (k = 0; k < 8; k = k + 1) stage_check_expected[k] = s3_exp[k];
                     check_stage_mem(name, 3);
@@ -302,7 +294,6 @@ module tb_ntt_top;
         rst = 1;
         start = 0;
         coef_in = 40'd0;
-        cycle_count = 0;
         error_count = 0;
         check_count = 0;
         setup_error_count = 0;

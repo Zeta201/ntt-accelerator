@@ -19,9 +19,6 @@ module tb_intt;
 
     always #5 clk = ~clk;
 
-    integer cycle_count;
-    always @(posedge clk) cycle_count <= cycle_count + 1;
-
     integer error_count;
     integer check_count;
     integer setup_error_count;
@@ -71,18 +68,18 @@ module tb_intt;
         output [4:0] out0, out1, out2, out3, out4, out5, out6, out7;
         output integer elapsed;
         output ok;
-        integer cyc_start, cyc_done, timeout_limit;
+        integer busy_cycles;
         begin
             coef_in = {in7, in6, in5, in4, in3, in2, in1, in0};
             inv = mode_inv;
             start <= 1'b1;
             @(posedge clk);
             #1;
-            cyc_start = cycle_count;
             start <= 1'b0;
 
-            timeout_limit = cyc_start + 200;
-            while (!done && cycle_count < timeout_limit) begin
+            busy_cycles = 0;
+            while (busy && busy_cycles < 200) begin
+                busy_cycles = busy_cycles + 1;
                 @(posedge clk);
                 #1;
             end
@@ -93,8 +90,7 @@ module tb_intt;
                 {out0,out1,out2,out3,out4,out5,out6,out7} = 0;
             end else begin
                 ok = 1;
-                cyc_done = cycle_count;
-                elapsed = cyc_done - cyc_start;
+                elapsed = busy_cycles;
                 out0 = coef_out[4:0];
                 out1 = coef_out[9:5];
                 out2 = coef_out[14:10];
@@ -142,7 +138,7 @@ module tb_intt;
     integer fwd_checked, inv_checked, roundtrip_checked;
 
     initial begin
-        clk=0; rst=1; start=0; inv=0; coef_in=0; cycle_count=0;
+        clk=0; rst=1; start=0; inv=0; coef_in=0;
         error_count=0; check_count=0; setup_error_count=0;
         fwd_checked=0; inv_checked=0; roundtrip_checked=0;
 
@@ -174,7 +170,7 @@ module tb_intt;
                     o0, o1, o2, o3, o4, o5, o6, o7, elapsed, ok_run);
                 check(ok_run, "forward: done did not assert within timeout");
                 if (ok_run) begin
-                    check(elapsed == 37, "forward: busy-cycle latency != 37");
+                    check(elapsed == 25, "forward: busy-cycle latency != 25");
                     check(o0===exp_vec[0] && o1===exp_vec[1] && o2===exp_vec[2] && o3===exp_vec[3] &&
                           o4===exp_vec[4] && o5===exp_vec[5] && o6===exp_vec[6] && o7===exp_vec[7],
                           "forward: output mismatch");
@@ -204,7 +200,7 @@ module tb_intt;
                     o0, o1, o2, o3, o4, o5, o6, o7, elapsed, ok_run);
                 check(ok_run, "inverse: done did not assert within timeout");
                 if (ok_run) begin
-                    check(elapsed == 61, "inverse: busy-cycle latency != 61");
+                    check(elapsed == 41, "inverse: busy-cycle latency != 41");
                     check(o0===exp_vec[0] && o1===exp_vec[1] && o2===exp_vec[2] && o3===exp_vec[3] &&
                           o4===exp_vec[4] && o5===exp_vec[5] && o6===exp_vec[6] && o7===exp_vec[7],
                           "inverse: output mismatch");
@@ -251,14 +247,14 @@ module tb_intt;
             start <= 1'b0;
             inv = 1'b0;
             el = 0;
-            while (!done && el < 200) begin
-                @(posedge clk); #1;
+            while (busy && el < 200) begin
                 el = el + 1;
+                @(posedge clk); #1;
             end
             check(done, "mode stability: transform did not complete");
             rt0=coef_out[4:0]; rt1=coef_out[9:5]; rt2=coef_out[14:10]; rt3=coef_out[19:15];
             rt4=coef_out[24:20]; rt5=coef_out[29:25]; rt6=coef_out[34:30]; rt7=coef_out[39:35];
-            check(el == 61,
+            check(el == 41,
                   "mode stability: latency changed after inv toggled while busy, mode_reg was not captured correctly");
             check(rt0===5'd13 && rt1===5'd1 && rt2===5'd6 && rt3===5'd5 &&
                   rt4===5'd8 && rt5===5'd11 && rt6===5'd10 && rt7===5'd15,
@@ -282,12 +278,12 @@ module tb_intt;
             @(posedge clk); #1;
             start <= 1'b0;
             el = 0;
-            while (!done && el < 200) begin
-                @(posedge clk); #1;
+            while (busy && el < 200) begin
                 el = el + 1;
+                @(posedge clk); #1;
             end
             check(done, "start-while-busy: transform did not complete");
-            check(el == 60, "start-while-busy: mid-flight start pulse altered the latency");
+            check(el == 40, "start-while-busy: mid-flight start pulse altered the latency");
             rt0=coef_out[4:0]; rt1=coef_out[9:5]; rt2=coef_out[14:10]; rt3=coef_out[19:15];
             rt4=coef_out[24:20]; rt5=coef_out[29:25]; rt6=coef_out[34:30]; rt7=coef_out[39:35];
             check(rt0===5'd13 && rt1===5'd1 && rt2===5'd6 && rt3===5'd5 &&
@@ -305,7 +301,7 @@ module tb_intt;
             @(posedge clk);
             #1;
             start <= 1'b0;
-            for (el = 0; el < 40; el = el + 1) begin
+            for (el = 0; el < 28; el = el + 1) begin
                 @(posedge clk); #1;
             end
             check(busy === 1'b1, "reset-during-norm: must still be busy before reset (normalization in progress)");
@@ -325,7 +321,7 @@ module tb_intt;
             run_transform(1'b1, 5'd1,5'd2,5'd3,5'd4,5'd5,5'd6,5'd7,5'd8,
                           rt0,rt1,rt2,rt3,rt4,rt5,rt6,rt7, elapsed, ok_run);
             check(ok_run, "fresh-after-reset: transform did not complete");
-            check(elapsed == 61, "fresh-after-reset: latency incorrect");
+            check(elapsed == 41, "fresh-after-reset: latency incorrect");
         end
 
         // Verify normalization across all memory locations.

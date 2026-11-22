@@ -17,16 +17,15 @@ module ntt_controller (
     output wire write_enable,
     output reg [2:0] lo_reg,
     output reg [2:0] hi_reg,
-    output reg [4:0] u_reg,
-    output reg [4:0] v_reg
+    output wire [4:0] u_c,
+    output wire [4:0] v_c
 );
-    localparam [2:0] S_IDLE = 3'd0;
-    localparam [2:0] S_LOAD = 3'd1;
-    localparam [2:0] S_READ = 3'd2;
-    localparam [2:0] S_COMPUTE = 3'd3;
-    localparam [2:0] S_WRITE = 3'd4;
+    localparam [1:0] S_IDLE = 2'd0;
+    localparam [1:0] S_LOAD = 2'd1;
+    localparam [1:0] S_READ = 2'd2;
+    localparam [1:0] S_WRITE = 2'd3;
 
-    reg [2:0] state;
+    reg [1:0] state;
     reg [1:0] stage;
     reg [1:0] bidx;
     reg start_d;
@@ -57,7 +56,6 @@ module ntt_controller (
     wire [4:0] tw;
     twiddle_rom u_rom (.exponent(twiddle_exp), .tw(tw));
 
-    wire [4:0] u_c, v_c;
     butterfly_datapath u_bfly (.a(a_reg), .b(b_reg), .tw(tw_reg), .u(u_c), .v(v_c));
 
     always @(posedge clk) begin
@@ -90,12 +88,6 @@ module ntt_controller (
                     tw_reg <= tw;
                     lo_reg <= lo;
                     hi_reg <= hi;
-                    state <= S_COMPUTE;
-                end
-
-                S_COMPUTE: begin
-                    u_reg <= u_c;
-                    v_reg <= v_c;
                     state <= S_WRITE;
                 end
 

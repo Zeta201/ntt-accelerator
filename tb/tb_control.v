@@ -6,8 +6,9 @@ module tb_control;
     localparam [2:0] S_IDLE = 3'd0;
     localparam [2:0] S_LOAD = 3'd1;
     localparam [2:0] S_READ = 3'd2;
-    localparam [2:0] S_COMPUTE = 3'd3;
-    localparam [2:0] S_WRITE = 3'd4;
+    localparam [2:0] S_WRITE = 3'd3;
+
+    localparam integer BUSY_CYCLES = 25;
 
     reg clk, rst, start;
     reg [39:0] coef_in;
@@ -222,6 +223,24 @@ module tb_control;
         check(ok == 1, "T7: back-to-back transform must reach done within timeout");
         for (k = 0; k < 8; k = k + 1)
             check(coef_out[5*k+:5] === EXP_ZEROS[5*k+:5], "T7: back-to-back transform output mismatch");
+
+        begin : t8_latency
+            integer busy_cycles;
+            coef_in <= IN_INC;
+            start   <= 1'b1;
+            @(posedge clk);
+            #1;
+            start <= 1'b0;
+            busy_cycles = 0;
+            while (busy) begin
+                busy_cycles = busy_cycles + 1;
+                @(posedge clk);
+                #1;
+            end
+            check(busy_cycles == BUSY_CYCLES,
+                  "T8: busy-cycle latency must equal BUSY_CYCLES");
+            $display("T8: measured busy-cycle latency = %0d (expected %0d)", busy_cycles, BUSY_CYCLES);
+        end
 
         $display("tb_control: %0d checks, %0d failures", check_count, error_count);
         if (error_count != 0) begin

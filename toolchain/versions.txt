@@ -1,0 +1,19 @@
+# Exact toolchain versions used to produce the committed synthesis and
+# place-and-route results under reports/<name>/, and to run the RTL
+# simulation regression.
+#
+# Captured directly from a verified run of `source scripts/setup_toolchain.sh`
+# followed by `bash scripts/run_synthesis.sh` (FPGA synthesis tools), and
+# from the separately installed Icarus Verilog / Python used by
+# scripts/run_all_tests.sh and friends (RTL simulation). Values here are not
+# hand-approximated -- regenerate this file by re-running those commands and
+# copying their reported versions if the toolchain is ever upgraded.
+
+[FPGA synthesis and place-and-route -- OSS CAD Suite]
+OSS CAD Suite build: 20261122
+Yosys: Yosys 0.71+77 (git sha1 11d972c20, Release, Clang /usr/local/osxcross/target/bin/aarch64-apple-darwin25.5-clang++ 21.1.8)
+nextpnr-ecp5: nextpnr-0.11.1-121-g15b77f5f
+
+[RTL simulation -- system install, separate from OSS CAD Suite]
+Icarus Verilog: Icarus Verilog version 13.0 (stable) (v13_0)
+Python: Python 3.11.13

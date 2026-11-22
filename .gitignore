@@ -12,6 +12,12 @@ a.out
 !waves/ntt_top.vcd
 !experiments/intt/waves/intt_top.vcd
 
+# nextpnr-ecp5 place-and-route reports and netlist JSON (regenerate via
+# `source scripts/setup_toolchain.sh && bash scripts/run_synthesis.sh`);
+# reports/<name>/synth_report.txt stays tracked as the committed record.
+reports/*/nextpnr_report.txt
+reports/*/*.json
+
 # OS / editor metadata
 .DS_Store
 *.swp
