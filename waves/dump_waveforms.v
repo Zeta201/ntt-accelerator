@@ -21,11 +21,11 @@ module dump_waveforms;
     always @(posedge clk) begin
         #1;
         if (busy)
-            $display("t=%0t state=%0d stage=%0d bidx=%0d lo=%0d hi=%0d twexp=%0d a_reg=%0d b_reg=%0d tw_reg=%0d u_reg=%0d v_reg=%0d we=%0b",
+            $display("t=%0t state=%0d stage=%0d bidx=%0d lo=%0d hi=%0d twexp=%0d a_reg=%0d b_reg=%0d tw_reg=%0d u_c=%0d v_c=%0d we=%0b",
                 $time, dut.u_ctrl.state, dut.u_ctrl.stage, dut.u_ctrl.bidx,
                 dut.u_ctrl.lo, dut.u_ctrl.hi, dut.u_ctrl.twiddle_exp,
                 dut.u_ctrl.a_reg, dut.u_ctrl.b_reg, dut.u_ctrl.tw_reg,
-                dut.u_ctrl.u_reg, dut.u_ctrl.v_reg, dut.write_enable);
+                dut.u_ctrl.u_c, dut.u_ctrl.v_c, dut.write_enable);
     end
 
     integer k;
