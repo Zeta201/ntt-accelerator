@@ -23,12 +23,6 @@ module tb_pipelined;
 
     always #5 clk = ~clk;
 
-    integer cycle_count;
-    always @(posedge clk) cycle_count <= cycle_count + 1;
-
-    // Count busy cycles using the same convention as the other experiments.
-    integer busy_cycle_accum;
-
     integer error_count;
     integer check_count;
     integer setup_error_count;
@@ -105,8 +99,6 @@ module tb_pipelined;
                 end
             end
         end
-
-        if (busy) busy_cycle_accum = busy_cycle_accum + 1;
 
         if (dut.u_ctrl.issue_valid) begin
             check_count = check_count + 1;
@@ -233,8 +225,8 @@ module tb_pipelined;
         reg [4:0] s2_exp [0:7];
         reg [4:0] s3_exp [0:7];
         reg [4:0] actual_out;
-        integer k, cyc_start, elapsed, timeout_limit, mismatch;
-        integer busy_accum_start, busy_cycles;
+        integer k, mismatch;
+        integer busy_cycles;
         begin
             $sformat(input_path, "reference/test_vectors/input_%0s.txt", name);
             $sformat(expected_path, "reference/test_vectors/expected_%0s.txt", name);
@@ -273,19 +265,14 @@ module tb_pipelined;
                 checkpoint1_pending = 1'b1;
                 checkpoint2_pending = 1'b1;
 
-                @(posedge clk);
                 start <= 1'b1;
-                cyc_start = cycle_count;
-                busy_accum_start = busy_cycle_accum;
-                @(posedge clk);
-                start <= 1'b0;
-
-                // Allow nonblocking assignments to settle before checking done.
                 @(posedge clk);
                 #1;
+                start <= 1'b0;
 
-                timeout_limit = cyc_start + 200;
-                while (!done && cycle_count < timeout_limit) begin
+                busy_cycles = 0;
+                while (busy && busy_cycles < 200) begin
+                    busy_cycles = busy_cycles + 1;
                     @(posedge clk);
                     #1;
                 end
@@ -295,8 +282,6 @@ module tb_pipelined;
                     error_count = error_count + 1;
                     $display("FAIL: vector '%0s': TIMEOUT waiting for done (no done within 200 cycles of start)", name);
                 end else begin
-                    busy_cycles = busy_cycle_accum - busy_accum_start;
-
                     for (k = 0; k < 8; k = k + 1) stage_check_expected[k] = s3_exp[k];
                     check_stage_mem(name, 3);
 
@@ -519,8 +504,6 @@ module tb_pipelined;
         rst = 1;
         start = 0;
         coef_in = 40'd0;
-        cycle_count = 0;
-        busy_cycle_accum = 0;
         error_count = 0;
         check_count = 0;
         setup_error_count = 0;

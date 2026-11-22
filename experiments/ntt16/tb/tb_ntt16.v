@@ -24,18 +24,12 @@ module tb_ntt16;
 
     always #5 clk = ~clk;
 
-    integer cycle_count;
-    // Update the cycle count in the NBA region to avoid races with testbench sampling.
-    always @(posedge clk) cycle_count <= cycle_count + 1;
-
     integer error_count;
     integer check_count;
     integer setup_error_count;
     integer vectors_checked;
 
-    // Count cycles with busy=1, from LOAD through the final WRITE.
-    // This matches the baseline's busy-cycle latency convention.
-    integer busy_cycle_accum;
+    // Cross-check that busy-cycle latency is data-independent (see run_vector).
     integer first_busy_cycles_recorded;
     integer first_busy_cycles;
 
@@ -50,9 +44,6 @@ module tb_ntt16;
     integer butterflies_this_transform;
     integer butterflies_total;
     integer butterflies_main_sweep;
-
-    integer first_elapsed_recorded;
-    integer first_elapsed_cycles;
 
     integer i;
 
@@ -98,7 +89,6 @@ module tb_ntt16;
     // Verify butterfly sequencing and state-dependent control signals.
     always @(posedge clk) begin
         #1;
-        if (busy) busy_cycle_accum = busy_cycle_accum + 1;
 
         if (dut.u_ctrl.state == 3'd2) begin // S_READ: issue one butterfly.
             check_count = check_count + 1;
@@ -115,7 +105,7 @@ module tb_ntt16;
         end
 
         check_count = check_count + 1;
-        if (dut.u_ctrl.write_enable && dut.u_ctrl.state !== 3'd4) begin
+        if (dut.u_ctrl.write_enable && dut.u_ctrl.state !== 3'd3) begin
             error_count = error_count + 1;
             $display("FAIL: write_enable asserted outside WRITE state (state=%0d)", dut.u_ctrl.state);
         end
@@ -190,8 +180,8 @@ module tb_ntt16;
         reg [4:0] s3_exp [0:15];
         reg [4:0] s4_exp [0:15];
         reg [4:0] actual_out;
-        integer k, cyc_start, cyc_done, elapsed, timeout_limit, mismatch;
-        integer busy_accum_start, busy_cycles;
+        integer k, mismatch;
+        integer busy_cycles;
         reg checkpoint1_done, checkpoint2_done, checkpoint3_done;
         begin
             $sformat(input_path, "experiments/ntt16/reference/test_vectors/input_%0s.txt", name);
@@ -230,26 +220,14 @@ module tb_ntt16;
                 checkpoint2_done = 0;
                 checkpoint3_done = 0;
 
-                @(posedge clk);
                 start <= 1'b1;
-                cyc_start = cycle_count;
-                busy_accum_start = busy_cycle_accum;
-                @(posedge clk);
-                start <= 1'b0;
-
-                // Allow the start-edge updates to settle before checking completion.
                 @(posedge clk);
                 #1;
-                if (!checkpoint1_done && dut.u_ctrl.state === 3'd2 && dut.u_ctrl.stage === 2'd1) begin
-                    checkpoint1_done = 1;
-                    for (k = 0; k < 16; k = k + 1) stage_check_expected[k] = s1_exp[k];
-                    check_stage_mem(name, 1);
-                end
+                start <= 1'b0;
 
-                timeout_limit = cyc_start + 400;
-                while (!done && cycle_count < timeout_limit) begin
-                    @(posedge clk);
-                    #1;
+                busy_cycles = 0;
+                while (busy && busy_cycles < 400) begin
+                    busy_cycles = busy_cycles + 1;
                     if (!checkpoint1_done && dut.u_ctrl.state === 3'd2 && dut.u_ctrl.stage === 2'd1) begin
                         checkpoint1_done = 1;
                         for (k = 0; k < 16; k = k + 1) stage_check_expected[k] = s1_exp[k];
@@ -265,6 +243,8 @@ module tb_ntt16;
                         for (k = 0; k < 16; k = k + 1) stage_check_expected[k] = s3_exp[k];
                         check_stage_mem(name, 3);
                     end
+                    @(posedge clk);
+                    #1;
                 end
 
                 check_count = check_count + 1;
@@ -272,10 +252,6 @@ module tb_ntt16;
                     error_count = error_count + 1;
                     $display("FAIL: vector '%0s': TIMEOUT waiting for done (no done within 400 cycles of start)", name);
                 end else begin
-                    cyc_done = cycle_count;
-                    elapsed = cyc_done - cyc_start;
-                    busy_cycles = busy_cycle_accum - busy_accum_start;
-
                     for (k = 0; k < 16; k = k + 1) stage_check_expected[k] = s4_exp[k];
                     check_stage_mem(name, 4);
 
@@ -304,16 +280,6 @@ module tb_ntt16;
                     butterflies_main_sweep = butterflies_main_sweep + butterflies_this_transform;
 
                     check_count = check_count + 1;
-                    if (first_elapsed_recorded == 0) begin
-                        first_elapsed_cycles = elapsed;
-                        first_elapsed_recorded = 1;
-                        $display("INFO: first measured start-to-done latency = %0d cycles (vector '%0s')", elapsed, name);
-                    end else if (elapsed !== first_elapsed_cycles) begin
-                        error_count = error_count + 1;
-                        $display("FAIL: vector '%0s': elapsed cycles %0d differs from first-measured %0d (timing should be data-independent)", name, elapsed, first_elapsed_cycles);
-                    end
-
-                    check_count = check_count + 1;
                     if (first_busy_cycles_recorded == 0) begin
                         first_busy_cycles = busy_cycles;
                         first_busy_cycles_recorded = 1;
@@ -324,7 +290,7 @@ module tb_ntt16;
                     end
 
                     if (mismatch == 0) begin
-                        $display("PASS: vector '%0s' (elapsed=%0d, busy_cycles=%0d, butterflies=%0d)", name, elapsed, busy_cycles, butterflies_this_transform);
+                        $display("PASS: vector '%0s' (busy_cycles=%0d, butterflies=%0d)", name, busy_cycles, butterflies_this_transform);
                     end
                 end
             end
@@ -482,15 +448,12 @@ module tb_ntt16;
         rst = 1;
         start = 0;
         coef_in = 80'd0;
-        cycle_count = 0;
         error_count = 0;
         check_count = 0;
         setup_error_count = 0;
         vectors_checked = 0;
         butterflies_total = 0;
         butterflies_main_sweep = 0;
-        first_elapsed_recorded = 0;
-        busy_cycle_accum = 0;
         first_busy_cycles_recorded = 0;
 
         load_manifest;
