@@ -238,10 +238,10 @@ flowchart TB
 
             subgraph ctllogic["Control logic"]
                 direction TB
-                sdet["start edge detector<br/>start_d, start_pulse"]
-                fsm["FSM state register<br/>state"]
+                sdet["start edge detector"]
+                fsm["FSM"]
                 cnt["stage, bidx counters"]
-                ctrlsig["control-signal generation<br/>busy, load_enable, write_enable (comb.)<br/>done (registered)"]
+                ctrlsig["control signal generation"]
                 sdet -.->|start_pulse| fsm
                 fsm -.->|WRITE exit| cnt
                 fsm -.-> ctrlsig
@@ -249,16 +249,16 @@ flowchart TB
 
             subgraph addrtwid["Address &amp; twiddle generation"]
                 direction TB
-                addrgen["address generation<br/>half, shift_amt, group, j"]
-                twidgen["twiddle-index generation<br/>twiddle_exp"]
+                addrgen["address generation"]
+                twidgen["twiddle index generation"]
                 rom["twiddle_rom"]
                 twidgen -.->|twiddle_exp| rom
             end
 
             subgraph dpregs["Datapath &amp; registers"]
                 direction TB
-                aregs["operand registers<br/>a_reg, b_reg, tw_reg"]
-                awregs["address registers<br/>lo_reg, hi_reg"]
+                aregs["operand registers"]
+                awregs["address registers"]
                 subgraph datapath["butterfly_datapath"]
                     direction LR
                     add["mod_add"]
@@ -276,7 +276,7 @@ flowchart TB
             rom -->|tw| aregs
         end
 
-        mem["coefficient_memory<br/>mem[0:7]"]
+        mem["coefficient_memory"]
         outmap["natural-order output mapping<br/>(bit reversal)"]
 
         addrgen -.->|lo, hi| mem
@@ -289,11 +289,11 @@ flowchart TB
         mem -->|mem_flat| outmap
     end
 
-    coefin --> mem
-    start -.-> sdet
-    rst -.-> ctrl
-    outmap --> coefout(["coef_out"])
-    ctrlsig -.-> handshake(["busy, done"])
+    coefin --> top
+    start -.-> top
+    rst -.-> top
+    top --> coefout(["coef_out"])
+    top -.-> handshake(["busy, done"])
 ```
 
 Solid arrows represent coefficient or arithmetic data. Dashed arrows represent control and address signals.
